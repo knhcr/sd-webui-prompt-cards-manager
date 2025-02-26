@@ -1,0 +1,7 @@
+*.pyc
+.coverage
+.env
+.vscode
+venv
+\.*.sw*
+node_modules
