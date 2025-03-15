@@ -5,3 +5,8 @@
 venv
 \.*.sw*
 node_modules
+prompt_cards
+prompt_cards.thumbs
+memo/
+.cursor
+DEBUG_FLAG

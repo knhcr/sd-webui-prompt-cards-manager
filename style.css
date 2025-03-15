@@ -1,0 +1,345 @@
+/* カスタムボタンに影を追加 */
+.pcm-svg-icon > svg {
+    filter: drop-shadow(4px 4px 6px rgba(0, 0, 0, 0.5));
+}
+
+/* ホバー時のアイコン切り替え */
+.pcm-send-with-cnet-button .normal-icon,
+.pcm-send-with-cnet-mask-button .normal-icon,
+.pcm-info-edit-button .normal-icon {
+    display: inline-block;
+}
+
+.pcm-send-with-cnet-button .hover-icon,
+.pcm-send-with-cnet-mask-button .hover-icon,
+.pcm-info-edit-button .hover-icon {
+    display: none;
+}
+
+.pcm-send-with-cnet-button:hover .normal-icon,
+.pcm-send-with-cnet-mask-button:hover .normal-icon,
+.pcm-info-edit-button:hover .normal-icon {
+    display: none;
+}
+
+.pcm-send-with-cnet-button:hover .hover-icon,
+.pcm-send-with-cnet-mask-button:hover .hover-icon,
+.pcm-info-edit-button:hover .hover-icon {
+    display: inline-block;
+}
+
+/* CNet 無効のカードは CNet ボタンを非表示にする */
+.cnet-disabled.pcm-send-with-cnet-button,
+.cnet-disabled.pcm-send-with-cnet-mask-button {
+    display: none;
+}
+
+/* CNet Mask は現状未実装 [TODO] */
+.pcm-send-with-cnet-mask-button {
+    display: none;
+}
+
+/*-------------------------------------------------------------------*/
+/* モーダル背景オーバーレイ*/
+.pcm-pie-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    max-height: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+/* モーダルウィンドウ */
+.pcm-pie-container.block.padded {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    background-color: var(--body-background-fill);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 80%;
+    width: 850px;
+    padding: 20px !important; /* gradio の.block.padded による !important を上書き */
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* メインの左右カラムの間隔 */
+.pcm-pie-content > div:nth-child(1) {
+    gap: 15px !important;
+}
+
+/* スクロールバーの表示 */
+.pcm-pie-container {
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+}
+
+/* スクロールバーの幅 */
+.pcm-pie-container.block.padded::-webkit-scrollbar {
+    width: 10px; 
+}
+
+/* スクロールバーの背景 */
+.pcm-pie-container.block.padded::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-radius: 5px;
+}
+
+/* スクロールバーのつまみ部分 */
+.pcm-pie-container.block.padded::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+/* スクロールバーホバー時のつまみの色 */
+.pcm-pie-container.block.padded::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+
+/* ヘッダとの間隔 */
+.pcm-pie-content {
+    margin-top: 15px;
+}
+
+/* description の背景色 */
+#pcm_pie_description textarea{
+    background: #363c45;
+}
+
+/* - フッター - */
+/* ボタン配置を右寄せにする */
+.pcm-pie-footer-btn-row {
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+/* ボタン間隔 */
+.pcm-pie-footer-btn-row button {
+    margin-left: 10px;
+}
+
+/* - 右側のカラム - */
+/* 右側のカラムの配置 */
+.pcm-pie-content-right {
+    padding-top: 20px;
+    align-items: center;
+}
+
+.pcm-pie-content-right img {
+    height: auto;
+}
+
+/* 画像の下のセパレータ */
+.pcm-pie-image-separator {
+    width:78%;
+    height:1px;
+    background-color:#ccc;
+    margin:5px 0;
+    margin-left:auto;
+    margin-right:32px;
+}
+
+/* - 解像度 スライダ - */
+/* Box の枠線削除 */
+.pcm-pie-resolution-box .form {
+    background: transparent;
+}
+
+/* Resolution Box の行間調整 */
+.pcm-pie-resolution-box .form *{
+    padding-bottom:1px;
+    padding-top:1px;
+}
+
+
+/* 解像度スライダ列の配置 */
+.pcm-pie-resolution-row {
+    position: relative;
+    left: -55px;
+    width: calc(100% + 15px) !important;/* 幅を広げて右端の位置を維持 */
+}
+
+/* 解像度スライダ列に自動適用される min-width: 320px を上書き */
+.pcm-pie-resolution-row > div {
+    min-width: 0!important;
+}
+
+/* Resolution スライダの幅 */
+#pcm_pie_resolution_slider_width, #pcm_pie_resolution_slider_height {
+    width: 79% !important;
+    margin-left: auto; /* 左側に余白を作る */
+    margin-right: 12px; /* 右側の余白をリセット */
+}
+
+/* - アスペクト比固定ボタン - */
+/* 表面 */
+#pcm_pie_fix_aspect_ratio_btn {
+    width: 29px;
+    height: 30px;
+    min-width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer; 
+    z-index: 5;
+    background: #d8d8d8;
+    border-radius: 3px;
+    transition: background-color 0.1s ease;
+}
+
+/* 配置 */
+#pcm_pie_fix_aspect_ratio_btn_wrapper {
+    padding-bottom: 10px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+/* 内部要素に対する追加設定 */
+#pcm_pie_fix_aspect_ratio_btn > * {
+    pointer-events: none; /* 内部要素のイベント無視 */
+    user-select: none; /* アイコンを選択不可 */
+}
+
+/* ロック状態 */
+#pcm_pie_fix_aspect_ratio_btn.pcm-pie-fix-aspect-ratio-btn-locked {
+    background: #e8e8a0;
+}
+
+/* - 解像度フッタ - */
+/* 左カラム */
+#pcm_pie_resolution_slider_footer > div:first-child {
+    min-width: auto !important;
+}
+
+/* 解像度スライダーフッターのボタン行の配置調整 */
+#pcm_pie_resolution_slider_footer_btn_row {
+    gap: 6px;
+    justify-content: center;
+    margin-left: 15px;
+}
+
+/* フッターボタンのサイズと配置調整 */
+#pcm_pie_resolution_slider_footer_btn_row button {
+    margin-top: 5px;
+    padding-top: 9px;
+    padding-bottom: 8px;
+    min-width: auto;
+    width: 46px;
+    flex: 0 0 auto !important; /* Gradioのflex設定を上書き */
+}
+
+/* 右カラム*/
+#pcm_pie_resolution_slider_footer > div:last-child {
+    min-width: auto !important;
+}
+
+/* テキスト要素のコンテナの余分な枠線と余白を削除 */
+.pcm_pie_resolution_slider_footer_label.block {
+    margin-bottom: 5px;
+}
+
+/* 解像度スライダフッターのテキストフォント */
+.pcm-pie-resolution-slider-footer-text {
+    font-weight: bold;
+    color: #dbc923!important;
+    font-style: italic;
+}
+
+/* アスペクト比表示行のカーソルをポインタにする */
+#pcm_pie_resolution_slider_footer_text_aspect_ratio_wrapper{
+    cursor: pointer;
+}
+
+/* Apply Resolution false 時の半透明化 */
+.pcm-pie-resolution-row.unchecked{
+    opacity:0.3
+}
+
+#pcm_pie_resolution_slider_footer.unchecked{
+    opacity:0.3
+}
+
+
+/* - 右列 - */
+/* 解像度テキスト */
+.pcm-pie-image-resolution-text {
+    text-align: right; /* テキストを右揃えにする */
+    width: 100%;       /* Row領域全体に広げる */
+    padding-right: 20px!important;  /* 右端との隙間 */
+    box-sizing: border-box!important;
+}
+
+.pcm-pie-data-set-buttons {
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 4px !important;
+}
+
+.pcm-pie-data-set-buttons button {
+    flex: 1;
+    min-width: 0;
+    padding: 4px 8px;
+    font-size: 0.9em;
+}
+
+/*-------------------------------------------------------------------*/
+/* Subdir Toggle */
+/* コントロールの整列 */
+.extra-networks-controls-div #txt2img_promptcards_controls, .extra-networks-controls-div #img2img_promptcards_controls{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* 要素間の間隔 */
+}
+
+/* ラベル */
+.pcm-subdir-toggle-label {
+    color: var(--body-text-color);
+    margin-right: 4px;
+}
+
+/* チェックボックス */
+#txt2img_pcm_subdirs_toggle, #img2img_pcm_subdirs_toggle {
+    width: 1.2em;
+    height: 1.2em;
+    border: 2px solid var(--checkbox-border-color);
+    border-radius: 4px;
+    margin-right: 5px;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+    background-color: var(--link-text-color);
+    background-color: transparent;
+    border-color: var(--checkbox-border-color);
+}
+
+/* チェックボックス */
+#txt2img_pcm_subdirs_toggle:checked, #img2img_pcm_subdirs_toggle:checked {
+    background-color: var(--link-text-color);
+    border-color: var(--link-text-color);
+}
+
+/* 検索入力欄の幅を調整 */
+#txt2img_extra_tabs .extra-network-control--search-text, #img2img_extra_tabs .extra-network-control--search-text {
+    width: 300px;
+}
+
+/* ExtraNetworksのTreeViewでファイルアイテムを非表示にする */
+#txt2img_promptcards_tree .tree-list-item[data-tree-entry-type="file"] {
+    display: none;
+}
+#img2img_promptcards_tree .tree-list-item[data-tree-entry-type="file"] {
+    display: none;
+}
