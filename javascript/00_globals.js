@@ -54,6 +54,19 @@ const pcmWaitForContent = (selector,cb)=>{
 }
 
 
+/** 要素を取得、無ければエラーメッセージを吐いてnullを返す */
+const pcmGetElement = (selector, base_elem = gradioApp(), suppressError = false) => {
+    if(base_elem === null) base_elem = gradioApp();
+    const element = base_elem.querySelector(selector);
+    if (!element) {
+        if (!suppressError){
+            console.error(`pcmDropImageToCnet element not found : ${selector}`);
+        }
+        return null;
+    }
+    return element;
+}
+
 /** デバッグプリント */
 const PCM_DEBUG_MODE = false;
 const PCM_DEBUG_PRINT = PCM_DEBUG_MODE ? (...args) => {console.log(...args);} : () => {};

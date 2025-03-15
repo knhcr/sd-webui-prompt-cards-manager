@@ -312,7 +312,7 @@ const _pcmPieSetResolution = (width, height)=>{
  * ポーズ情報エディタの画面表示(Gradioの管轄外)を更新する
 */
 const pcmPieRefresh = ()=>{
-    console.log('pcm_pie_refresh called'); // debug
+    PCM_DEBUG_PRINT('pcm_pie_refresh called');
     _pcmPieUpdateAspectRatio(); // aspect ratio (表示のみ)を更新
     _pcmPieUpdateSquareRoot(); // square root の表示更新
     // 解像度適用チェックボックスに併せて解像度スライダーの半透明化を更新
@@ -326,7 +326,7 @@ const pcmPieRefresh = ()=>{
  * ポーズ情報エディタの画面表示(Gradioの管轄外)をリセットする
 */
 const pcmPieResetPage = ()=>{
-    console.log('pcm_pie_reset_page called'); // debug
+    PCM_DEBUG_PRINT('pcm_pie_reset_page called');
     // アスペクト比ロックを解除
     if(pcmPieAspectRatioStatus.isLocked){
         pcmPieAspectRatioStatus.toggleAspectRatio();

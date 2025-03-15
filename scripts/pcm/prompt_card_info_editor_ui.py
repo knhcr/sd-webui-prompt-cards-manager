@@ -5,7 +5,6 @@ import sys
 import os
 import traceback
 from string import Template
-from werkzeug.utils import safe_join
 from scripts.pcm.constants import thumbs_folder, endpoint_base, extension_root_path
 from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.cache_info import CacheInfo

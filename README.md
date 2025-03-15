@@ -14,7 +14,8 @@ By clicking on a card, you can input the registered prompt or replace a prompt t
   - Manage complex prompts combining multiple LoRAs or wildcards, etc, as a single card
 etc.
 
-If you have ControlNet installed, you can also set the card image directly to ControlNet by clicking a dedicated button.
+If you use forge WebUI, you can also set the card image directly to ControlNet by clicking a dedicated button.
+(Currently only for forge builtin ControlNet)
 
 Note that this extension does not have features to automatically generate prompts or apply them randomly.
 
@@ -76,13 +77,26 @@ Note that this extension does not have features to automatically generate prompt
   - With clicking this button, the card image is automatically put in the ControlNet unit.
   - ControlNet settings can be configured in the WebUI's Settings tab (currently cannot be changed per card)
   - After changing `CNet Enabled` check/uncheck, you need to press refresh button in the card list view to redraw the button display
+  - Currenly a1111 is not supported. (Only for forge builtin ControlNet)
 
 
 ![example](./docs/images/04_btn_cnet.png)
 
 -----------------------------------------------------------------------------------------------------------------------------
 # Screen Descriptions
-## Prompt Registration
+## Extra Networks Prompt Cards Tab
+* You can choose both tree style view and directory style view
+  - `Settings` > `Stable Diffusion` > `Extra Networks` > `Extra Networks directory view style`
+  - When you change this setting, you need to restart WebUI server
+
+![example](./docs/images/tree.png)
+
+![example](./docs/images/dir.png)
+
+
+* `SubDir` checkbox toggles whether to display cards from subfolders of the selected folder.
+
+## Prompt Registration Modal Window
 * Pressing the Card Edit button in the top right of the card opens a screen like this
 
 ![example](./docs/images/05_editor.png)

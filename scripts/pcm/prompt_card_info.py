@@ -6,7 +6,7 @@ from typing import Dict, Tuple
 import copy
 import json
 import traceback
-from werkzeug.utils import safe_join
+from pathlib import Path
 from scripts.pcm.constants import image_folder, extension_root_path
 from scripts.pcm.cache_info import CacheInfo
 from scripts.pcm.constants import DEBUG_PRINT
@@ -51,18 +51,22 @@ class PromptCardInfo:
     """ プロンプトカード情報コンテナ """
     image_folder_path = os.path.join(extension_root_path, image_folder)
 
-    __default_card_info =  {
-        'prompt': '',
-        'negative_prompt': '',
-        'isReplace': shared.opts.prompt_cards_manager_default_is_replace,
-        'enableCnet': shared.opts.prompt_cards_manager_default_cnet_enabled,
-        'apply_resolution': shared.opts.prompt_cards_manager_default_apply_resolution,
-        'resolution': {
-            'width': shared.opts.prompt_cards_manager_default_resolution_width,
-            'height': shared.opts.prompt_cards_manager_default_resolution_height
-        },
-        # 現状 category はカード情報ファイルのパスから生成し、データとしては保存しない
-    }
+    @classmethod
+    def __get_default_card_info(cls):
+        """ デフォルトのカード情報を生成 """
+        __default_card_info =  {
+            'prompt': '',
+            'negative_prompt': '',
+            'isReplace': shared.opts.prompt_cards_manager_default_is_replace,
+            'enableCnet': shared.opts.prompt_cards_manager_default_cnet_enabled,
+            'apply_resolution': shared.opts.prompt_cards_manager_default_apply_resolution,
+            'resolution': {
+                'width': shared.opts.prompt_cards_manager_default_resolution_width,
+                'height': shared.opts.prompt_cards_manager_default_resolution_height
+            },
+            # 現状 category はカード情報ファイルのパスから生成し、データとしては保存しない
+        }
+        return __default_card_info
 
     def __init__(self, thumbs_name):
         """ デフォルト値で初期化、既にカード情報ファイルがあれば読み込む
@@ -82,7 +86,7 @@ class PromptCardInfo:
         self.image_path = image_path
 
         # self.card_info
-        self.card_info : dict = copy.deepcopy(PromptCardInfo.__default_card_info)
+        self.card_info : dict = PromptCardInfo.__get_default_card_info()
 
         # self.category
         rel_path = CacheInfo.cache_info[self.thumbs_name].get('rel_path', '')
@@ -190,3 +194,25 @@ class PromptCardInfo:
         return data
 
 
+
+def safe_join(safe_dir, target_path):
+    ''' werkzeug.utils.safe_join() の代替
+    target_path が safe_dir 以下にあるかをチェックしあれば絶対パスにして返す
+    無い場合は None を返す
+    '''
+    safe_path = Path(safe_dir).resolve()
+    target_path = Path(target_path)
+    
+    if not target_path.is_absolute():
+        # 相対パスの場合は safe_dir 以下に結合して判定
+        target_path = safe_path.joinpath(target_path).resolve()
+    else:
+        # 絶対パスの場合はそのまま判定
+        target_path = target_path.resolve()
+
+    safe_path_str = os.path.normpath(str(safe_path))
+    target_path_str = os.path.normpath(str(target_path))
+    if target_path_str.startswith(safe_path_str + os.path.sep):
+        return target_path_str
+    else:
+        return None
