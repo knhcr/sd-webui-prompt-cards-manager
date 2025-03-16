@@ -5,7 +5,13 @@ from scripts.pcm.constants import DEBUG_PRINT
 
 def on_ui_settings():
     section = ("prompt_cards_manager", "Prompt Cards Manager")
-    
+
+    # ignore dot starts
+    shared.opts.add_option("prompt_cards_manager_ignore_dot_starts", shared.OptionInfo(
+        True, "Ignore dirs and files starting with '.' (like '.DS_Store', '.git', etc.)",
+        section=section
+    ))
+
     # default value : is_replace
     shared.opts.add_option("prompt_cards_manager_default_is_replace", shared.OptionInfo(
         True, "Replace Mode (Default value)",

@@ -7,6 +7,7 @@ from scripts.pcm.constants import image_folder, templates_folder, endpoint_base,
 from scripts.pcm.cache_info import CacheInfo
 from scripts.pcm.prompt_card_info import PromptCardInfoManager
 from scripts.pcm.constants import DEBUG_PRINT
+from scripts.pcm.utility import filter_walk
 
 
 class PromptCardsPage(ExtraNetworksPage):
@@ -91,7 +92,7 @@ class PromptCardsPage(ExtraNetworksPage):
             return
 
         valid_image_paths = []
-        for root, _, files in os.walk(self.img_folder_path):
+        for root, _, files in filter_walk(self.img_folder_path, ignore_dot_starts=shared.opts.prompt_cards_manager_ignore_dot_starts):
             for filename in files:
                 if os.path.splitext(filename)[1].lower() in ('.png', '.jpg', '.jpeg', '.webp'):
                     valid_image_paths.append(os.path.join(root, filename))
@@ -234,7 +235,7 @@ class PromptCardsPage(ExtraNetworksPage):
 
         subdirs = {}
         for parentdir in [os.path.abspath(x) for x in self.allowed_directories_for_previews()]:
-            for root, dirs, _ in sorted(os.walk(parentdir, followlinks=True), key=lambda x: shared.natural_sort_key(x[0])):
+            for root, dirs, _ in sorted(filter_walk(parentdir, ignore_dot_starts=shared.opts.prompt_cards_manager_ignore_dot_starts), key=lambda x: shared.natural_sort_key(x[0])):
                 for dirname in sorted(dirs, key=shared.natural_sort_key):
                     x = os.path.join(root, dirname)
 

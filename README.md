@@ -22,6 +22,9 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2027/03/17
+  - Added an option to ignore `.` starting files and dirs (such as `.git`)
+
 * 2025/03/15
   - First version
 
@@ -32,7 +35,7 @@ Note that this extension does not have features to automatically generate prompt
   Make sure you have another extension installed that treats lines starting with `#` as comments
   - For example, [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts) has such functionality
   - Also, if you're using a forge-based WebUI, it probably comes with this functionality by default
-  - You can operate without using decorative lines by turning off `Replace Mode` ([described later](#prompt-registration-modal-screen)), but in that case, prompt replacement cannot be performed
+  - You can operate without using decorative lines by turning off `Replace Mode` ([described later](#prompt-registration-modal-window)), but in that case, prompt replacement cannot be performed
 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -41,6 +44,9 @@ Note that this extension does not have features to automatically generate prompt
 #### Image Placement
 * Place any images in the `extensions/sd-webui-prompt-cards-manager/prompt_cards` folder
   - It recognizes `.png`, `.jpg`, `.jpeg`, `.webp` files
+  - By default, files and dirs starting with `.` (such as `.git`) are ignored.
+    If you needs them, you can set the option to not to be ignored in the Settings section.
+
 
 * Like LoRA, you can create subfolders to classify and manage cards more easily
   - This extension treats the first-level folder name as the "**category**" of that card
@@ -51,7 +57,7 @@ Note that this extension does not have features to automatically generate prompt
 
 
 #### Registering Prompts to Cards
-* Press the Card Edit button (`i` button) in the top right of the card to display the prompt registration modal screen ([described later](#prompt-registration-modal-screen)),
+* Press the Card Edit button (`i` button) in the top right of the card to display the prompt registration modal screen ([described later](#prompt-registration-modal-window)),
   enter the prompts you want to register in Prompt and Negative Prompt, and press Save
 ![example](./docs/images/02_btn_edit.png)
 
@@ -67,13 +73,13 @@ Note that this extension does not have features to automatically generate prompt
   - If you click a card of the same category again, all content within the decorative lines will be deleted and replaced
   - Since the decorative lines are used as markers for detection, if you change the decorative lines, the replacement target cannot be detected and prompt will be added to the bottom of the current prompt
 
-* Cards with `Replace Mode` ([described later](#prompt-registration-modal-screen)) turned off will not use decorative lines, and the registered prompts will simply be added to the bottom
+* Cards with `Replace Mode` ([described later](#prompt-registration-modal-window)) turned off will not use decorative lines, and the registered prompts will simply be added to the bottom
 
 
 ![example](./docs/images/03_prompt.png)
 
 #### Using ControlNet
-* For cards with `CNet Enabled` checked ([described later](#prompt-registration-modal-screen)), a button to set the card image to ControlNet will be displayed
+* For cards with `CNet Enabled` checked ([described later](#prompt-registration-modal-window)), a button to set the card image to ControlNet will be displayed
   - With clicking this button, the card image is automatically put in the ControlNet unit.
   - ControlNet settings can be configured in the WebUI's Settings tab (currently cannot be changed per card)
   - After changing `CNet Enabled` check/uncheck, you need to press refresh button in the card list view to redraw the button display
