@@ -10,3 +10,4 @@ prompt_cards.thumbs
 memo/
 .cursor
 DEBUG_FLAG
+*.code-workspace
