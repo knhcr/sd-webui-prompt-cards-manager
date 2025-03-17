@@ -135,6 +135,15 @@ def on_ui_settings():
         section=section
     ))
 
+    # fix 'Template:' paste behavior of sd-dynamic-prompts.
+    shared.opts.add_option("prompt_cards_manager_fix_template_paste_behavior", shared.OptionInfo(
+        False,
+        "Fix sd-dynamic-prompts 'Template:' pasting behavior. " + \
+        "With this option enabled, when you using sd-dynamic-prompts' saving template option, " + \
+        "'#' comment outed lines in 'Prompt' and 'Negative prompt' fields will be pasted in their fields correctly.",
+        section=section
+    ))
+
 
 # コールバック登録
 script_callbacks.on_ui_settings(on_ui_settings)
