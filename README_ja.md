@@ -23,6 +23,7 @@ etc.
 -----------------------------------------------------------------------------------------------------------------------------
 ## 更新履歴
 * 2025/03/18
+  - カードの表示名からファイル拡張子を削除
   - [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts) の template の貼り付けに係る処理の不具合を修正するオプションを追加
     + 本拡張の Settings で `Fix sd-dynamic-prompts 'Template:' pasting behavior.` を有効にすると、
       sd-dynamic-prompts の `Save template to metadata` を有効にして保存した画像のメタデータを用いて

@@ -194,6 +194,9 @@ class PromptCardsPage(ExtraNetworksPage):
         search_term_template = "<span class='hidden search_terms'>{search_term}</span>"
         for search_term in item.get("search_terms", []):
             search_terms_html += search_term_template.format(search_term=search_term)
+
+        # 表示名から拡張子を削除
+        name = os.path.splitext(html.escape(item.get("name", "")))[0]
         
         # テンプレートに渡す辞書
         item_with_extras = {
@@ -201,7 +204,7 @@ class PromptCardsPage(ExtraNetworksPage):
             "card_clicked": onclick,
             "description": html.escape(item.get("description", "")),
             "local_preview": html.escape(item.get("local_preview", "")),
-            "name": html.escape(item.get("name", "")),
+            "name": name,
             "prompt": item.get("prompt", ""),
             "save_card_preview": html.escape(f"return saveCardPreview(event, '{tabname}', '{item.get('local_preview', '')}');"),
             "search_only": "",
