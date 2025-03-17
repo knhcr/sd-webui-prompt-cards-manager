@@ -144,6 +144,13 @@ def on_ui_settings():
         section=section
     ))
 
+    # cancel editing with 'Ctrl + Q'
+    shared.opts.add_option("prompt_cards_manager_cancel_editing_with_ctrl_q", shared.OptionInfo(
+        False,
+        "Prompt Card Editor shortcut : 'Ctrl + Q' to cancel editing instead of 'Esc'.",
+        section=section
+    ))
+
 
 # コールバック登録
 script_callbacks.on_ui_settings(on_ui_settings)

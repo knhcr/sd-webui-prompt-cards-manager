@@ -338,9 +338,12 @@ const pcmPieResetPage = ()=>{
  */
 const pcmPieOnKeyDownEsc = (event)=>{
     const isOpen = gradioApp().querySelector('#pcm_pie_container').style.display !== 'none';
-    if (!isOpen || event.key !== 'Escape') return;
-    event.preventDefault();
-    gradioApp().querySelector('#pcm_pie_close_btn').click();
+    const isKeyEvent = opts.prompt_cards_manager_cancel_editing_with_ctrl_q
+        ? (event.ctrlKey && event.key === 'q') : event.key === 'Escape';
+    if (isOpen && isKeyEvent){
+        event.preventDefault();
+        gradioApp().querySelector('#pcm_pie_close_btn').click();
+    }
 };
 window.addEventListener('keydown', pcmPieOnKeyDownEsc);
 
