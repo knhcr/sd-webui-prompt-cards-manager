@@ -86,12 +86,9 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
         var search_input_elem = gradioApp().querySelector("#" + tabname + "_" + extra_networks_tabname + "_extra_search");
 
         if(_search_text) {
-            /*
             // パスの区切り文字を正規化
-            if (extra_networks_tabname === 'promptcard') {
-                _search_text = _search_text.replace(/\\/g, '/');
-            }
-            */
+            _search_text = _search_text.replace(/\\/g, '/');
+            
             // SubDirチェックボックスの状態を確認
             var checkbox = gradioApp().querySelector(`#${tabname}_pcm_subdirs_toggle`);
             if (checkbox && !checkbox.checked && !_search_text.endsWith('$')) {

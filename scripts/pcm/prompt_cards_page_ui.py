@@ -104,12 +104,12 @@ class PromptCardsPage(ExtraNetworksPage):
         index = 0
         for img_full_path in valid_image_paths:
             # self.folder_path からの相対パス（"prompt_cards" 含まず)
-            # e.g "xxx.png", "sub1\yyy.png"
+            # e.g "xxx.png", "sub1\yyy.png" (後で正規化)
             rel_path = os.path.relpath(img_full_path, img_folder_path)
             
-            # e.g. "xxx.png" -> "prompt_cards", "sub1\yyy.png" -> "prompt_cards/sub1"
+            # e.g. "xxx.png" -> "prompt_cards", "sub1/yyy.png" -> "prompt_cards/sub1"
             search_path = os.path.join(os.path.split(img_folder_path)[1],os.path.dirname(rel_path))
-            #search_path = search_path.replace('\\', '/') # パスの区切り文字を正規化
+            search_path = search_path.replace('\\', '/') # パスの区切り文字を正規化
         
             # direcotry end mark '$'の挿入
             #   "prompt_cards"      -> "prompt_cards$"
@@ -121,15 +121,15 @@ class PromptCardsPage(ExtraNetworksPage):
             preview_url = CacheInfo.find_preview(thumbs_name) # サムネイルのエンドポイントURL
     
             item = {
-                "name": rel_path,
-                "filename": img_full_path,
+                "name": rel_path.replace('\\', '/'), # "sub1/xxx.png"
+                "filename": img_full_path, # "/physical_full_path/prompt_cards/sub1/xxx.png"
                 "shorthash": "",
                 "preview": preview_url, 
                 "local_preview": img_full_path,
                 "prompt": "",
                 "description": "",
                 "metadata": {},
-                "search_terms": [search_path],
+                "search_terms": [search_path], # "prompt_cards/sub1$"
                 "sort_keys": {"default": index},
             }
         
