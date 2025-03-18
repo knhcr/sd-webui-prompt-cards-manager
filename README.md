@@ -23,7 +23,7 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/03/18
-  - Adujusted Card display
+  - Adjusted Card display
     + Added `ShowDirName` Checkbox, where you can toggle display folder path or not.
     + Normalized folder path separator to `/`.
   - Added an option to choose `Ctrl+Q` key for canceling Card Edtior instead of `Esc`.
