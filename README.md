@@ -26,8 +26,8 @@ Note that this extension does not have features to automatically generate prompt
   - Adjusted Card display
     + Added `ShowDirName` Checkbox, where you can toggle display folder path or not.
     + Normalized folder path separator to `/`.
+    + Removed file name extension from card display.
   - Added an option to choose `Ctrl+Q` key for canceling Card Edtior instead of `Esc`.
-  - Removed file name extension from card display.
   - Added an option to fix [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts) 's template pasting behavior.
     + Enabling the `Fix sd-dynamic-prompts 'Template:' pasting behavior` option in this extension's Settings,
       the issue, where all comment lines that were saved as template in png_info with sd-dynamic-prompts’ `Save template to metadata` option are completely removed when restoring as generation parameters from images, will be fixed.
@@ -54,18 +54,19 @@ Note that this extension does not have features to automatically generate prompt
 ## How to Use
 ### Card Preparation
 #### Image Placement
-* Place any images in the `extensions/sd-webui-prompt-cards-manager/prompt_cards` folder
-  - It recognizes `.png`, `.jpg`, `.jpeg`, `.webp` files
+* Place any image files in the `extensions/sd-webui-prompt-cards-manager/prompt_cards` folder.
+  - This extension recognizes `.png`, `.jpg`, `.jpeg`, `.webp` files.
   - By default, files and dirs starting with `.` (such as `.git`) are ignored.
     If you needs them, you can set the option to not to be ignored in the Settings section.
 
 
-* Like LoRA, you can create subfolders to classify and manage cards more easily
-  - This extension treats the first-level folder name as the "**category**" of that card
+* Like LoRA, you can create subfolders to classify and manage cards more easily.
+  - This extension treats the first-level folder name as the "**category**" of that card.
 
 
-* After placing images in the folder, press the refresh button in the top right of the PromptCards tab,
-  and the placed images will be displayed as cards
+* After you placed images in the folder, press the refresh button in the top right of the PromptCards tab,
+  the placed images will be displayed as cards.
+
 
 
 #### Registering Prompts to Cards
@@ -76,7 +77,7 @@ Note that this extension does not have features to automatically generate prompt
 
 ### Using Cards
 * Clicking a card will apply the registered Prompt and Negative Prompt
-  - Prompts are surrounded by decorative lines that include the category name (= first-level subfolder name)
+  - Prompts are surrounded by decorative lines that include the category name (= 1st-level subfolder name)
     + If decorative lines with the same category name already exist, they will be replaced
     + Otherwise, they will be added to the end
   - Clicking the same card consecutively toggles between applying and removing the prompt
@@ -85,14 +86,14 @@ Note that this extension does not have features to automatically generate prompt
   - If you click a card of the same category again, all content within the decorative lines will be deleted and replaced
   - Since the decorative lines are used as markers for detection, if you change the decorative lines, the replacement target cannot be detected and prompt will be added to the bottom of the current prompt
 
-* Cards with `Replace Mode` ([described later](#prompt-registration-modal-window)) turned off will not use decorative lines, and the registered prompts will simply be added to the bottom
+* The cards with `Replace Mode` uncehcked ([described later](#prompt-registration-modal-window)) will not use decorative lines, and the registered prompts will simply be added to the bottom of Prompt / Negative Prompt.
 
 
 ![example](./docs/images/03_prompt.png)
 
 #### Using ControlNet
-* For cards with `CNet Enabled` checked ([described later](#prompt-registration-modal-window)), a button to set the card image to ControlNet will be displayed
-  - With clicking this button, the card image is automatically put in the ControlNet unit.
+* For the cards with `CNet Enabled` checked ([described later](#prompt-registration-modal-window)), a button for setting the card image to ControlNet will be displayed
+  - With clicking this button, the card image is automatically put in the ControlNet unit-0.
   - ControlNet settings can be configured in the WebUI's Settings tab (currently cannot be changed per card)
   - After changing `CNet Enabled` check/uncheck, you need to press refresh button in the card list view to redraw the button display
   - Currenly a1111 is not supported. (Only for forge builtin ControlNet)
@@ -123,18 +124,18 @@ Note that this extension does not have features to automatically generate prompt
   - Enter any prompt you want to register for this card
   - Completion by [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete) works
   - If a txt file with the same name as the image exists (e.g. `foo.txt` for `foo.png`),
-    the content of that txt file will be automatically loaded into the `Prompt` text area.
+    the content in the txt file will be automatically loaded into the `Prompt` text area.
 
 * Negative Prompt
-  - Same as Prompt
+  - Same as Prompt 
 
 * Description
-  - Use this as a memo for card description
+  - Use this textarea as your memo for card description
 
 * Replace Mode
   - When checked, Prompt and Negative Prompt are inserted with decorative lines
-    Also, if text of the same category is already entered, that location will be replaced
-  - When turned off, decorative lines are not used and text is simply added to the end of the current Prompt and Negative Prompt
+    Also, if text of the same category is already exists in Prompt / Negative Prompt area, that location will be replaced.
+  - When unchecked, decorative lines are not used and text is simply added to the bottom of the current Prompt and Negative Prompt
 
 * CNet Enabled
   - Determines whether to display a button to set the card image to Control Net for this card
