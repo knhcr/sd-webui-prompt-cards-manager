@@ -1,7 +1,7 @@
 <div class='card' onclick="{card_clicked}" style="{style}">
     {background_image}
     <div class="actions">
-        <div class="name">{name}</div>
+        <div class="name" orgname="{orgName}" basename="{baseName}">{name}</div>
         <div class="description">{description}</div>
     </div>
     <div class="button-row">

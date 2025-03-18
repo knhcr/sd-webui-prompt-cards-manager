@@ -298,20 +298,25 @@
 /*-------------------------------------------------------------------*/
 /* Subdir Toggle */
 /* コントロールの整列 */
-.extra-networks-controls-div #txt2img_promptcards_controls, .extra-networks-controls-div #img2img_promptcards_controls{
+.extra-networks-controls-div #txt2img_promptcards_controls,
+.extra-networks-controls-div #img2img_promptcards_controls{
     display: flex;
     align-items: center;
     gap: 0.5rem; /* 要素間の間隔 */
 }
 
 /* ラベル */
-.pcm-subdir-toggle-label {
+.pcm-subdir-toggle-label,
+.pcm-dirname-toggle-label {
     color: var(--body-text-color);
     margin-right: 4px;
+    cursor: pointer;
 }
 
 /* チェックボックス */
-#txt2img_pcm_subdirs_toggle, #img2img_pcm_subdirs_toggle {
+#txt2img_pcm_subdirs_toggle, #img2img_pcm_subdirs_toggle,
+#txt2img_pcm_dirname_toggle, #img2img_pcm_dirname_toggle
+{
     width: 1.2em;
     height: 1.2em;
     border: 2px solid var(--checkbox-border-color);
@@ -323,16 +328,21 @@
     background-color: var(--link-text-color);
     background-color: transparent;
     border-color: var(--checkbox-border-color);
+    cursor: pointer;
 }
 
 /* チェックボックス */
-#txt2img_pcm_subdirs_toggle:checked, #img2img_pcm_subdirs_toggle:checked {
+#txt2img_pcm_subdirs_toggle:checked, #img2img_pcm_subdirs_toggle:checked,
+#txt2img_pcm_dirname_toggle:checked, #img2img_pcm_dirname_toggle:checked
+{
     background-color: var(--link-text-color);
     border-color: var(--link-text-color);
 }
 
 /* 検索入力欄の幅を調整 */
-#txt2img_extra_tabs .extra-network-control--search-text, #img2img_extra_tabs .extra-network-control--search-text {
+#txt2img_extra_tabs .extra-network-control--search-text,
+#img2img_extra_tabs .extra-network-control--search-text
+{
     width: 300px;
 }
 

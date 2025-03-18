@@ -23,6 +23,9 @@ etc.
 -----------------------------------------------------------------------------------------------------------------------------
 ## 更新履歴
 * 2025/03/18
+  - カードの表示名を調整
+    + `ShowDirName` チェックボックスの追加(フォルダ名の表示／非表示をトグル)
+    + フォルダの区切り文字の表示を環境に依らず `/` に統一
   - カードエディタキャンセル用キーボードショーカットに `Esc` ではなく `Ctrl+Q` を使用するオプションを追加
   - カードの表示名からファイル拡張子を削除
   - [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts) の template の貼り付けに係る処理の不具合を修正するオプションを追加
@@ -104,11 +107,10 @@ etc.
 
 ![example](./docs/images/tree.png)
 
-![example](./docs/images/dir.png)
-
-
 * `SubDir` チェックボックスは選択中のフォルダのサブフォルダのカードも表示するかどうかトグルで切り替える機能です
+* `ShowDirName` checkbox toggles whether to display each card's folder path or not.
 
+![ShowDirName](./docs/images/showDirName.png)
 
 ## プロンプト登録用モーダル画面
 * カード右上の Card Edit ボタンを押すと下のような画面が開きます

@@ -204,7 +204,7 @@ class PromptCardsPage(ExtraNetworksPage):
             "card_clicked": onclick,
             "description": html.escape(item.get("description", "")),
             "local_preview": html.escape(item.get("local_preview", "")),
-            "name": name,
+            "name": html.escape(os.path.basename(name)), # 初期値は hideDirName = True
             "prompt": item.get("prompt", ""),
             "save_card_preview": html.escape(f"return saveCardPreview(event, '{tabname}', '{item.get('local_preview', '')}');"),
             "search_only": "",
@@ -216,6 +216,8 @@ class PromptCardsPage(ExtraNetworksPage):
             "send_cnet_mask_button": send_cnet_mask_button,
             "send_cnet_button": send_cnet_button,
             "info_edit_button": info_edit_button,
+            "orgName": html.escape(name), # hideDirName 用 (相対パス付きファイル名)
+            "baseName": html.escape(os.path.basename(name)), # hideDirName 用 (ファイル名のみ)
         }
         
         # template が渡されなかった場合は辞書を返す (TreeView生成処理)

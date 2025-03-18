@@ -23,6 +23,9 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/03/18
+  - Adujusted Card display
+    + Added `ShowDirName` Checkbox, where you can toggle display folder path or not.
+    + Normalized folder path separator to `/`.
   - Added an option to choose `Ctrl+Q` key for canceling Card Edtior instead of `Esc`.
   - Removed file name extension from card display.
   - Added an option to fix [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts) 's template pasting behavior.
@@ -106,10 +109,10 @@ Note that this extension does not have features to automatically generate prompt
 
 ![example](./docs/images/tree.png)
 
-![example](./docs/images/dir.png)
+* `SubDir` checkbox toggles whether to display cards in subfolders of the selected folder or not.
+* `ShowDirName` checkbox toggles whether to display each card's folder path or not.
 
-
-* `SubDir` checkbox toggles whether to display cards from subfolders of the selected folder.
+![ShowDirName](./docs/images/showDirName.png)
 
 ## Prompt Registration Modal Window
 * Pressing the Card Edit button in the top right of the card opens a screen like this
