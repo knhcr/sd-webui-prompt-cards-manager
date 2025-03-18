@@ -106,11 +106,11 @@ class PromptCardInfo:
             if os.path.exists(card_info_path):
                 with open(card_info_path, 'r', encoding="utf-8") as f:
                     tmp = json.load(f)
-            
-            card_info_path = self.image_path.rsplit('.', 1)[0] + '.txt'
-            if os.path.exists(card_info_path):
-                with open(card_info_path, 'r', encoding="utf-8") as f:
-                    tmp['prompt'] = f.read()
+            else:
+                card_info_path = self.image_path.rsplit('.', 1)[0] + '.txt'
+                if os.path.exists(card_info_path):
+                    with open(card_info_path, 'r', encoding="utf-8") as f:
+                        tmp['prompt'] = f.read()
         except:
             print(f"Error loading prompt card info: {card_info_path}", file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
