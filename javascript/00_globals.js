@@ -69,4 +69,6 @@ const pcmGetElement = (selector, base_elem = gradioApp(), suppressError = false)
 
 /** デバッグプリント */
 let PCM_DEBUG_MODE = false;
-const PCM_DEBUG_PRINT = PCM_DEBUG_MODE ? (...args) => {console.log(...args);} : () => {};
+const PCM_DEBUG_PRINT = (...args) => {
+    if(PCM_DEBUG_MODE){ console.log(...args); }
+};
