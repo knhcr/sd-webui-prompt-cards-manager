@@ -11,3 +11,4 @@ memo/
 .cursor
 DEBUG_FLAG
 *.code-workspace
+*localdev*
