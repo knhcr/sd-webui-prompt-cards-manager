@@ -119,6 +119,8 @@ Note that this extension does not have features to automatically generate prompt
 * Prompt
   - Enter any prompt you want to register for this card
   - Completion by [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete) works
+  - If a txt file with the same name as the image exists (e.g. `foo.txt` for `foo.png`),
+    the content of that txt file will be automatically loaded into the `Prompt` text area.
 
 * Negative Prompt
   - Same as Prompt

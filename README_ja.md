@@ -118,6 +118,8 @@ etc.
 * Prompt
   - このカードに登録したいプロンプトを好きなように入力してください
   - [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete) による補完が効きます
+  - 画像ファイルと同名の txt ファイルが存在した場合 (例. `foo.png` に対して `foo.txt` が存在)、
+    その txt ファイルの中身が自動的に `Prompt` エリアに読み込まれます。
 
 * Negative Prompt
   - Prompt と同様
