@@ -4,8 +4,9 @@
 const pcmPieInitialize = async()=>{
     PCM_DEBUG_PRINT('pcm_pie initialized');
 
-    // エスケープキー押下時にモーダルを閉じる
-    window.addEventListener('keydown', pcmPieOnKeyDownEsc);
+    // キーボードショートカット
+    window.addEventListener('keydown', pcmPieOnKeyDownEsc); // エスケープキー押下時にモーダルを閉じる
+    window.addEventListener('keydown', pcmPieOnKeyDownCtrlS); // Ctrl-S で保存
    
     // ボタンのツールチップ
     //  - 右列データセットボタン
@@ -38,7 +39,7 @@ const pcmPieInitialize = async()=>{
     gradioApp().querySelector('#pcm_pie_close_btn').setAttribute(
         'title', 'Cancel and close. [Esc]');
     gradioApp().querySelector('#pcm_pie_save_btn').setAttribute(
-        'title', 'Save and close.');
+        'title', 'Save and close. [Ctrl-S');
 
 
     // 解像度スライダのコールバック
@@ -337,17 +338,34 @@ const pcmPieResetPage = ()=>{
 }
 
 /**
- * エスケープキー押下時にモーダルを閉じる
+ * Escape で Cancel
  */
 const pcmPieOnKeyDownEsc = (event)=>{
-    const isOpen = gradioApp().querySelector('#pcm_pie_container').style.display !== 'none';
+    const isOpen = !gradioApp().querySelector('#pcm_pie_container').classList.contains("hidden");
     const isKeyEvent = opts.prompt_cards_manager_cancel_editing_with_ctrl_q
         ? (event.ctrlKey && event.key === 'q') : event.key === 'Escape';
     if (isOpen && isKeyEvent){
+        PCM_DEBUG_PRINT("Escape event.")
         event.preventDefault();
         gradioApp().querySelector('#pcm_pie_close_btn').click();
     }
 };
+
+
+/**
+ * Ctrl-S で Save
+ */
+const pcmPieOnKeyDownCtrlS = (event)=>{
+    if (!opts.prompt_cards_manager_save_editing_with_ctrl_s){return;}
+    const isOpen = !gradioApp().querySelector('#pcm_pie_container').classList.contains("hidden");
+    const isKeyEvent = event.ctrlKey && event.key === 's';
+    if(isOpen && isKeyEvent){
+        PCM_DEBUG_PRINT("Ctrl-S event.")
+        event.preventDefault();
+        gradioApp().querySelector('#pcm_pie_save_btn').click();
+    }
+}
+
 
 /**
  * 解像度適用チェックボックスのコールバック

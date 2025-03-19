@@ -157,6 +157,13 @@ def on_ui_settings():
         section=section
     ))
 
+    # save editting with 'Ctrl + S'
+    shared.opts.add_option("prompt_cards_manager_save_editing_with_ctrl_s", shared.OptionInfo(
+        True,
+        "Prompt Card Editor shortcut : 'Ctrl + S' for saving. To disable, uncheck this option.",
+        section=section
+    ))
+
 
 # コールバック登録
 script_callbacks.on_ui_settings(on_ui_settings)

@@ -22,9 +22,13 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/03/20
+  - Added shortcut key for saving with `Ctrl-S` at Card Edit page. (Optional)
+
 * 2025/03/19
-  - At the right side of prompt textarea, now you can always see a small gallery component
-    which shows the image generation result. ([Sample](#mini-gallery))
+  - Added Mini Gallery
+    + At the right side of prompt textarea, now you can always see a small gallery component
+      which shows the image generation result. ([Sample](#mini-gallery))
     + If you don't need this, uncheck the option to hide that at `Settings` page. (Show by default)
 
 * 2025/03/18
@@ -32,7 +36,7 @@ Note that this extension does not have features to automatically generate prompt
     + Added `ShowDirName` Checkbox, where you can toggle display folder path or not.
     + Normalized folder path separator to `/`.
     + Removed file name extension from card display.
-  - Added an option to choose `Ctrl+Q` key for canceling Card Edtior instead of `Esc`.
+  - Added an option to choose `Ctrl+Q` key for canceling Card Edti page instead of `Esc`.
   - Added an option to fix [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts) 's template pasting behavior.
     + Enabling the `Fix sd-dynamic-prompts 'Template:' pasting behavior` option in this extension's Settings,
       the issue, where all comment lines that were saved as template in png_info with sd-dynamic-prompts’ `Save template to metadata` option are completely removed when restoring as generation parameters from images, will be fixed.
