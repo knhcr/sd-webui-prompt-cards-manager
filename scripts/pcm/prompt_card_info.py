@@ -27,10 +27,10 @@ class PromptCardInfoManager:
         cls.refresh_card_info_dict()
 
         if thumbs_name not in cls.__card_info_dict:
-            DEBUG_PRINT(f"PromptCardInfoManager card initialize: {thumbs_name}")
+            #DEBUG_PRINT(f"PromptCardInfoManager card initialize: {thumbs_name}")
             cls.__card_info_dict[thumbs_name] = PromptCardInfo(thumbs_name)
         elif is_refresh:
-            DEBUG_PRINT(f"PromptCardInfoManager card refresh: {thumbs_name}")
+            #DEBUG_PRINT(f"PromptCardInfoManager card refresh: {thumbs_name}")
             cls.__card_info_dict[thumbs_name].load_card_info_from_file()
         
         return cls.__card_info_dict[thumbs_name]
@@ -101,7 +101,7 @@ class PromptCardInfo:
         '''
         tmp = {}
         card_info_path = self.image_path.rsplit('.', 1)[0] + '.json'
-        DEBUG_PRINT(f"PromptCardInfo.load_card_info_from_file card_info_path: {card_info_path}")
+        #DEBUG_PRINT(f"PromptCardInfo.load_card_info_from_file card_info_path: {card_info_path}")
         try:
             if os.path.exists(card_info_path):
                 with open(card_info_path, 'r', encoding="utf-8") as f:
@@ -188,7 +188,7 @@ class PromptCardInfo:
         ''' フロントエンドに渡す用のカード情報
         現状はcategory を追加して返す
         '''
-        DEBUG_PRINT(f"PromptCardInfo.get_card_info_for_frontend card_info: {self.card_info}")
+        #DEBUG_PRINT(f"PromptCardInfo.get_card_info_for_frontend card_info: {self.card_info}")
         data = self.card_info.copy()
         data['category'] = self.category
         return data
