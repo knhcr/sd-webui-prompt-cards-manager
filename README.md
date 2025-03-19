@@ -22,6 +22,11 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/03/19
+  - At the right side of prompt textarea, now you can always see a small gallery component
+    which shows the image generation result. ([Sample](#mini-gallery))
+    + If you don't need this, uncheck the option to hide that at `Settings` page. (Show by default)
+
 * 2025/03/18
   - Adjusted Card display
     + Added `ShowDirName` Checkbox, where you can toggle display folder path or not.
@@ -110,10 +115,19 @@ Note that this extension does not have features to automatically generate prompt
 
 ![example](./docs/images/tree.png)
 
+### Control Belt
 * `SubDir` checkbox toggles whether to display cards in subfolders of the selected folder or not.
 * `ShowDirName` checkbox toggles whether to display each card's folder path or not.
 
 ![ShowDirName](./docs/images/showDirName.png)
+
+### Mini Gallery
+  - At the right side of prompt textarea, you can always see a small gallery component which shows the image generation result.
+    + This is equivalent to the default output gallery in the `Genaration` tab.
+  - If you don't need this, uncheck `Settings` > `Show Mini Gallery` option.
+
+![MiniGellery](./docs/images/mini%20gallery.png)
+
 
 ## Prompt Registration Modal Window
 * Pressing the Card Edit button in the top right of the card opens a screen like this
