@@ -1,4 +1,25 @@
-function pcmSetupMiniGalleryObserver() {
+async function pcmSetupMiniGalleryObserver() {
+    PCM_DEBUG_PRINT(`pcmSetupMiniGalleryObserver: prompt_cards_manager_show_mini_gallery ${opts.prompt_cards_manager_show_mini_gallery}`);
+    // OnUiLoaded のタイミングはかなり早いので Settings の初期化が完了するまで待機
+    if (opts.prompt_cards_manager_show_mini_gallery === undefined) {
+        for (let i = 0; i < 50; i++){
+            await pcmSleepAsync(100);
+            if (opts.prompt_cards_manager_show_mini_gallery !== undefined){
+                break;
+            }
+        }
+    }
+    
+    PCM_DEBUG_PRINT(`pcmSetupMiniGalleryObserve: prompt_cards_manager_show_mini_gallery ${opts.prompt_cards_manager_show_mini_gallery}`);
+    if (!opts.prompt_cards_manager_show_mini_gallery) {
+        const galleryColumn = gradioApp().querySelector('#pcm_mini_gallery_column');
+        if (galleryColumn) galleryColumn.parentElement.parentElement.style.display = 'none';
+    }else{
+        const galleryColumn = gradioApp().querySelector('#pcm_mini_gallery_column');
+        if (galleryColumn) galleryColumn.parentElement.parentElement.style.display = 'block';
+    }
+
+        
     // 画像生成時の動作
     //  - Gallery はイメージ選択時と非選択時でDOMの構造が変わるため監視対象が複数必要
     //    + どちらのモードでも #txt2img_gallery .grid-wrap > .grid-container > button.thumbnail-item > img は存在

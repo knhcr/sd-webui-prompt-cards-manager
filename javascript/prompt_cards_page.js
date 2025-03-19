@@ -273,9 +273,6 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     const resizeMode = opts.prompt_cards_manager_default_controlnet_resize_mode;
 
     // -- 関数定義 --
-    /** 待機 */
-    const sleepAsync = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
     /** Data URI から DataTransfer オブジェクトを作成する */
     const createDataTransferAsync = async (dataUri) => {
         const mimeType = dataUri.split(';')[0].split(':')[1];
@@ -308,7 +305,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     }
     if (!elemTmp.classList.contains('open')){ // 開いていない場合
         elemTmp.click();
-        await sleepAsync(50);
+        await pcmSleepAsync(50);
     }
 
     // 以下 #input-accordion-0 の中の処理
@@ -327,7 +324,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     }
     if (!elemTmp.classList.contains('open')){ // 開いていない場合
         elemTmp.click();
-        await sleepAsync(50);
+        await pcmSleepAsync(50);
     }
 
     // CNetが有効になっていなければ Enable ボタンをクリック
@@ -341,7 +338,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
         if(!statusTmp.props.value){
             PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet ControlNet-${index} Enable checkbox clicked`);
             elemTmp.click();
-            await sleepAsync(10);
+            await pcmSleepAsync(10);
         }
     }
 
@@ -355,7 +352,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     selectorTmp = `#tab_${tabname} .tabs.gradio-tabs.extra-networks > .tab-nav.scroll-hide > button`
     if(!(elemTmp = pcmGetElementBySelectorAndText(selectorTmp, 'Generation'))) return;
     elemTmp.click();
-    await sleepAsync(50);
+    await pcmSleepAsync(50);
     PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet Generation tab clicked`);
 
     // CNet Model 選択処理    
@@ -373,7 +370,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
             for (let i = 0; i < 5; i++){
                 if(statusTmp && statusTmp.props.choices.length > 1) break;
                 PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet ControlNet Model List Refreshing... ${i}`);
-                await sleepAsync(100);
+                await pcmSleepAsync(100);
             }
         }else{
             console.error("Prompt Cards Manager Error. ControlNet model list refresh button not found.");
@@ -407,7 +404,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     }
 
     // 画像ドロップイベントをエミュレート
-    let [dataTransferImg, _] = await Promise.all([pDataTransferImg, sleepAsync(350)]);
+    let [dataTransferImg, _] = await Promise.all([pDataTransferImg, pcmSleepAsync(350)]);
     selectorTmp = `#${tabname}_controlnet_ControlNet-${index}_input_image .image-container > div`
     if(!(elemTmp = pcmGetElement(selectorTmp, baseElem))){
         console.error(`Prompt Cards Manager Error. ${tabname} ControlNet Unit ${index} Input Image Area not found`);
@@ -480,7 +477,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     selectorTmp = `#tab_${tabname} .tabs.gradio-tabs.extra-networks > .tab-nav.scroll-hide > button`
     if(!(elemTmp = pcmGetElementBySelectorAndText(selectorTmp, 'PromptCards'))) return;
     elemTmp.click();
-    await sleepAsync(50);
+    await pcmSleepAsync(50);
 
     PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet end.`);
 }

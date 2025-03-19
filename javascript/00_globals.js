@@ -67,6 +67,10 @@ const pcmGetElement = (selector, base_elem = gradioApp(), suppressError = false)
     return element;
 }
 
+/** 指定されたミリ秒数だけ待機する */
+const pcmSleepAsync = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+
 /** デバッグプリント */
 let PCM_DEBUG_MODE = false;
 const PCM_DEBUG_PRINT = (...args) => {

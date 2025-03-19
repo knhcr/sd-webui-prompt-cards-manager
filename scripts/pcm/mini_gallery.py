@@ -2,7 +2,9 @@ import os
 import gradio as gr
 from urllib.parse import unquote
 from modules import script_callbacks
+from modules import shared
 from scripts.pcm.constants import DEBUG_PRINT
+
 
 
 class MiniGallery:
@@ -15,13 +17,13 @@ class MiniGallery:
     @classmethod
     def create_mini_gallery(cls):
         with gr.Group():
-            with gr.Column():
+            with gr.Column(elem_id="pcm_mini_gallery_column"):
                 cls.mini_gallery = gr.Gallery(
                     value=[], elem_id="pcm_mini_gallery", elem_classes="gradio-gallery",
-                    height = 180, width = 200,
+                    height = 175, width = 170,
                     select_types=["index"],
                     interactive=False, show_label=False, show_share_button=False
-                    )
+                )
                 # JS 側で画像生成完了時に画像を表示するためにchangeイベントを発火させる
                 cls.hidden_txt = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt")
 

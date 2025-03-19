@@ -6,6 +6,12 @@ from scripts.pcm.constants import DEBUG_PRINT
 def on_ui_settings():
     section = ("prompt_cards_manager", "Prompt Cards Manager")
 
+    # show mini gallery (needs reload ui)
+    shared.opts.add_option("prompt_cards_manager_show_mini_gallery", shared.OptionInfo(
+        True, "Show Mini Gallery",
+        section=section
+    ).needs_restart())
+
     # ignore dot starts
     shared.opts.add_option("prompt_cards_manager_ignore_dot_starts", shared.OptionInfo(
         True, "Ignore dirs and files starting with '.' (like '.DS_Store', '.git', etc.)",
@@ -14,33 +20,33 @@ def on_ui_settings():
 
     # default value : is_replace
     shared.opts.add_option("prompt_cards_manager_default_is_replace", shared.OptionInfo(
-        True, "Replace Mode (Default value)",
+        True, "[Editor Default Value] Replace Mode ",
         section=section
     ))
 
     # default value : apply_resolution
     shared.opts.add_option("prompt_cards_manager_default_apply_resolution", shared.OptionInfo(
-        True, "Apply Resolution (Default value)",
+        True, "[Editor Default Value] Apply Resolution",
         section=section
     ))
 
     # default value : resolution width
     shared.opts.add_option("prompt_cards_manager_default_resolution_width", shared.OptionInfo(
-        1024, "Resolution Width (Default value)",
+        1024, "[Editor Default Value] Resolution Width",
         gr.Slider, {"minimum": 64, "maximum": 3072, "step": 8}, 
         section=section
     ))
 
     # default value : resolution height
     shared.opts.add_option("prompt_cards_manager_default_resolution_height", shared.OptionInfo(
-        1024, "Resolution Height (Default value)",
+        1024, "[Editor Default Value] Resolution Height",
         gr.Slider, {"minimum": 64, "maximum": 3072, "step": 8}, 
         section=section
     ))
 
     # default value : cnet_enabled
     shared.opts.add_option("prompt_cards_manager_default_cnet_enabled", shared.OptionInfo(
-        True, "CNet Enabled (Default value)",
+        True, "[Editor Default Value] CNet Enabled",
         section=section
     ))
 
@@ -147,7 +153,7 @@ def on_ui_settings():
     # cancel editing with 'Ctrl + Q'
     shared.opts.add_option("prompt_cards_manager_cancel_editing_with_ctrl_q", shared.OptionInfo(
         False,
-        "Prompt Card Editor shortcut : 'Ctrl + Q' to cancel editing instead of 'Esc'.",
+        "Prompt Card Editor shortcut : 'Ctrl + Q' for canceling instead of 'Esc'.",
         section=section
     ))
 

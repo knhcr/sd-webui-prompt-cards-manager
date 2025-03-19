@@ -1,8 +1,11 @@
 /**
  * 初期化処理 (UI ロード後に実行)
  */
-const pcmPieInitialize = ()=>{
+const pcmPieInitialize = async()=>{
     PCM_DEBUG_PRINT('pcm_pie initialized');
+
+    // エスケープキー押下時にモーダルを閉じる
+    window.addEventListener('keydown', pcmPieOnKeyDownEsc);
    
     // ボタンのツールチップ
     //  - 右列データセットボタン
@@ -345,7 +348,6 @@ const pcmPieOnKeyDownEsc = (event)=>{
         gradioApp().querySelector('#pcm_pie_close_btn').click();
     }
 };
-window.addEventListener('keydown', pcmPieOnKeyDownEsc);
 
 /**
  * 解像度適用チェックボックスのコールバック
@@ -361,4 +363,5 @@ const pcmPieApplyResolutionCheckboxOnchange = ()=>{
 }
 
 // 初期化処理を登録
-onUiLoaded(pcmPieInitialize);
+//onUiLoaded(pcmPieInitialize);
+pcmWaitForContent('#pcm_pie_data_set_prpt_btn', pcmPieInitialize);
