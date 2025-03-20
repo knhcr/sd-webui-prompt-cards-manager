@@ -32,6 +32,11 @@ async function pcmSetupMiniGallery(){
             cnet_enabled_mg.checked = cnet_enabled_dg.checked;
             updateInput(cnet_enabled_mg);
         }
+    }else{
+        const elem = gradioApp().querySelector('#pcm_mini_gallery_cnet_enabled');
+        if (elem){
+            elem.parentElement.parentElement.style.display = 'none';
+        }
     }
 
     // コールバックの登録
