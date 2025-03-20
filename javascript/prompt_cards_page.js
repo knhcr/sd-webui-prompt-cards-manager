@@ -105,6 +105,17 @@ async function pcmCardClick(event, tabname, thumbsName) {
             elemTmp.value = data.resolution.height;
             updateInput(elemTmp);
         }
+
+        // Mini Gallery の値も更新
+        const width_mg = gradioApp().querySelector('#pcm_mini_gallery_width input[type="number"]');
+        const height_mg = gradioApp().querySelector('#pcm_mini_gallery_height input[type="number"]');
+        if (width_mg && height_mg){
+            width_mg.value = data.resolution.width;
+            updateInput(width_mg);
+            height_mg.value = data.resolution.height;
+            updateInput(height_mg);
+        }
+
     }
 
     // 元のスクロール位置に戻す

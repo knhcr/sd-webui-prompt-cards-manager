@@ -59,7 +59,6 @@ class MiniGallery:
 
                 # JS 側からの発火用
                 cls.hidden_txt_image = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt_image") # 画像表示用
-                cls.hidden_txt_control = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt_control") # スライダとCNET用
 
         # Gallery の画像更新
         cls.hidden_txt_image.input(
@@ -107,14 +106,6 @@ class MiniGallery:
             _js = cls._js_pipelines['cnet_enabled'].substitute(num_inputs=len(cnet_enabled_inputs)),
         )
 
-        # Generation タブの設定値変更イベントの通知を受け取り、ミニギャラリーの値を更新
-        control_values_update_inputs = [cls.hidden_txt_control, cls.width_slider, cls.height_slider, cls.cnet_enabled]
-        control_values_update_outputs = [cls.width_slider, cls.height_slider, cls.cnet_enabled]
-        cls.hidden_txt_control.input(
-            fn=cls.update_control_values,
-            inputs = control_values_update_inputs,
-            outputs = control_values_update_outputs,
-        )
 
     @classmethod
     def on_after_component(cls, component, **kwargs):
@@ -132,30 +123,6 @@ class MiniGallery:
         DEBUG_PRINT(f"MiniGallery.on_hidden_txt_change image_paths: {image_paths}")
         return gr.update(value=image_paths, preview=True) # preview=True で選択モードで表示される
     
-    @classmethod
-    def update_control_values(cls,txt, width, height, cnet_enabled):
-        ''' Generation タブの設定値変更イベントの通知を受け取り、ミニギャラリーの値を更新
-        txt : type=value$timestamp, typeは 'width' 'height' 'cnet_enabled' のいずれか
-        '''
-        ret = [gr.update(), gr.update(), gr.update()] # None を返すと最小値になるため明示的に変更なしを伝える
-        if len(txt) > 0:
-            txt = txt.split("$")[0]
-            if len(txt) > 0:
-                type, value = txt.split("=")[0], txt.split("=")[1]
-                if type == "width":
-                    ret[0] = gr.update(value=int(value))
-
-                elif type == "height":
-                    ret[1] = gr.update(value=int(value))
-
-                elif type == "cnet_enabled":
-                    if value.lower() == "True":
-                        ret[2] = gr.update(value=True)
-                    else:
-                        ret[2] = gr.update(value=False)
-        return ret
-
-
 
 # create mini gallery
 script_callbacks.on_after_component(MiniGallery.on_after_component)

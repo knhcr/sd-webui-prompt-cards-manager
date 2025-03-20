@@ -180,10 +180,8 @@ function pcmSetupMiniGallerySliderObserver(){
 */
 
 /** 
- * Generation タブの解像度とCNET-unit0の有効/無効を監視
- * 変更検知すると hidden txtarea を使って python に飛ばす
- * JSはchange event で検知し、python(Gradio)はinput event しか発火しないため無限ループはしないが、
- * 値が同じ場合は発火しないようチェックも入れる
+ * Generation タブの解像度とCNET-unit0の有効/無効を Mini Gallery に反映
+ * 値が同じ場合はスキップ
  * */
 function pcmSetupGenerationConditionsObservers(){
     const width_dg_num = gradioApp().querySelector('#txt2img_column_size #txt2img_width input[type="number"]');
@@ -196,13 +194,9 @@ function pcmSetupGenerationConditionsObservers(){
     const height_mg = gradioApp().querySelector('#pcm_mini_gallery_height input[type="number"]');
     const cnet_enabled_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_enabled input[type="checkbox"]');
 
-    const hiddenTxtControl = gradioApp().querySelector('#pcm_mini_gallery_hidden_txt_control textarea');
-
-    if (!width_dg_num || !width_dg_range){
-        PCM_DEBUG_PRINT(`!!! pcmSetupMiniGallerySliderObserver width_dg not found`);
+    if (!width_dg_num || !width_mg){
         return;
     }
-
 
     // Width の数値ボックス変更時
     width_dg_num.addEventListener('change', (e)=>{
@@ -239,19 +233,26 @@ function pcmSetupGenerationConditionsObservers(){
     // CNet Enabled のチェックボックス変更時 (a1111 の場合は存在しないためスキップ)
     if (cnet_enabled_dg){
         cnet_enabled_dg.addEventListener('change', (e)=>{
-            PCM_DEBUG_PRINT(`pcm_mini_gallery_cnet_enabled_change: ${e.target.value}`);
-            if(e.target.value !== cnet_enabled_mg.value){
-                _updateMiniGalleryControlValues(e.target.value, "cnet_enabled");
+            PCM_DEBUG_PRINT(`pcm_mini_gallery_cnet_enabled_change: ${e.target.checked}`);
+            if(e.target.checked !== cnet_enabled_mg.checked){
+                _updateMiniGalleryControlValues(e.target.checked, "cnet_enabled");
             }
         });
     }
 
-    /** テキストに'type=value$timestamp' の形式でセットし、python に渡す */
+    /**
+     * Mini Gallery の値を変更
+     */
     function _updateMiniGalleryControlValues(value, type){
-        PCM_DEBUG_PRINT(`pcm_mini_gallery : ${type}=${value}`);
-        const txt = `${type}=${value}$${Date.now()}`;
-        hiddenTxtControl.value = txt;
-        hiddenTxtControl.dispatchEvent(new Event('input', {bubbles:true}));
+        if (type === "width" && value !== width_mg.value){
+            width_mg.value = value;
+            updateInput(width_mg);
+        }else if (type === "height" && value !== height_mg.value){
+            height_mg.value = value;
+            updateInput(height_mg);
+        }else if (type === "cnet_enabled" && value !== cnet_enabled_mg.checked){
+            cnet_enabled_mg.checked = value;
+            updateInput(cnet_enabled_mg);
+        }
     }
 }
-
