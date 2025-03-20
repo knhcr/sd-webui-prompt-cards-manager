@@ -14,7 +14,7 @@ def on_ui_settings():
 
     # ignore dot starts
     shared.opts.add_option("prompt_cards_manager_ignore_dot_starts", shared.OptionInfo(
-        True, "Ignore dirs and files starting with '.' (like '.DS_Store', '.git', etc.)",
+        True, "Ignore dirs and files starting with . (such as .git, .DS_Store)",
         section=section
     ))
 
@@ -153,14 +153,14 @@ def on_ui_settings():
     # cancel editing with 'Ctrl + Q'
     shared.opts.add_option("prompt_cards_manager_cancel_editing_with_ctrl_q", shared.OptionInfo(
         False,
-        "Prompt Card Editor shortcut : 'Ctrl + Q' for canceling instead of 'Esc'.",
+        "Card Editor shortcut key : 'Ctrl + Q' for canceling instead of 'Esc'.",
         section=section
     ))
 
     # save editting with 'Ctrl + S'
     shared.opts.add_option("prompt_cards_manager_save_editing_with_ctrl_s", shared.OptionInfo(
         True,
-        "Prompt Card Editor shortcut : 'Ctrl + S' for saving. To disable, uncheck this option.",
+        "Card Editor shortcut key : 'Ctrl + S' for saving. To disable, uncheck this option.",
         section=section
     ))
 
