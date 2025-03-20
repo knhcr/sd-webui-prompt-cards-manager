@@ -45,20 +45,18 @@ class MiniGallery:
 
     @classmethod
     def create_mini_gallery(cls):
-        with gr.Group():
-            with gr.Column(elem_id="pcm_mini_gallery_column"):
-                cls.mini_gallery = gr.Gallery(
-                    value=[], elem_id="pcm_mini_gallery", elem_classes="gradio-gallery",
-                    height = 175, width = 170,
-                    select_types=["index"],
-                    interactive=False, show_label=False, show_share_button=False
-                )
-                cls.width_slider = gr.Slider(label="t2i Width", elem_id="pcm_mini_gallery_width", value=512, minimum=64, maximum=2048, step=8, interactive=True)
-                cls.height_slider = gr.Slider(label="t2i Height", elem_id="pcm_mini_gallery_height", value=512, minimum=64, maximum=2048, step=8, interactive=True)
-                cls.cnet_enabled = gr.Checkbox(label="t2i CNet-unit0 Enabled", elem_id="pcm_mini_gallery_cnet_enabled", value=False, interactive=True)
-
-                # JS 側からの発火用
-                cls.hidden_txt_image = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt_image") # 画像表示用
+        with gr.Column(elem_id="pcm_mini_gallery_column", scale=1):
+            cls.mini_gallery = gr.Gallery(
+                value=[], elem_id="pcm_mini_gallery", elem_classes="gradio-gallery",
+                height = 175, width = 170,
+                select_types=["index"],
+                interactive=False, show_label=False, show_share_button=False
+            )
+            cls.width_slider = gr.Slider(label="t2i Width", elem_id="pcm_mini_gallery_width", value=512, minimum=64, maximum=2048, step=8, interactive=True)
+            cls.height_slider = gr.Slider(label="t2i Height", elem_id="pcm_mini_gallery_height", value=512, minimum=64, maximum=2048, step=8, interactive=True)
+            cls.cnet_enabled = gr.Checkbox(label="t2i CNet-unit0 Enabled", elem_id="pcm_mini_gallery_cnet_enabled", value=False, interactive=True)
+            # JS 側からの発火用
+            cls.hidden_txt_image = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt_image") # 画像表示用
 
         # Gallery の画像更新
         cls.hidden_txt_image.input(
