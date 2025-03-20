@@ -2,8 +2,11 @@
 [日本語README](./README_ja.md)
 
 ## Overview
-This is an extension for [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) that allows you to manage prompts and negative prompts using card-based units, similar to LoRA. You can register any prompt for any image, and display the images as cards in the **PromptCards** tab of Extra Networks.
-By clicking on a card, you can input the registered prompt or replace a prompt that has already been entered on another card.
+This is an extension for [AUTOMATIC1111/stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) that allows you to manage prompts and negative prompts using card-based GUI, similar to that of LoRA. You can register any prompt for any image, and display the images as cards in the **PromptCards** tab of Extra Networks.
+By clicking on a card, you can input the registered prompt or replace a prompt that has already been entered by another card.
+
+Additionally, as an extra feature, a mini gallery that always displays the generated image results is added to the right side of the prompt area. This allows you to adjust the prompt while previewing the generated results without switching back and forth to the Generation tab. (If not needed, it can be hidden in the `Settings`.)
+
 
 ![inserted_text](./docs/images/01_title.png)
 
@@ -23,6 +26,7 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/03/20
+  - Added Resolution Slider and CNet checkbox
   - Added shortcut key for saving with `Ctrl-S` at Card Edit page. (Optional)
 
 * 2025/03/19
@@ -52,8 +56,8 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Prerequisites
-* This extension inserts prompts surrounded by decorative lines starting with `#`
-  Make sure you have another extension installed that treats lines starting with `#` as comments
+* This extension inserts prompts surrounded by decorative lines starting with `#`.
+  Make sure you have another extension installed that treats lines starting with `#` as comments.
   - For example, [sd-dynamic-prompts](https://github.com/adieyal/sd-dynamic-prompts) has such functionality
   - Also, if you're using a forge-based WebUI, it probably comes with this functionality by default
   - You can operate without using decorative lines by turning off `Replace Mode` ([described later](#prompt-registration-modal-window)), but in that case, prompt replacement cannot be performed
@@ -126,9 +130,9 @@ Note that this extension does not have features to automatically generate prompt
 ![ShowDirName](./docs/images/showDirName.png)
 
 ### Mini Gallery
-  - At the right side of prompt textarea, you can always see a small gallery component which shows the image generation result.
-    + This is equivalent to the default output gallery in the `Genaration` tab.
-  - If you don't need this, uncheck `Settings` > `Show Mini Gallery` option.
+  - At the right side of prompt textarea, you can always see a small gallery which shows the image generation result.
+  - The resolution sliders and CNet checkbox is syncronized with those of Generation tab.
+  - If you don't need this gallery, uncheck `Settings` > `Show Mini Gallery` option.
 
 ![MiniGellery](./docs/images/mini%20gallery.png)
 
