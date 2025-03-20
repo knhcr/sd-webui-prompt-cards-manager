@@ -4,11 +4,40 @@ from urllib.parse import unquote
 from modules import script_callbacks
 from modules import shared
 from scripts.pcm.constants import DEBUG_PRINT
-
+from string import Template
 
 
 class MiniGallery:
     mini_gallery = None
+
+    _js_pipelines = {
+        # Width Slider : Mini Gallery -> Default Gallery
+        "width_slider": Template("""
+            function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                pcmUpdateDefaultGallerySliderWidth(inputs[0]);
+                return inputs;
+            }
+        """),
+
+        # Height Slider : Mini Gallery -> Default Gallery
+        "height_slider": Template("""
+            function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                pcmUpdateDefaultGallerySliderHeight(inputs[0]);
+                return inputs;
+            }
+        """),
+
+        # CNet Enabled : Mini Gallery -> CNet Unit 0 
+        "cnet_enabled": Template("""
+            async function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                await pcmUpdateDefaultGalleryCNetEnabled(inputs[0]);
+                return inputs;
+            }
+        """),
+    }
 
     @classmethod
     def __init__(cls):
@@ -24,13 +53,67 @@ class MiniGallery:
                     select_types=["index"],
                     interactive=False, show_label=False, show_share_button=False
                 )
-                # JS 側で画像生成完了時に画像を表示するためにchangeイベントを発火させる
-                cls.hidden_txt = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt")
+                cls.width_slider = gr.Slider(label="t2i Width", elem_id="pcm_mini_gallery_width", value=512, minimum=64, maximum=2048, step=8, interactive=True)
+                cls.height_slider = gr.Slider(label="t2i Height", elem_id="pcm_mini_gallery_height", value=512, minimum=64, maximum=2048, step=8, interactive=True)
+                cls.cnet_enabled = gr.Checkbox(label="t2i CNet-unit0 Enabled", elem_id="pcm_mini_gallery_cnet_enabled", value=False, interactive=True)
 
-        cls.hidden_txt.input(
+                # JS 側からの発火用
+                cls.hidden_txt_image = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt_image") # 画像表示用
+                cls.hidden_txt_control = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt_control") # スライダとCNET用
+
+        # Gallery の画像更新
+        cls.hidden_txt_image.input(
             fn=cls.on_hidden_txt_change,
-            inputs=[cls.hidden_txt],
+            inputs=[cls.hidden_txt_image],
             outputs=[cls.mini_gallery]
+        )
+
+        # Generation タブのスライダー更新 width
+        width_slider_inputs = [cls.width_slider,]
+        cls.width_slider.change(
+            fn=lambda x: x,
+            inputs = width_slider_inputs,
+            outputs = [],
+            _js = cls._js_pipelines['width_slider'].substitute(num_inputs=len(width_slider_inputs)),
+        )
+        cls.width_slider.release( # change だけだと最終的な値を取り逃すため release も必要
+            fn=lambda x: x,
+            inputs = width_slider_inputs,
+            outputs = [],
+            _js = cls._js_pipelines['width_slider'].substitute(num_inputs=len(width_slider_inputs)),
+        )        
+
+        # Generation タブのスライダー更新 height
+        height_slider_inputs = [cls.height_slider,]
+        cls.height_slider.change(
+            fn=lambda x: x,
+            inputs = height_slider_inputs,
+            outputs = [],
+            _js = cls._js_pipelines['height_slider'].substitute(num_inputs=len(width_slider_inputs)),
+        )
+        cls.height_slider.release( # change だけだと最終的な値を取り逃すため release も必要
+            fn=lambda x: x,
+            inputs = height_slider_inputs,
+            outputs = [],
+            _js = cls._js_pipelines['height_slider'].substitute(num_inputs=len(width_slider_inputs)),
+        )
+
+        # Generation タブの CNet Unit 0 の cnet_enabled 更新
+        cnet_enabled_inputs = [cls.cnet_enabled]
+        cls.cnet_enabled.change(
+            fn=lambda x: x,
+            inputs = cnet_enabled_inputs,
+            outputs = [],
+            _js = cls._js_pipelines['cnet_enabled'].substitute(num_inputs=len(cnet_enabled_inputs)),
+        )
+
+        # Generation タブの設定値変更イベントの通知を受け取り、ミニギャラリーの値を更新
+        control_values_update_inputs = [cls.hidden_txt_control, cls.width_slider, cls.height_slider, cls.cnet_enabled]
+        control_values_update_outputs = [cls.width_slider, cls.height_slider, cls.cnet_enabled]
+        cls.hidden_txt_control.input(
+            fn=cls.update_control_values,
+            inputs = control_values_update_inputs,
+            outputs = control_values_update_outputs,
         )
 
     @classmethod
@@ -48,6 +131,30 @@ class MiniGallery:
         image_paths = filter(lambda x : os.path.exists(x), image_paths)
         DEBUG_PRINT(f"MiniGallery.on_hidden_txt_change image_paths: {image_paths}")
         return gr.update(value=image_paths, preview=True) # preview=True で選択モードで表示される
+    
+    @classmethod
+    def update_control_values(cls,txt, width, height, cnet_enabled):
+        ''' Generation タブの設定値変更イベントの通知を受け取り、ミニギャラリーの値を更新
+        txt : type=value$timestamp, typeは 'width' 'height' 'cnet_enabled' のいずれか
+        '''
+        ret = [gr.update(), gr.update(), gr.update()] # None を返すと最小値になるため明示的に変更なしを伝える
+        if len(txt) > 0:
+            txt = txt.split("$")[0]
+            if len(txt) > 0:
+                type, value = txt.split("=")[0], txt.split("=")[1]
+                if type == "width":
+                    ret[0] = gr.update(value=int(value))
+
+                elif type == "height":
+                    ret[1] = gr.update(value=int(value))
+
+                elif type == "cnet_enabled":
+                    if value.lower() == "True":
+                        ret[2] = gr.update(value=True)
+                    else:
+                        ret[2] = gr.update(value=False)
+        return ret
+
 
 
 # create mini gallery

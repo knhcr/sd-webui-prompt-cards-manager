@@ -83,8 +83,8 @@ async function pcmCardClick(event, tabname, thumbsName) {
         updateInput(elemTmp);
     }
 
-    // 解像度更新
-    if (data.apply_resolution){
+    // 解像度更新 (i2i で解像度変更が必要とは思えないため t2i のみ)
+    if (tabname === "txt2img" && data.apply_resolution){
         // width
         selectorTmp = '#txt2img_column_size #txt2img_width input[type="number"]';
         elemTmp = gradioApp().querySelector(selectorTmp);
@@ -227,7 +227,9 @@ async function pcmGetImageAndMask(thumbsName, maskSuffix){
 
 
 /**
- * ControlNetへの画像ドラッグ＆ドロップをエミュレート
+ * ControlNetへの画像ドラッグ＆ドロップをエミュレート 
+ * [TODO] i2i の場合 Upload independent control image をチェックする必要あり
+ *       (そもそもi2iでCNetまで使うような画像修正掛ける時にこの機能は使わないと思うので要らんかも)
  * @param {string} dataUri data:${mimetype};base64,${img_base64}
  * @param {number} index ControlNet のインデックス
  * @param {string} tabname タブ名 (txt2img, img2img)
@@ -290,7 +292,6 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
         dataTransfer.effectAllowed = "all";
         return dataTransfer;
     }
-
     // ----------------
     
     let selectorTmp = ''; // テンポラリセレクタ
@@ -355,7 +356,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     await pcmSleepAsync(50);
     PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet Generation tab clicked`);
 
-    // CNet Model 選択処理    
+    // CNet Model 選択処理
     let modelList = [];
     //  - CNet モデルリストが空なら更新
     statusTmp = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_model_dropdown") // リストは共通なので txt2img, 0 でOK
