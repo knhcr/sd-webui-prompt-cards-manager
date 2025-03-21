@@ -9,6 +9,13 @@ async function pcmSetupMiniGallery(){
         return;
     }
 
+    // ミニギャラリー Show Cnet が False になっている場合
+    const isShowCnet = opts.prompt_cards_manager_show_cnet_values_in_mini_gallery;
+    if (!isShowCnet){
+        const cnetWeight = gradioApp().querySelector('#pcm_mini_gallery_cnet_weight input[type="number"]');
+        
+    }
+
     // 初期値の同期
     pcmUpdateMiniGalleryControlValues();
 
@@ -200,6 +207,32 @@ async function pcmUpdateDefaultGalleryCNetEnabled(_cnet_enabled){
             elemTmp.click(); 
             await pcmSleepAsync(10);
         }
+    }
+}
+
+/** [Gradioからコール] CNet Weight : Mini Gallery -> Generation Tab (txt2img のみ) */
+async function pcmUpdateDefaultGalleryCNetWeight(_cnet_weight){
+    selectorTmp = `#txt2img_controlnet_ControlNet-0_controlnet_control_weight_slider input[type="number"]`;
+    elemTmp = gradioApp().querySelector(selectorTmp);
+    if (!elemTmp) return;
+    const weight = parseFloat(elemTmp.value);
+    if (weight !== _cnet_weight){
+        PCM_DEBUG_PRINT(`pcmUpdateDefaultGalleryCNetWeight change weight ${weight} -> ${_cnet_weight}`);
+        elemTmp.value = _cnet_weight;
+        updateInput(elemTmp); // only input event (change event not fired)
+    }
+}
+
+/** [Gradioからコール] CNet End Step : Mini Gallery -> Generation Tab (txt2img のみ) */
+async function pcmUpdateDefaultGalleryCNetEndStep(_cnet_end_step){
+    selectorTmp = `#txt2img_controlnet_ControlNet-0_controlnet_ending_control_step_slider input[type="number"]`;
+    elemTmp = gradioApp().querySelector(selectorTmp);
+    if (!elemTmp) return;
+    const endStep = parseFloat(elemTmp.value);
+    if (endStep !== _cnet_end_step){
+        PCM_DEBUG_PRINT(`pcmUpdateDefaultGalleryCNetEndStep change endStep ${endStep} -> ${_cnet_end_step}`);
+        elemTmp.value = _cnet_end_step;
+        updateInput(elemTmp); // only input event (change event not fired)
     }
 }
 

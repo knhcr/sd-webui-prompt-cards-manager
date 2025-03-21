@@ -37,6 +37,24 @@ class MiniGallery:
                 return inputs;
             }
         """),
+
+        # CNet Weight : Mini Gallery -> CNet Unit 0
+        "cnet_weight": Template("""
+            async function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                await pcmUpdateDefaultGalleryCNetWeight(inputs[0]);
+                return inputs;
+            }
+        """),
+
+        # CNet End Step : Mini Gallery -> CNet Unit 0
+        "cnet_end_step": Template("""
+            async function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                await pcmUpdateDefaultGalleryCNetEndStep(inputs[0]);
+                return inputs;
+            }
+        """),
     }
 
     @classmethod
@@ -52,9 +70,28 @@ class MiniGallery:
                 select_types=["index"],
                 interactive=False, show_label=False, show_share_button=False
             )
-            cls.width_slider = gr.Slider(label="t2i Width", elem_id="pcm_mini_gallery_width", value=512, minimum=64, maximum=2048, step=8, interactive=True)
-            cls.height_slider = gr.Slider(label="t2i Height", elem_id="pcm_mini_gallery_height", value=512, minimum=64, maximum=2048, step=8, interactive=True)
-            cls.cnet_enabled = gr.Checkbox(label="t2i CNet-unit0 Enabled", elem_id="pcm_mini_gallery_cnet_enabled", value=False, interactive=True)
+
+            with gr.Group(elem_id="pcm_mini_gallery_resolution_group"):
+                with gr.Row():
+                    cls.width_slider = gr.Slider(label="t2i Width", elem_id="pcm_mini_gallery_width",
+                                                 interactive=True,
+                                                 value=512, minimum=64, maximum=2048, step=8)
+                    cls.height_slider = gr.Slider(label="t2i Height", elem_id="pcm_mini_gallery_height",
+                                                  interactive=True,
+                                                  value=512, minimum=64, maximum=2048, step=8)
+                    
+            with gr.Group(elem_id="pcm_mini_gallery_cnet_group"):
+                cls.cnet_enabled = gr.Checkbox(label="CNet Unit 0 Enabled (t2i)", elem_id="pcm_mini_gallery_cnet_enabled",
+                                               value=False, interactive=True)
+                with gr.Row(variant="compact", equal_height=True, elem_classes="flex-row"):
+                    cls.cnet_weight = gr.Slider(scale=1, label="Weight", elem_id="pcm_mini_gallery_cnet_weight",
+                                                interactive=True,
+                                                value=1.0, minimum=0.0, maximum=2.0, step=0.05)
+                    cls.cnet_end_step = gr.Slider(scale=1, label="Step End", elem_id="pcm_mini_gallery_cnet_end_step",
+                                                  interactive=True,
+                                                  value=1.0,
+                                                  minimum=0.0, maximum=1.0, step=0.01)
+
             # JS 側からの発火用
             cls.hidden_txt_image = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt_image") # 画像表示用
 
@@ -104,6 +141,23 @@ class MiniGallery:
             _js = cls._js_pipelines['cnet_enabled'].substitute(num_inputs=len(cnet_enabled_inputs)),
         )
 
+        # Generation タブの CNet Unit 0 の cnet_weight 更新 (release のみ)
+        cnet_weight_inputs = [cls.cnet_weight]
+        cls.cnet_weight.release(
+            fn=lambda x: x,
+            inputs = cnet_weight_inputs,
+            outputs = [],
+            _js = cls._js_pipelines['cnet_weight'].substitute(num_inputs=len(cnet_weight_inputs)),
+        )
+
+        # Generation タブの CNet Unit 0 の cnet_end_step 更新 (release のみ)
+        cnet_end_step_inputs = [cls.cnet_end_step]
+        cls.cnet_end_step.release(
+            fn=lambda x: x,
+            inputs = cnet_end_step_inputs,
+            outputs = [],
+            _js = cls._js_pipelines['cnet_end_step'].substitute(num_inputs=len(cnet_end_step_inputs)),
+        )        
 
     @classmethod
     def on_after_component(cls, component, **kwargs):

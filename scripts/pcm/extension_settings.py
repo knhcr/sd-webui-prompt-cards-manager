@@ -8,7 +8,13 @@ def on_ui_settings():
 
     # show mini gallery (needs reload ui)
     shared.opts.add_option("prompt_cards_manager_show_mini_gallery", shared.OptionInfo(
-        True, "Show Mini Gallery",
+        True, "Mini Gallery : Enable",
+        section=section
+    ).needs_restart())
+
+    # show cnet values in mini gallery
+    shared.opts.add_option("prompt_cards_manager_show_cnet_values_in_mini_gallery", shared.OptionInfo(
+        True, "Mini Gallery : Show ControlNet Parameters",
         section=section
     ).needs_restart())
 
