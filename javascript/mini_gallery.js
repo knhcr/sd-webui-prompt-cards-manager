@@ -1,5 +1,4 @@
-onUiLoaded(pcmSetupMiniGallery); // ミニギャラリーの初期化
-
+/** Mini Gallery の初期化 */
 async function pcmSetupMiniGallery(){
     // ミニギャラリーが非表示になっている場合は非表示にして終了
     const isShow = await pcmGetMiniGalleryIsShow();
@@ -16,6 +15,8 @@ async function pcmSetupMiniGallery(){
         if (cnetGroup) cnetGroup.style.display = 'none';
     }
 
+    document.querySelector("#pcm_mini_gallery_switch_btn").setAttribute("title", "Switch width/height");
+
     // 初期値の同期
     pcmUpdateMiniGalleryControlValues({update_width: true, update_height: true});
 
@@ -27,12 +28,20 @@ async function pcmSetupMiniGallery(){
     pcmRegisterGenerationConditionsCallbacks();
 
     // その他のスクリプト群からの変更に対応
-    // 解像度スイッチボタン -> Mini Gallery
+    // Generation Tab の解像度スイッチボタン -> Mini Gallery
     const resSwitchBtn = gradioApp().querySelector('#txt2img_res_switch_btn');
     if (resSwitchBtn){
         resSwitchBtn.addEventListener('click', async (e)=>{
             await pcmSleepAsync(80);
             pcmUpdateMiniGalleryControlValues({update_width: true, update_height: true});
+        });
+    }
+
+    // Mini Gallery の解像度スイッチボタン -> Generation Tab
+    const miniGalleryResSwitchBtn = gradioApp().querySelector('#pcm_mini_gallery_switch_btn');
+    if (miniGalleryResSwitchBtn){
+        miniGalleryResSwitchBtn.addEventListener('click', async (e)=>{
+            pcmMinigallerySwitchWidthHeight();
         });
     }
 
@@ -79,7 +88,6 @@ async function pcmSetupMiniGallery(){
     }
 }
 
-
 /** OnUiLoaded のタイミングはかなり早いので Settings の初期化が完了するまで待機して結果を返す */
 async function pcmGetMiniGalleryIsShow(){
     if (opts.prompt_cards_manager_show_mini_gallery === undefined) {
@@ -93,7 +101,6 @@ async function pcmGetMiniGalleryIsShow(){
     PCM_DEBUG_PRINT(`pcmIsMiniGalleryShowOption: prompt_cards_manager_show_mini_gallery ${opts.prompt_cards_manager_show_mini_gallery}`);
     return opts.prompt_cards_manager_show_mini_gallery;
 }
-
 
 /** 画像生成を監視して Mini Gallery に画像を転送 */
 function pcmSetupMiniGalleryImageObserver() {
@@ -402,3 +409,42 @@ function pcmUpdateMiniGalleryControlValues({
         }
     }
 }
+
+/** Switch width and height Button of Mini Gallery */
+function pcmMinigallerySwitchWidthHeight(){
+    const _width_elem = gradioApp().querySelector('#pcm_mini_gallery_width input[type="number"]');
+    const _height_elem = gradioApp().querySelector('#pcm_mini_gallery_height input[type="number"]');
+    if (!_width_elem || !_height_elem) return;
+
+    const _width = parseInt(_width_elem.value);
+    const _height = parseInt(_height_elem.value);
+
+    if (_width !== _height){
+        const tmp = _width;
+        _width_elem.value = _height;
+        _height_elem.value = tmp;
+        updateInput(_width_elem);
+        updateInput(_height_elem);
+
+        // Update Generation Tab
+        let selectorTmp = `#txt2img_column_size #txt2img_width input[type="number"]`;
+        let elemTmp = gradioApp().querySelector(selectorTmp);
+        if (!elemTmp) return;
+        const width = parseInt(elemTmp.value);
+        if (width !== _width){
+            elemTmp.value = _width;
+            updateInput(elemTmp);
+        }
+
+        selectorTmp = `#txt2img_column_size #txt2img_height input[type="number"]`;
+        elemTmp = gradioApp().querySelector(selectorTmp);
+        if (!elemTmp) return;
+        const height = parseInt(elemTmp.value);
+        if (height !== _height){
+            elemTmp.value = height;
+            updateInput(elemTmp);
+        }
+    }
+}
+
+onUiLoaded(pcmSetupMiniGallery); // ミニギャラリーの初期化
