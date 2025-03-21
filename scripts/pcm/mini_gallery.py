@@ -68,13 +68,21 @@ class MiniGallery:
             )
 
             with gr.Group(elem_id="pcm_mini_gallery_resolution_group"):
-                with gr.Row():
-                    self.width_slider = gr.Slider(label="t2i Width", elem_id="pcm_mini_gallery_width",
-                                                 interactive=True,
-                                                 value=512, minimum=64, maximum=2048, step=8)
-                    self.height_slider = gr.Slider(label="t2i Height", elem_id="pcm_mini_gallery_height",
-                                                  interactive=True,
-                                                  value=512, minimum=64, maximum=2048, step=8)
+                with gr.Row(elem_id="pcm_mini_gallery_resolution_row"):
+                    with gr.Column(scale=5, elem_id="pcm_mini_gallery_resolution_slider_column"):
+                        self.width_slider = gr.Slider(label="t2i Width",
+                                                      elem_id="pcm_mini_gallery_width",
+                                                      elem_classes="pcm_mini_gallery_resolution_slider_width",
+                                                      interactive=True,
+                                                      value=512, minimum=64, maximum=2048, step=8)
+                        self.height_slider = gr.Slider(label="t2i Height",
+                                                       elem_id="pcm_mini_gallery_height",
+                                                       elem_classes="pcm_mini_gallery_resolution_slider_height",
+                                                       interactive=True,
+                                                       value=512, minimum=64, maximum=2048, step=8)
+                    with gr.Column(scale=1, elem_id="pcm_mini_gallery_resolution_button_column"):
+                        self.switch_btn = gr.Button(value="⇅", elem_id="pcm_mini_gallery_switch_btn",
+                                                    variant="secondary", width=35, min_width=30)
                     
             with gr.Group(elem_id="pcm_mini_gallery_cnet_group"):
                 self.cnet_enabled = gr.Checkbox(label="t2i CNet Unit 0 Enabled", elem_id="pcm_mini_gallery_cnet_enabled",
