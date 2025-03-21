@@ -8,7 +8,7 @@ def on_ui_settings():
 
     # show mini gallery (needs reload ui)
     shared.opts.add_option("prompt_cards_manager_show_mini_gallery", shared.OptionInfo(
-        True, "Mini Gallery : Enable",
+        True, "Mini Gallery : Enable (Completely disapper Mini Gallery)",
         section=section
     ).needs_restart())
 

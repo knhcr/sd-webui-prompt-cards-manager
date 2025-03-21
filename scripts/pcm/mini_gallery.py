@@ -77,7 +77,7 @@ class MiniGallery:
                                                   value=512, minimum=64, maximum=2048, step=8)
                     
             with gr.Group(elem_id="pcm_mini_gallery_cnet_group"):
-                self.cnet_enabled = gr.Checkbox(label="CNet Unit 0 Enabled (t2i)", elem_id="pcm_mini_gallery_cnet_enabled",
+                self.cnet_enabled = gr.Checkbox(label="t2i CNet Unit 0 Enabled", elem_id="pcm_mini_gallery_cnet_enabled",
                                                value=False, interactive=True)
                 with gr.Row(variant="compact", equal_height=True, elem_classes="flex-row"):
                     self.cnet_weight = gr.Slider(scale=1, label="Weight", elem_id="pcm_mini_gallery_cnet_weight",

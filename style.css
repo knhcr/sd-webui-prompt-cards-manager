@@ -357,5 +357,14 @@
 /* Mini Gallery */
 /*#pcm_mini_gallery_width,#pcm_mini_gallery_height,*/
 #pcm_mini_gallery_cnet_weight, #pcm_mini_gallery_cnet_end_step{
-    min-width: var(--pcm-mingallery-min-width, 10px) !important;
+    min-width: 10px !important;
+}
+
+#pcm_mini_gallery_cnet_group{
+    /*display: none;*/
+    margin-top: -8px;
+}
+
+#pcm_mini_gallery_column{
+    gap: 10px;
 }

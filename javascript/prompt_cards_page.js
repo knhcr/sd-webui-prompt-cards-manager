@@ -109,6 +109,7 @@ async function pcmCardClick(event, tabname, thumbsName) {
         // Mini Gallery の値も更新
         //  - 前の処理の updateInput() は input イベントの発火
         //    Mini Gallery 用にスライダーにセットした change イベントのコールバックは発火しないため
+        /*
         const width_mg = gradioApp().querySelector('#pcm_mini_gallery_width input[type="number"]');
         const height_mg = gradioApp().querySelector('#pcm_mini_gallery_height input[type="number"]');
         if (width_mg && height_mg){
@@ -120,7 +121,11 @@ async function pcmCardClick(event, tabname, thumbsName) {
                 height_mg.value = data.resolution.height;
                 updateInput(height_mg);
             }
-        }
+        }*/
+        pcmUpdateMiniGalleryControlValues({
+            update_width: true, update_height: true,
+            update_cnet_enabled: true, update_cnet_weight: true, update_cnet_end_step: true
+        });
 
     }
 
@@ -158,6 +163,11 @@ async function pcmSendCnetBtnClick(event, tabname, thumbs_name, mask_suffix) {
         pcmDropImageToCnet(images[1], 0, tabname, true);
     }
     */
+
+    // Mini Gallery の ControlNet 関連の値更新
+    pcmUpdateMiniGalleryControlValues({
+        update_cnet_enabled: true, update_cnet_weight: true, update_cnet_end_step: true
+    });
 }
 
 

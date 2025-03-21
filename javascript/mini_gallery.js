@@ -12,63 +12,69 @@ async function pcmSetupMiniGallery(){
     // ミニギャラリー Show Cnet が False になっている場合
     const isShowCnet = opts.prompt_cards_manager_show_cnet_values_in_mini_gallery;
     if (!isShowCnet){
-        const cnetWeight = gradioApp().querySelector('#pcm_mini_gallery_cnet_weight input[type="number"]');
-        
+        const cnetGroup = gradioApp().querySelector('#pcm_mini_gallery_cnet_group');
+        if (cnetGroup) cnetGroup.style.display = 'none';
     }
 
     // 初期値の同期
-    pcmUpdateMiniGalleryControlValues();
+    pcmUpdateMiniGalleryControlValues({update_width: true, update_height: true});
 
-    // コールバックの登録
-
+    // -- コールバックの登録 --
     // 画像生成時に画像をセット
     pcmSetupMiniGalleryImageObserver(); 
 
-    // Generation Tab 解像度スライダ から Mini Gallery へのパラメータ同期
+    // Generation Tab のコントロール群本体 -> Mini Gallery
     pcmRegisterGenerationConditionsCallbacks();
 
-    // 解像度スイッチボタン
+    // その他のスクリプト群からの変更に対応
+    // 解像度スイッチボタン -> Mini Gallery
     const resSwitchBtn = gradioApp().querySelector('#txt2img_res_switch_btn');
     if (resSwitchBtn){
         resSwitchBtn.addEventListener('click', async (e)=>{
             await pcmSleepAsync(80);
-            pcmUpdateMiniGalleryControlValues();
+            pcmUpdateMiniGalleryControlValues({update_width: true, update_height: true});
         });
     }
 
-    // png_inf paste ボタン
+    // png_inf paste ボタン -> Mini Gallery
     const pngInfPasteBtn = gradioApp().querySelector('#txt2img_tools button#paste');
     if (pngInfPasteBtn){
         pngInfPasteBtn.addEventListener('click', async (e)=>{
             await pcmSleepAsync(100);
-            pcmUpdateMiniGalleryControlValues();
+            pcmUpdateMiniGalleryControlValues({
+                update_width: true, update_height: true,
+                update_cnet_enabled: true, update_cnet_weight: true, update_cnet_end_step: true
+            });
         });
     }
 
-    // Config Presets Extension ドロップダウン
+    // Config Presets Extension ドロップダウン -> Mini Gallery
     const configPresetsExtDropdown = gradioApp().querySelector('#config_preset_txt2img_dropdown input');
     if (configPresetsExtDropdown){
         configPresetsExtDropdown.addEventListener('change', async (e)=>{
             await pcmSleepAsync(100);
-            pcmUpdateMiniGalleryControlValues();
+            pcmUpdateMiniGalleryControlValues({update_width: true, update_height: true});
         });
     }
 
-    // Config Presets Extension Reapply ボタン
+    // Config Presets Extension Reapply ボタン -> Mini Gallery
     const scriptConfigPresetReapplyBtn = gradioApp().querySelector('#txt2img_extra_tabs #script_config_preset_reapply_button');
     if (scriptConfigPresetReapplyBtn){
         scriptConfigPresetReapplyBtn.addEventListener('click', async (e)=>{
             await pcmSleepAsync(100);
-            pcmUpdateMiniGalleryControlValues();
+            pcmUpdateMiniGalleryControlValues({update_width: true, update_height: true});
         });
     }
 
-    // PNG Info タブ Send to txt2img ボタン
+    // PNG Info タブ Send to txt2img ボタン -> Mini Gallery
     const pngInfoSendToTxt2imgBtn = gradioApp().querySelector('#tab_pnginfo button#txt2img_tab');
     if (pngInfoSendToTxt2imgBtn){
         pngInfoSendToTxt2imgBtn.addEventListener('click', async (e)=>{
             await pcmSleepAsync(800);
-            pcmUpdateMiniGalleryControlValues();
+            pcmUpdateMiniGalleryControlValues({
+                update_width: true, update_height: true,
+                update_cnet_enabled: true, update_cnet_weight: true, update_cnet_end_step: true
+            });
         });
     }
 }
@@ -236,106 +242,163 @@ async function pcmUpdateDefaultGalleryCNetEndStep(_cnet_end_step){
     }
 }
 
-/** [CallBack] Width, Height, CNet enabled : Generation Tab -> Mini Gallery (txt2img のみ) */
+/** [CallBack] Width, Height, CNet enabled : Generation Tab -> Mini Gallery (txt2img のみ)
+ * 直接当該コントールを弄る場合はこれで更新
+ * 別途 script で更新する場合は pcmUpdateMiniGalleryControlValues を明示的に叩かせる必要あり
+*/
 function pcmRegisterGenerationConditionsCallbacks(){
     const width_dg_num = gradioApp().querySelector('#txt2img_column_size #txt2img_width input[type="number"]');
     const width_dg_range = gradioApp().querySelector('#txt2img_column_size #txt2img_width input[type="range"]');
     const height_dg_num = gradioApp().querySelector('#txt2img_column_size #txt2img_height input[type="number"]');
     const height_dg_range = gradioApp().querySelector('#txt2img_column_size #txt2img_height input[type="range"]');
     const cnet_enabled_dg = gradioApp().querySelector('#txt2img_controlnet_ControlNet-0_controlnet_enable_checkbox input[type="checkbox"]');
+    const cnet_weight_dg_num = gradioApp().querySelector('#txt2img_controlnet_ControlNet-0_controlnet_control_weight_slider input[type="number"]');
+    const cnet_weight_dg_range = gradioApp().querySelector('#txt2img_controlnet_ControlNet-0_controlnet_control_weight_slider input[type="range"]');
+    const cnet_end_step_dg_num = gradioApp().querySelector('#txt2img_controlnet_ControlNet-0_controlnet_ending_control_step_slider input[type="number"]');
+    const cnet_end_step_dg_range = gradioApp().querySelector('#txt2img_controlnet_ControlNet-0_controlnet_ending_control_step_slider input[type="range"]');
 
-    const width_mg = gradioApp().querySelector('#pcm_mini_gallery_width input[type="number"]');
-    const height_mg = gradioApp().querySelector('#pcm_mini_gallery_height input[type="number"]');
-    const cnet_enabled_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_enabled input[type="checkbox"]');
-
-    if (!width_dg_num || !width_mg){
-        return;
-    }
-
-    // Width の数値ボックス変更時
+    // Width (Number box)
     width_dg_num.addEventListener('change', (e)=>{
-        PCM_DEBUG_PRINT(`pcm_mini_gallery_width_change num: ${e.target.value}`);
-        if(e.target.value !== width_mg.value){
-            _updateMiniGalleryControlValue(e.target.value, "width");
-        }
+        pcmUpdateMiniGalleryControlValues({update_width: true});
     });
 
-    // Width のスライダー変更時
+    // Width (Range slider)
     width_dg_range.addEventListener('change', (e)=>{
-        PCM_DEBUG_PRINT(`pcm_mini_gallery_width_change range: ${e.target.value}`);
-        if(e.target.value !== width_mg.value){
-            _updateMiniGalleryControlValue(e.target.value, "width");
-        }
+        pcmUpdateMiniGalleryControlValues({update_width: true});
     });
 
-    // Height の数値ボックス変更時
+    // Height (Number box)
     height_dg_num.addEventListener('change', (e)=>{
-        PCM_DEBUG_PRINT(`pcm_mini_gallery_height_change num: ${e.target.value}`);
-        if(e.target.value !== height_mg.value){
-            _updateMiniGalleryControlValue(e.target.value, "height");
-        }
+        pcmUpdateMiniGalleryControlValues({update_height: true});
     });
 
-    // Height のスライダー変更時
+    // Height (Range slider)
     height_dg_range.addEventListener('change', (e)=>{
-        PCM_DEBUG_PRINT(`pcm_mini_gallery_height_change range: ${e.target.value}`);
-        if(e.target.value !== height_mg.value){
-            _updateMiniGalleryControlValue(e.target.value, "height");
-        }
+        pcmUpdateMiniGalleryControlValues({update_height: true});
     });
 
-    // CNet Enabled のチェックボックス変更時 (a1111 の場合は存在しないためスキップ)
-    if (cnet_enabled_dg){
-        cnet_enabled_dg.addEventListener('change', (e)=>{
-            PCM_DEBUG_PRINT(`pcm_mini_gallery_cnet_enabled_change: ${e.target.checked}`);
-            if(e.target.checked !== cnet_enabled_mg.checked){
-                _updateMiniGalleryControlValue(e.target.checked, "cnet_enabled");
-            }
-        });
-    }
+    // CNet
+    const isShowCnet = opts.prompt_cards_manager_show_cnet_values_in_mini_gallery;
+    if (isShowCnet){
+        // CNet Enabled
+        if (cnet_enabled_dg){
+            cnet_enabled_dg.addEventListener('change', (e)=>{
+                pcmUpdateMiniGalleryControlValues({update_cnet_enabled: true});
+            });
+        }
 
-    /**
-     * Mini Gallery の値を変更
-     */
-    function _updateMiniGalleryControlValue(value, type){
-        if (type === "width" && value !== width_mg.value){
-            width_mg.value = value;
-            updateInput(width_mg);
-        }else if (type === "height" && value !== height_mg.value){
-            height_mg.value = value;
-            updateInput(height_mg);
-        }else if (type === "cnet_enabled" && value !== cnet_enabled_mg.checked){
-            cnet_enabled_mg.checked = value;
-            updateInput(cnet_enabled_mg);
+        // CNet Weight (Number box)
+        if (cnet_weight_dg_num){
+            cnet_weight_dg_num.addEventListener('change', (e)=>{
+                pcmUpdateMiniGalleryControlValues({update_cnet_weight: true});
+            });
+        }
+
+        // CNet Weight (Range slider)
+        if (cnet_weight_dg_range){
+            cnet_weight_dg_range.addEventListener('change', (e)=>{
+                pcmUpdateMiniGalleryControlValues({update_cnet_weight: true});
+            });
+        }
+
+        // CNet End Step (Number box)
+        if (cnet_end_step_dg_num){
+            cnet_end_step_dg_num.addEventListener('change', (e)=>{
+                pcmUpdateMiniGalleryControlValues({update_cnet_end_step: true});
+            });
+        }
+
+        // CNet End Step (Range slider)
+        if (cnet_end_step_dg_range){
+            cnet_end_step_dg_range.addEventListener('change', (e)=>{
+                pcmUpdateMiniGalleryControlValues({update_cnet_end_step: true});
+            });
         }
     }
 }
 
 
-/** Call this function when you change Generation Resolution via script. */
-function pcmUpdateMiniGalleryControlValues(){
-    const width =pcmGetGradioComponentByElemId("txt2img_width");
-    if(width){
-        const width_mg = gradioApp().querySelector('#pcm_mini_gallery_width input[type="number"]');
-        if(width_mg){
-            width_mg.value = width.props.value;
-            updateInput(width_mg);
+/** Call this function when you change Generation Resolution via script.
+ * @param {boolean} update_width Default: false, if true, update width
+ * @param {boolean} update_height Default: false, if true, update height
+ * @param {boolean} update_cnet_enabled Default: false, if true, update cnet enabled
+ * @param {boolean} update_cnet_weight Default: false, if true, update cnet weight
+ * @param {boolean} update_cnet_end_step Default: false, if true, update cnet end step
+*/
+function pcmUpdateMiniGalleryControlValues({
+    update_width= false, update_height= false,
+    update_cnet_enabled= false, update_cnet_weight= false, update_cnet_end_step= false }){
+
+    // 解像度 width
+    if (update_width){
+        const width =pcmGetGradioComponentByElemId("txt2img_width");
+        if(width){
+            const width_mg = gradioApp().querySelector('#pcm_mini_gallery_width input[type="number"]');
+            if(width_mg){
+                if (width.props.value !== width_mg.value){
+                    width_mg.value = width.props.value;
+                    updateInput(width_mg);
+                }
+            }
         }
     }
-    const height = pcmGetGradioComponentByElemId("txt2img_height");
-    if(height){
-        const height_mg = gradioApp().querySelector('#pcm_mini_gallery_height input[type="number"]');
-        if(height_mg){
-            height_mg.value = height.props.value;
-            updateInput(height_mg);
+    // 解像度 height
+    if (update_height){
+        const height = pcmGetGradioComponentByElemId("txt2img_height");
+        if(height){
+            const height_mg = gradioApp().querySelector('#pcm_mini_gallery_height input[type="number"]');
+            if(height_mg){
+                if (height.props.value !== height_mg.value){
+                    height_mg.value = height.props.value;
+                    updateInput(height_mg);
+                }
+            }
         }
     }
-    const cnet_enabled = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_enable_checkbox");
-    if(cnet_enabled){
-        const cnet_enabled_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_enabled input[type="checkbox"]');
-        if(cnet_enabled_mg){
-            cnet_enabled_mg.checked = cnet_enabled.props.value;
-            updateInput(cnet_enabled_mg);
+
+    // CNet
+    const isShowCnet = opts.prompt_cards_manager_show_cnet_values_in_mini_gallery;
+    if (isShowCnet){
+        // CNet Enabled
+        if (update_cnet_enabled){
+            const cnet_enabled = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_enable_checkbox");
+            if(cnet_enabled){
+                const cnet_enabled_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_enabled input[type="checkbox"]');
+                if(cnet_enabled_mg){
+                    if (cnet_enabled.props.value !== cnet_enabled_mg.checked){
+                        cnet_enabled_mg.checked = cnet_enabled.props.value;
+                        updateInput(cnet_enabled_mg);
+                    }
+                }
+            }
+        }
+
+        // CNet Weight
+        if (update_cnet_weight){
+            const cnet_weight = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_control_weight_slider");
+            if(cnet_weight){
+                const cnet_weight_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_weight input[type="number"]');
+                if(cnet_weight_mg){
+                    if (cnet_weight.props.value !== cnet_weight_mg.value){
+                        cnet_weight_mg.value = cnet_weight.props.value;
+                        updateInput(cnet_weight_mg);
+                    }
+                }
+            }
+        }   
+
+        // CNet End Step
+        if (update_cnet_end_step){
+            const cnet_end_step = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_ending_control_step_slider");
+            if(cnet_end_step){
+                const cnet_end_step_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_end_step input[type="number"]');
+                if(cnet_end_step_mg){
+                    if (cnet_end_step.props.value !== cnet_end_step_mg.value){
+                        cnet_end_step_mg.value = cnet_end_step.props.value;
+                        updateInput(cnet_end_step_mg);
+                    }
+                }
+            }
         }
     }
 }
