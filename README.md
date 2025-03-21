@@ -25,6 +25,9 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/03/22
+  - Improved Mini Gallery functionality.
+
 * 2025/03/20
   - Added Resolution Slider and CNet checkbox to mini gallery
   - Added shortcut key for saving with `Ctrl-S` at Card Edit page. (Optional)
