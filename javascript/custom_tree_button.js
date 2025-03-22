@@ -317,14 +317,13 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
         _btn.dataset.selected = "";
     }
 
-    /** PromptCards タブ専用処理に置き換え */
     function _update_search(_tabname, _extra_networks_tabname, _search_text) {
         if(_search_text) {
             // パスの区切り文字を正規化
             _search_text = _search_text.replace(/\\/g, '/');
             
             // SubDirチェックボックスの状態を確認
-            var checkbox = gradioApp().querySelector(`#${tabname}_pcm_subdirs_toaggle`);
+            var checkbox = gradioApp().querySelector(`#${_tabname}_pcm_subdirs_toggle`);
             if (checkbox && !checkbox.checked && !_search_text.endsWith('$')) {
                 // SubDirにチェックが無い場合は$を付加
                 _search_text += '$';
@@ -362,3 +361,36 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
 
 // 初期化
 pcmWaitForContent('#txt2img_promptcards_extra_refresh', PcmCardSearch.initialize);
+
+
+/** subdir toggle callback */
+function pcmToggleSubdirs(tabname) {
+    const checkbox = gradioApp().querySelector(`#${tabname}_pcm_subdirs_toggle`);
+    const PCM_SEARCH_ROOT = 'prompt_cards';
+    
+    let search_text = PcmCardSearch.queries[tabname].path;
+    if (checkbox.checked) {
+        if (search_text.endsWith('$')) {
+            search_text = search_text.slice(0, -1);
+        }else{
+            search_text += '$';
+        }
+    } else {
+        if (!search_text.endsWith('$')) {
+            if (!search_text) {
+                search_text = PCM_SEARCH_ROOT + '$'; // 空文字の場合(全マッチ状態) の場合に $ を付ける場合はルートノードを付加 
+            } else {
+                search_text += '$';
+            }
+        }
+    }
+    PcmCardSearch.updateQuery(tabname, "path", search_text);
+}
+
+pcmWaitForContent('#txt2img_pcm_subdirs_toggle', ()=>{
+    for (const tabname of ['txt2img', 'img2img']){
+        gradioApp().querySelector(`#${tabname}_pcm_subdirs_toggle`).addEventListener('change', function() {
+            pcmToggleSubdirs(tabname);
+        });
+    }
+});

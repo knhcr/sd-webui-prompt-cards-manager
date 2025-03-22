@@ -55,36 +55,9 @@ const pcmAddSubdirToggleCheckbox = ()=>{
         label.htmlFor = checkboxId;
         subdirCheckbox.classList.add('gr-checkbox', 'gr-text-input');
         subdirCheckbox.checked = true;
-        subdirCheckbox.addEventListener('change', function() {
-            toggleSubdirs(tabname, 'promptcards');
-        });
+        // => PcmCardSearch クラスを利用するため、custom_tree_button.js で event listner を追加
         controlsDiv.insertBefore(subdirCheckbox, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
     }
-}
-
-/** subdir toggle callback */
-function toggleSubdirs(tabname, extra_networks_tabname) {
-    const checkbox = gradioApp().querySelector(`#${tabname}_pcm_subdirs_toggle`);
-    const search = gradioApp().querySelector(`#${tabname}_${extra_networks_tabname}_extra_search`);
-    const pcm_search_root = 'prompt_cards';
-    
-    let currentValue = search.value;
-    if (checkbox.checked) {
-        if (currentValue.endsWith('$')) {
-            search.value = currentValue.slice(0, -1);
-        }else{
-            search.value = currentValue + '$';
-        }
-    } else {
-        if (!currentValue.endsWith('$')) {
-            if (!currentValue) {
-                search.value = pcm_search_root + '$';
-            } else {
-                search.value = currentValue + '$';
-            }
-        }
-    }
-    updateInput(search);
 }
 
 /* --------------------------------------------------------------------------------------*/
