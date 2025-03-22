@@ -1,8 +1,45 @@
+/** search textbox : prompt */
+const pcmAddSearchTextboxPrompt = ()=>{
+    for (let tabname of ['txt2img', 'img2img']){
+        const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        const controlsDiv = gradioApp().querySelector(selector);
+
+        let elem = document.createElement('div');
+        elem.classList.add('extra-network-control--search');
+        let elem2 = document.createElement('input');
+        elem2.id = `${tabname}_promptcards_extra_search_prompt`;
+        elem2.classList.add('extra-network-control--search-text');
+        elem2.type = 'search';
+        elem2.placeholder = 'Prompt Search';
+        elem.appendChild(elem2);
+        controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
+    
+    }
+}
+
+/** search textbox : Description */
+const pcmAddSearchTextboxDesc = ()=>{
+    for (let tabname of ['txt2img', 'img2img']){
+        const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        const controlsDiv = gradioApp().querySelector(selector);
+
+        let elem = document.createElement('div');
+        elem.classList.add('extra-network-control--search');
+        let elem2 = document.createElement('input');
+        elem2.id = `${tabname}_promptcards_extra_search_desc`;
+        elem2.classList.add('extra-network-control--search-text');
+        elem2.type = 'search';
+        elem2.placeholder = 'Description Search';
+        elem.appendChild(elem2);
+        controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
+    
+    }
+}
+
 /** subdir toggle checkbox */
 const pcmAddSubdirToggleCheckbox = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
-        PCM_DEBUG_PRINT(`pcm_add_subdir_toggle_checkbox called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
         // ラベル
         const label = document.createElement('label');
@@ -96,8 +133,12 @@ function _pcmRefreshHideDirName(tabname, extra_networks_tabname) {
 /* --------------------------------------------------------------------------------------*/
 
 // checkbox 追加 (onUiLoaded では早すぎるため要素を監視)
-pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', pcmAddSubdirToggleCheckbox);
-pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', pcmAddDirnameToggleCheckbox);
+pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', ()=>{
+    pcmAddSearchTextboxDesc();
+    pcmAddSearchTextboxPrompt();
+    pcmAddSubdirToggleCheckbox();
+    pcmAddDirnameToggleCheckbox();
+});
 
 // HideDirName : refresh btn の callback にも追加
 pcmWaitForContent('.tab-nav #txt2img_promptcards_extra_refresh', ()=>{

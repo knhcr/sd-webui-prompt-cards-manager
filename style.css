@@ -390,3 +390,10 @@
 #pcm_mini_gallery_cnet_group{
     margin-top: -8px;
 }
+
+/*--------------------------------------*/
+/* control belt */
+div > #txt2img_promptcards_extra_search, div:has(> #txt2img_promptcards_extra_search),
+div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_search){
+    display:none;
+}
