@@ -49,7 +49,7 @@ async function pcmSetupMiniGallery(){
     const pngInfPasteBtn = gradioApp().querySelector('#txt2img_tools button#paste');
     if (pngInfPasteBtn){
         pngInfPasteBtn.addEventListener('click', async (e)=>{
-            await pcmSleepAsync(100);
+            await pcmSleepAsync(500);
             pcmUpdateMiniGalleryControlValues({
                 update_width: true, update_height: true,
                 update_cnet_enabled: true, update_cnet_weight: true, update_cnet_end_step: true
