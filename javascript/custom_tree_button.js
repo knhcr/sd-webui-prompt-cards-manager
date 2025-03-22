@@ -3,27 +3,12 @@ class PcmCardSearch {
     static isInitialized = false;
 
     static async initialize(){                
-        // この時点ではカード一覧が無いので、カード情報の初期化は初回のupdateMatch() 呼び出し時に遅延して行う
-
-        let elem = gradioApp().querySelector('#txt2img_promptcards_extra_refresh');
-        if(elem){
-            elem.addEventListener('click', ()=>{
-                PcmCardSearch.updateCards();
-            });
-        }
-        elem = gradioApp().querySelector('#img2img_promptcards_extra_refresh');
-        if(elem){
-            elem.addEventListener('click', ()=>{
-                PcmCardSearch.updateCards();
-            });
-        }
+        // この時点ではカード一覧が無いので、カード情報の初期化は初回の updateMatch() 呼び出し時に遅延して行う
     }
 
     /* 下記のオブジェクト
     {<org_name>: {path: <search_terms>, prompt: <prompt>, desc: <description>, elem:{"txt2img": <elem>, "img2img": <elem>}}, ... }
-    elem は <div class="card">
-    prompt, desc は lower case
-    */
+    elem は <div class="card">要素, prompt, desc は lower case */
     static cards = {};
 
     static queries = {
@@ -62,26 +47,31 @@ class PcmCardSearch {
             PCM_DEBUG_PRINT(`!!! pcmCardSearch.updateCards: ${Object.keys(json)}`);
 
             let cards = {};
-            for(const tabname of ["txt2img", "img2img"]){
-                // ページ上の全カード要素
-                const card_elems = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards .card`));
-                for (const card_elem of card_elems){
-                    const org_name = card_elem.querySelector(".name").getAttribute("orgname");
-                    let card;
-                    if(org_name in cards){
-                        card = cards[org_name];
-                    } else if(org_name in json){
-                        card = json[org_name];
-                        card.elem = {txt2img: null, img2img: null};
-                    } else{
-                        // ここには来ないはずだが念のため
-                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: illegal state. org_name: ${org_name} not found in json, but found in cards`);
-                        card = {path: "", prompt: "", desc: "", elem:{"txt2img": null, "img2img": null}};
-                    }
-                    card.elem[tabname] = card_elem;
-                    cards[org_name] = card;
-                }
+            await pcmSleepAsync(1000); // カード更新後 DOM の更新を待つ
+            
+            // ページ上の全カード element の hash テーブル
+            const card_elems_t2i = Array.from(gradioApp().querySelectorAll(`#txt2img_promptcards_cards .card`));
+            const card_elems_t2i_hash = {}
+            for (const elem of card_elems_t2i){
+                const orgname = elem.querySelector(".name").getAttribute("orgname");
+                card_elems_t2i_hash[orgname] = elem;
             }
+            const card_elems_i2i = Array.from(gradioApp().querySelectorAll(`#img2img_promptcards_cards .card`));
+            const card_elems_i2i_hash = {}
+            for (const elem of card_elems_i2i){
+                const orgname = elem.querySelector(".name").getAttribute("orgname");
+                card_elems_i2i_hash[orgname] = elem;
+            }
+
+            for (const orgname in json){
+                cards[orgname] = {
+                    path: json[orgname].path,
+                    prompt: json[orgname].prompt,
+                    desc: json[orgname].desc,
+                    elem:{"txt2img": card_elems_t2i_hash[orgname], "img2img": card_elems_i2i_hash[orgname]}
+                };
+            }
+            
             PcmCardSearch.cards = cards;
             PcmCardSearch.clearQuery();
         } catch (error) {
@@ -430,5 +420,18 @@ pcmWaitForContent('#txt2img_promptcards_extra_search_desc', ()=>{
         elem.addEventListener('input', ()=>{
             pcmDescSearchCallback(tabname);
         });
+    }
+});
+
+
+/** Card List Refresh Button Callback */
+pcmWaitForContent('#txt2img_promptcards_extra_refresh', ()=>{
+    for (const tabname of ['txt2img', 'img2img']){
+        let elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_refresh`);
+        if(elem){
+            elem.addEventListener('click', ()=>{
+                PcmCardSearch.updateCards();
+            });
+        }
     }
 });
