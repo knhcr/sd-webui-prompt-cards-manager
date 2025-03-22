@@ -394,3 +394,41 @@ pcmWaitForContent('#txt2img_pcm_subdirs_toggle', ()=>{
         });
     }
 });
+
+
+/** Prompt Search Callback */
+function pcmPromptSearchCallback(tabname){
+    const elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_search_prompt`);
+    if(!elem) return;
+    let query = elem.value;
+    if (query === null || query === undefined) query = "";
+    PcmCardSearch.updateQuery(tabname, "prompt", query, true);
+}
+
+pcmWaitForContent('#txt2img_promptcards_extra_search_prompt', ()=>{
+    for (const tabname of ['txt2img', 'img2img']){
+        const elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_search_prompt`);
+        elem.addEventListener('input', ()=>{
+            pcmPromptSearchCallback(tabname);
+        });
+    }
+});
+
+
+/** Desc Search Callback */
+function pcmDescSearchCallback(tabname){
+    const elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_search_desc`);
+    if(!elem) return;
+    let query = elem.value;
+    if (query === null || query === undefined) query = "";
+    PcmCardSearch.updateQuery(tabname, "desc", query, true);
+}
+
+pcmWaitForContent('#txt2img_promptcards_extra_search_desc', ()=>{
+    for (const tabname of ['txt2img', 'img2img']){
+        const elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_search_desc`);
+        elem.addEventListener('input', ()=>{
+            pcmDescSearchCallback(tabname);
+        });
+    }
+});

@@ -1,4 +1,6 @@
-/** search textbox : prompt */
+/** search textbox : prompt 
+ * PcmCardSearch クラスを利用するため、custom_tree_button.js で event listner を追加
+*/
 const pcmAddSearchTextboxPrompt = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
@@ -17,7 +19,9 @@ const pcmAddSearchTextboxPrompt = ()=>{
     }
 }
 
-/** search textbox : Description */
+/** search textbox : Description
+ * PcmCardSearch クラスを利用するため、custom_tree_button.js で event listner を追加
+*/
 const pcmAddSearchTextboxDesc = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
@@ -36,7 +40,9 @@ const pcmAddSearchTextboxDesc = ()=>{
     }
 }
 
-/** subdir toggle checkbox */
+/** subdir toggle checkbox
+ * PcmCardSearch クラスを利用するため、custom_tree_button.js で event listner を追加
+*/
 const pcmAddSubdirToggleCheckbox = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
@@ -55,7 +61,6 @@ const pcmAddSubdirToggleCheckbox = ()=>{
         label.htmlFor = checkboxId;
         subdirCheckbox.classList.add('gr-checkbox', 'gr-text-input');
         subdirCheckbox.checked = true;
-        // => PcmCardSearch クラスを利用するため、custom_tree_button.js で event listner を追加
         controlsDiv.insertBefore(subdirCheckbox, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
     }
 }
