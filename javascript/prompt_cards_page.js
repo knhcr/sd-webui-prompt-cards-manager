@@ -1,6 +1,21 @@
 /** 最後にクリックされたカード名 (thumbs_name) */
 let pcmLastClickedCard = "";
 
+/** 現在のカテゴリのフォルダオブジェクトの配列
+ *  - [[folder_obj, folder_obj, ...], [folder_obj, folder_obj, ...]]
+ *  - 一つ目の配列は t2i, 二つ目の配列は i2i
+ *  - Ctrl + 数字キー でカテゴリ切り替えに使用
+ *  - カードリフレッシュ時に更新
+*/
+let pcmCategoryFolders = [[],[]];
+
+/** 選択したフォルダの履歴 
+ *   - 配列は t2i, i2i の順 */
+let pcmSelectedFolderHistory = [[null], [null]]; // 選択した要素の履歴(新しい順)
+let pcmSelectedFolderHistoryIndex = [0, 0]; // Undo/Redo 用現在のインデックス
+let pcmSelectedFolderHistoryIndexMax = 20; // 履歴の最大長
+let pcmSelectedFolderHistoryIsEventUndoRedo = 0; // Undo :-1, Redo:1, 通常のclick イベント: 0
+
 /**
  * Prompt Cards Manager カードのクリックハンドラー
  * カード情報をプロンプトに反映
@@ -171,7 +186,7 @@ async function pcmSendCnetBtnClick(event, tabname, thumbs_name, mask_suffix) {
 }
 
 
-/** 更新テキストを生成
+/** プロンプト更新テキストを生成
  * @param {string} currentText 現在のテキスト
  * @param {string} text 追加するテキスト
  * @param {string} category カテゴリ情報
@@ -522,3 +537,137 @@ async function pcmDropImageToCnetExtension(dataUri, index = 0, tabname = "txt2im
     // [TODO]
     return;
 }
+
+/** カテゴリリストの更新 */
+function pcmCardPageRefreshCategoryList(){
+    for (const [idx, tabName] of ["txt2img", "img2img"].entries()){
+        const folderList = gradioApp().querySelectorAll(`#${tabName}_promptcards_tree > ul > li > ul >li > .tree-list-content-dir`);
+        pcmCategoryFolders[idx] = Array.from(folderList);
+    }
+}
+
+/** フォルダクリックした履歴の更新 (連続して同じフォルダをクリックした場合はスキップ)
+ * @param {string} tabname タブ名 (txt2img, img2img)
+ * @param {Element} elem 最新の選択フォルダ DOM element
+*/
+function pcmUpdateSelectedFolderHistory(tabname, elem){
+    let tabIndex;
+    if (tabname === "txt2img"){
+        tabIndex = 0;
+    }else if (tabname === "img2img"){
+        tabIndex = 1;
+    }else{
+        return;
+    }
+
+    const targetArray = pcmSelectedFolderHistory[tabIndex];
+
+    // Undo/Redo からのイベントの場合
+    if(pcmSelectedFolderHistoryIsEventUndoRedo !== 0){
+        let tmp = pcmSelectedFolderHistoryIndex[tabIndex] + pcmSelectedFolderHistoryIsEventUndoRedo;
+        if(tmp < 0 || tmp >= targetArray.length){
+            // ここには来ないが念のため
+        }else{
+            pcmSelectedFolderHistoryIndex[tabIndex] = tmp;
+        }
+        pcmSelectedFolderHistoryIsEventUndoRedo = 0;
+        return;
+    }
+
+    // 通常のクリックイベントの場合
+    if(targetArray[0] === elem) return; // 連続して同じフォルダをクリックした場合はスキップ
+    if(pcmSelectedFolderHistoryIndex[tabIndex] > 0){
+        // Undo状態からのクリックの場合履歴を枝刈り
+        targetArray.splice(0, pcmSelectedFolderHistoryIndex[tabIndex]); // 現在のインデックスより前の要素を削除
+        pcmSelectedFolderHistoryIndex[tabIndex] = 0; // 現在のインデックスを0に戻す
+    }
+    
+    if(targetArray.length >= pcmSelectedFolderHistoryIndexMax){
+        targetArray.pop();
+    }
+    targetArray.unshift(elem);
+}
+
+/** Ctrl + [1-9] でカテゴリ切り替えの click を発火
+ * @param {number} number 押下キーの数字 (1-9)
+ * @param {number} tabIndex タブインデックス (0: txt2img, 1: img2img)
+*/
+function pcmCardPageSwitchCategory(number, tabIndex){
+    if(number < 1 || number > 9) return;
+    if (number > pcmCategoryFolders[tabIndex].length) return;
+
+    const target = pcmCategoryFolders[tabIndex][number-1];
+    if(!target) return;
+    target.click(); // クリック履歴の更新は custom_tree_button.js のディレクトリ click event で発生するため不要
+}
+
+/** Ctrl + 0, Alt + 0 で Undo/Redo の click を発火
+ *   - クリック履歴の更新は custom_tree_button.js のディレクトリ click event で発生するため不要
+ * @param {number} tabIndex タブインデックス (0: txt2img, 1: img2img)
+ * @param {number} isUndoRedo 1: Undo, -1: Redo
+*/
+function pcmCardPageDoUndoRedo(tabIndex, isUndoRedo){
+    let nextIndex = pcmSelectedFolderHistoryIndex[tabIndex] + isUndoRedo;
+    if(nextIndex < 0 || nextIndex >= pcmSelectedFolderHistory[tabIndex].length){
+        pcmSelectedFolderHistoryIsEventUndoRedo = 0; // 念のため
+        return;
+    }
+    pcmSelectedFolderHistoryIsEventUndoRedo = isUndoRedo;
+    if(pcmSelectedFolderHistory[tabIndex][nextIndex]){
+        pcmSelectedFolderHistory[tabIndex][nextIndex].click(); // クリック履歴の更新は custom_tree_button.js のディレクトリ click event で発生するため不要
+    }
+}
+
+
+/** Ctrl + 数字キー, Alt + 0 コールバック登録 */
+window.addEventListener('keydown', (event)=>{
+    if(event.ctrlKey && /^\d$/.test(event.key)){
+        // 現在のタブ
+        let tabIndex = -1;
+        let elem = gradioApp().querySelector('#tab_txt2img');
+        if(elem && elem.style.display === 'block'){
+            tabIndex = 0; // "txt2img"
+        }else{
+            elem = gradioApp().querySelector('#tab_img2img');
+            if(elem && elem.style.display === 'block'){
+                tabIndex = 1; // "img2img"
+            }
+        }
+        if(tabIndex === -1) return;
+        if(event.key === '0'){
+            pcmCardPageDoUndoRedo(tabIndex, 1); // Undo
+        }else{
+            pcmCardPageSwitchCategory(parseInt(event.key,10), tabIndex); // カテゴリクリック
+        }
+
+    } else if(event.altKey && event.key === '0'){
+        // 現在のタブ
+        let tabIndex = -1;
+        let elem = gradioApp().querySelector('#tab_txt2img');
+        if(elem && elem.style.display === 'block'){
+            tabIndex = 0; // "txt2img"
+        }else{
+            elem = gradioApp().querySelector('#tab_img2img');
+            if(elem && elem.style.display === 'block'){
+                tabIndex = 1; // "img2img"
+            }
+        }
+        if(tabIndex === -1) return;
+        pcmCardPageDoUndoRedo(tabIndex, -1); // Redo
+    }    
+});
+
+/** Ctrl + 数字キー 処理の初期化
+ *   - リフレッシュボタンにカテゴリリストの更新処理追加
+ *   - pcmCategoryFolders 初期化
+ */
+pcmWaitForContent('#txt2img_promptcards_tree .tree-list-content-dir', ()=>{
+    gradioApp().querySelector('#txt2img_promptcards_extra_refresh').addEventListener('click', (event)=>{
+        pcmCardPageRefreshCategoryList();
+    });
+    gradioApp().querySelector('#img2img_promptcards_extra_refresh').addEventListener('click', (event)=>{
+        pcmCardPageRefreshCategoryList();
+    });
+    pcmCardPageRefreshCategoryList();
+});
+

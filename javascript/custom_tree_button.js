@@ -123,4 +123,7 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
             _update_search(tabname, extra_networks_tabname, btn.dataset.path);
         }
     }
+
+    // 現在選択中のフォルダの更新
+    pcmUpdateSelectedFolderHistory(tabname, event.target);
 }
