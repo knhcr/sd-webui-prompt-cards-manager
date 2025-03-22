@@ -661,7 +661,7 @@ window.addEventListener('keydown', (event)=>{
  *   - リフレッシュボタンにカテゴリリストの更新処理追加
  *   - pcmCategoryFolders 初期化
  */
-pcmWaitForContent('#txt2img_promptcards_tree .tree-list-content-dir', ()=>{
+pcmWaitForContent('#txt2img_promptcards_tree .tree-list-content-dir', async ()=>{
     gradioApp().querySelector('#txt2img_promptcards_extra_refresh').addEventListener('click', (event)=>{
         pcmCardPageRefreshCategoryList();
     });

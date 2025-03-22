@@ -108,7 +108,8 @@ class PromptCardsPage(ExtraNetworksPage):
             rel_path = os.path.relpath(img_full_path, img_folder_path)
             
             # e.g. "xxx.png" -> "prompt_cards", "sub1/yyy.png" -> "prompt_cards/sub1"
-            search_path = os.path.join(os.path.split(img_folder_path)[1],os.path.dirname(rel_path))
+            rel_path_dir = os.path.dirname(rel_path)
+            search_path = os.path.join(image_folder, rel_path_dir) if rel_path_dir != "" else image_folder
             search_path = search_path.replace('\\', '/') # パスの区切り文字を正規化
         
             # direcotry end mark '$'の挿入
@@ -196,7 +197,8 @@ class PromptCardsPage(ExtraNetworksPage):
             search_terms_html += search_term_template.format(search_term=search_term)
 
         # 表示名から拡張子を削除
-        name = os.path.splitext(html.escape(item.get("name", "")))[0]
+        org_name = html.escape(os.path.splitext(item.get("name", ""))[0])
+        base_name = os.path.basename(org_name)
         
         # テンプレートに渡す辞書
         item_with_extras = {
@@ -204,7 +206,7 @@ class PromptCardsPage(ExtraNetworksPage):
             "card_clicked": onclick,
             "description": html.escape(item.get("description", "")),
             "local_preview": html.escape(item.get("local_preview", "")),
-            "name": html.escape(os.path.basename(name)), # 初期値は hideDirName = True
+            "name": base_name, # 初期値は hideDirName = True
             "prompt": item.get("prompt", ""),
             "save_card_preview": html.escape(f"return saveCardPreview(event, '{tabname}', '{item.get('local_preview', '')}');"),
             "search_only": "",
@@ -216,8 +218,8 @@ class PromptCardsPage(ExtraNetworksPage):
             "send_cnet_mask_button": send_cnet_mask_button,
             "send_cnet_button": send_cnet_button,
             "info_edit_button": info_edit_button,
-            "orgName": html.escape(name), # hideDirName 用 (相対パス付きファイル名)
-            "baseName": html.escape(os.path.basename(name)), # hideDirName 用 (ファイル名のみ)
+            "orgName": org_name, # hideDirName 用 (相対パス付きファイル名)
+            "baseName": base_name, # hideDirName 用 (ファイル名のみ)
         }
         
         # template が渡されなかった場合は辞書を返す (TreeView生成処理)

@@ -41,13 +41,24 @@ class APIRoutes:
         async def prompt_card_info(request: Request):
             """ プロンプトカード情報を取得 (categoryも追加した JSON 形式) """
             qs = dict(request.query_params)
-            DEBUG_PRINT(f"API Routes.prompt_card_info qs: {qs}")
+            #DEBUG_PRINT(f"API Routes.prompt_card_info qs: {qs}")
 
             card_info = cls.card_info_manager.get_card_info(qs["thumbs_name"])
             ret = card_info.get_card_info_for_frontend()
             DEBUG_PRINT(f"API Routes.prompt_card_info ret: {ret}")
             return JSONResponse(ret)
         
+
+        @app.get(f"{endpoint_base}/prompt-card-info-all-for-search")
+        async def prompt_card_info_all_for_search(request: Request):
+            """ プロンプトカードをブラウザ上で検索するための全情報を取得
+                cutsom_tree_button.js PcmCardSearch.updateCards() で使用
+            """
+            ret = cls.card_info_manager.get_all_card_info_for_search()
+            DEBUG_PRINT(f"API Routes.prompt_card_info_all_for_search called")
+            return JSONResponse(ret)
+
+
         @app.get(f"{endpoint_base}/image")
         async def get_image(request: Request):
             """ 画像ファイルを取得 (CNET, CNET Mask 用)

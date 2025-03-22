@@ -3,7 +3,6 @@ from __future__ import annotations
 import sys
 import os
 from typing import Dict, Tuple
-import copy
 import json
 import traceback
 from pathlib import Path
@@ -12,7 +11,7 @@ from scripts.pcm.cache_info import CacheInfo
 from scripts.pcm.constants import DEBUG_PRINT
 from base64 import b64encode
 from modules import shared
-
+import html
 class PromptCardInfoManager:
     """ プロンプトカード情報管理 """
 
@@ -26,9 +25,11 @@ class PromptCardInfoManager:
     def get_card_info(cls, thumbs_name, is_refresh=True):
         cls.refresh_card_info_dict()
 
+        # カード情報が無い場合は新規作成
         if thumbs_name not in cls.__card_info_dict:
             #DEBUG_PRINT(f"PromptCardInfoManager card initialize: {thumbs_name}")
             cls.__card_info_dict[thumbs_name] = PromptCardInfo(thumbs_name)
+        # カード情報がある場合は更新
         elif is_refresh:
             #DEBUG_PRINT(f"PromptCardInfoManager card refresh: {thumbs_name}")
             cls.__card_info_dict[thumbs_name].load_card_info_from_file()
@@ -45,6 +46,36 @@ class PromptCardInfoManager:
         for thumbs_name in list(cls.__card_info_dict.keys()):
             if thumbs_name not in CacheInfo.cache_info:
                 del cls.__card_info_dict[thumbs_name]
+
+    @classmethod
+    def get_all_card_info_for_search(cls):
+        ''' ブラウザ上でカードを検索するための全情報を取得
+        org_name をキーとして全カードの下記のような辞書を返す
+            { <org_name> : {
+                path : {search_terms}, prompt : {prompt}, desc : {description} }
+            }
+         prompt, desc は lower case に変換
+        '''
+        ret = {}
+        # 全カードを探索して情報を取得
+        for thumbs_name in CacheInfo.cache_info:
+            card_info = cls.get_card_info(thumbs_name, is_refresh=False).card_info
+
+            rel_path = CacheInfo.cache_info[thumbs_name].get("rel_path", "")
+            rel_path = rel_path.replace('\\', '/') # パスの区切り文字を正規化
+
+            rel_path_dir = os.path.dirname(rel_path)
+            search_path = image_folder + '/' + rel_path_dir if rel_path_dir != "" else image_folder
+            search_path += "$"
+
+            org_name = html.escape(os.path.splitext(rel_path)[0])
+
+            ret[org_name] = {
+                "path": search_path,
+                "prompt": card_info.get("prompt", "").lower(),
+                "desc": card_info.get("description", "").lower()
+            }
+        return ret
 
 
 class PromptCardInfo:

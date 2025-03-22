@@ -1,3 +1,239 @@
+/** カード検索管理クラス */
+class PcmCardSearch {
+    static isInitialized = false;
+
+    static async initialize(){                
+        // この時点ではカード一覧が無いので、カード情報の初期化は初回のupdateMatch() 呼び出し時に遅延して行う
+
+        let elem = gradioApp().querySelector('#txt2img_promptcards_extra_refresh');
+        if(elem){
+            elem.addEventListener('click', ()=>{
+                PcmCardSearch.updateCards();
+            });
+        }
+        elem = gradioApp().querySelector('#img2img_promptcards_extra_refresh');
+        if(elem){
+            elem.addEventListener('click', ()=>{
+                PcmCardSearch.updateCards();
+            });
+        }
+    }
+
+    /* 下記のオブジェクト
+    {<org_name>: {path: <search_terms>, prompt: <prompt>, desc: <description>, elem:{"txt2img": <elem>, "img2img": <elem>}}, ... }
+    elem は <div class="card">
+    prompt, desc は lower case
+    */
+    static cards = {};
+
+    static queries = {
+        "txt2img":{ path: "", prompt: [], desc: [] },
+        "img2img":{ path: "", prompt: [], desc: [] }
+    };
+
+    static previousQueries = {
+        "txt2img":{ path: "", prompt: [], desc: [] },
+        "img2img":{ path: "", prompt: [], desc: [] }
+    };
+
+    /** 現状の各クエリのマッチ結果 (cards[org_name] のオブジェクトの配列) */
+    static tmpMatch = {
+        "txt2img" : { path: [], prompt: [], desc: [] },
+        "img2img" : { path: [], prompt: [], desc: [] }
+    };
+
+    static cardsInfoUrl = `${PCM_API_ENDPOINT_BASE}/prompt-card-info-all-for-search`;
+
+    constructor(){
+    }
+   
+    /** カードデータを更新 (カード情報をサーバから取得し、DOM 要素へのハンドラも更新) */
+    static async updateCards(){
+        if(!PcmCardSearch.isInitialized) PcmCardSearch.isInitialized = true;
+
+        try {
+            const res = await fetch(PcmCardSearch.cardsInfoUrl);
+            if (!res.ok) {
+                console.error(`pcmCardSearch.updateCards failed: ${res.statusText}`);
+            return;
+            }
+            const json = await res.json();  // {<org_name>: {path: <search_terms>, prompt: <prompt>, desc: <description>}, ... }
+            
+            PCM_DEBUG_PRINT(`!!! pcmCardSearch.updateCards: ${Object.keys(json)}`);
+
+            let cards = {};
+            for(const tabname of ["txt2img", "img2img"]){
+                // ページ上の全カード要素
+                const card_elems = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards .card`));
+                for (const card_elem of card_elems){
+                    const org_name = card_elem.querySelector(".name").getAttribute("orgname");
+                    let card;
+                    if(org_name in cards){
+                        card = cards[org_name];
+                    } else if(org_name in json){
+                        card = json[org_name];
+                        card.elem = {txt2img: null, img2img: null};
+                    } else{
+                        // ここには来ないはずだが念のため
+                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: illegal state. org_name: ${org_name} not found in json, but found in cards`);
+                        card = {path: "", prompt: "", desc: "", elem:{"txt2img": null, "img2img": null}};
+                    }
+                    card.elem[tabname] = card_elem;
+                    cards[org_name] = card;
+                }
+            }
+            PcmCardSearch.cards = cards;
+            PcmCardSearch.clearQuery();
+        } catch (error) {
+            console.error(`pcmCardSearch.updateCards failed: ${error}`);
+        }
+    }
+
+    /** 指定したクエリ文字列を更新 (デフォルトでupdateMatch()も実行)
+     * @param {string} tabname "txt2img" or "img2img"
+     * @param {string} type "path" or "prompt" or "desc"
+     * @param {string} query クエリ文字列 (内部でtrimされる)
+     * @param {boolean} isUpdateMatch マッチのアップデートもするか (デフォルトtrue)
+     */
+    static updateQuery(tabname, type, query, isUpdateMatch=true){
+        if(tabname!=='txt2img' && tabname!=='img2img') return;
+        if(type!=='path' && type!=='prompt' && type!=='desc') return;
+
+        PcmCardSearch.previousQueries[tabname][type] = PcmCardSearch.queries[tabname][type];
+
+        query = query.trim().toLowerCase();
+        if(type=="path"){
+            PcmCardSearch.queries[tabname][type] = query;
+        }else if(type=="prompt"){
+            PcmCardSearch.queries[tabname][type] = query.split(' ');
+        }else if(type=="desc"){
+            PcmCardSearch.queries[tabname][type] = query.split(' ');
+        }
+
+        if(isUpdateMatch){
+            PcmCardSearch.updateMatch(tabname);
+        }
+    }
+
+    /** クエリをクリア (マッチ結果もクリア) */
+    static clearQuery(){
+        PcmCardSearch.queries = {
+            "txt2img":{ path: "", prompt: [], desc: [] },
+            "img2img":{ path: "", prompt: [], desc: [] }
+        };
+        PcmCardSearch.previousQueries = {
+            "txt2img":{ path: "", prompt: [], desc: [] },
+            "img2img":{ path: "", prompt: [], desc: [] }
+        };
+        PcmCardSearch.updateMatch("txt2img", true);
+        PcmCardSearch.updateMatch("img2img", true);
+    }
+
+    /** マッチのアップデート (DOMへの反映も実施)
+     * @param {string} tabname "txt2img" or "img2img"
+     * @param {boolean} force 前回マッチ時からクエリに変更が無くても再度マッチ処理するか (デフォルトfalse)
+     */
+    static updateMatch(tabname, force=false){
+        if(tabname!=='txt2img' && tabname!=='img2img') return;
+
+        if(!PcmCardSearch.isInitialized) PcmCardSearch.updateCards();
+
+        PcmCardSearch.#updateMatchPath(tabname, force);
+        PcmCardSearch.#updateMatchPrompt(tabname, force);
+        PcmCardSearch.#updateMatchDesc(tabname, force);
+        PcmCardSearch.#updateDom(tabname);
+    }
+
+    /** Path マッチ
+     * @param {string} tabname "txt2img" or "img2img"
+     * @param {boolean} force 前回マッチ時からクエリに変更が無くても再度マッチ処理するか (デフォルトfalse)
+     */
+    static #updateMatchPath(tabname, force=false){
+        if(tabname!=='txt2img' && tabname!=='img2img') return;
+        const query = PcmCardSearch.queries[tabname].path;
+        if(!force && query === PcmCardSearch.previousQueries[tabname].path) return;
+
+        let ret = [];
+        if(query.length == 0) {
+            ret = Object.values(PcmCardSearch.cards);
+        } else {
+            for(const card of Object.values(PcmCardSearch.cards)){
+                if(card.path.indexOf(query) != -1){
+                    ret.push(card);
+                }
+            }
+        }
+        PCM_DEBUG_PRINT(`pcmCardSearch.updateMatchPath: ${tabname}.path query: ${query}, ret: ${ret.length}`);
+        PcmCardSearch.tmpMatch[tabname].path = ret;
+    }
+
+    /** Prompt マッチ
+     * @param {string} tabname "txt2img" or "img2img"
+     * @param {boolean} force 前回マッチ時からクエリに変更が無くても再度マッチ処理するか (デフォルトfalse)
+     */
+    static #updateMatchPrompt(tabname, force=false){
+        if(tabname!=='txt2img' && tabname!=='img2img') return;
+        if(!force && PcmCardSearch.previousQueries[tabname].prompt === PcmCardSearch.queries[tabname].prompt) return;
+
+        let ret = [];
+        if(PcmCardSearch.queries[tabname].prompt.length == 0) {
+            PcmCardSearch.tmpMatch[tabname].prompt = Object.values(PcmCardSearch.cards);
+            return;
+        }
+
+        for(const card of Object.values(PcmCardSearch.cards)){
+            for(const p of PcmCardSearch.queries[tabname].prompt){
+                if(card.prompt.indexOf(p) != -1){
+                    ret.push(card);
+                    break;
+                }
+            }
+        }
+        PcmCardSearch.tmpMatch[tabname].prompt = ret;
+    }
+
+    /** Description マッチ
+     * @param {string} tabname "txt2img" or "img2img"
+     * @param {boolean} force 前回マッチ時からクエリに変更が無くても再度マッチ処理するか (デフォルトfalse)
+     */
+    static #updateMatchDesc(tabname, force=false){
+        if(tabname!=='txt2img' && tabname!=='img2img') return;
+        if(!force && PcmCardSearch.previousQueries[tabname].desc === PcmCardSearch.queries[tabname].desc) return;
+
+        let ret = [];
+        if(PcmCardSearch.queries[tabname].desc.length == 0) {
+            PcmCardSearch.tmpMatch[tabname].desc = Object.values(PcmCardSearch.cards);
+            return;
+        }
+
+        for(const card of Object.values(PcmCardSearch.cards)){
+            for(const d of PcmCardSearch.queries[tabname].desc){
+                if(card.desc.indexOf(d) != -1){
+                    ret.push(card);
+                    break;
+                }
+            }
+        }
+        PcmCardSearch.tmpMatch[tabname].desc = ret;
+    }
+
+    /** マッチ結果のDOMへの反映 */
+    static #updateDom(tabname){
+        if(tabname!=='txt2img' && tabname!=='img2img') return;
+
+        let match = PcmCardSearch.tmpMatch[tabname].path.filter( card =>
+                PcmCardSearch.tmpMatch[tabname].prompt.includes(card) &&
+                PcmCardSearch.tmpMatch[tabname].desc.includes(card));
+
+        PCM_DEBUG_PRINT(`pcmCardSearch.updateDom ${tabname} : match: ${match.length}`);
+
+        for(const card of Object.values(PcmCardSearch.cards)){
+            const visible = match.includes(card);
+            card.elem[tabname].classList.toggle("hidden", !visible);
+        }
+    }
+}
+
 /** ディレクトリツリービューのアイテムクリック */
 function pcmExtraNetworksTreeOnClick(event, tabname, extra_networks_tabname) {
     /**
@@ -81,24 +317,20 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
         _btn.dataset.selected = "";
     }
 
+    /** PromptCards タブ専用処理に置き換え */
     function _update_search(_tabname, _extra_networks_tabname, _search_text) {
-        // Update search input with select button's path.
-        var search_input_elem = gradioApp().querySelector("#" + tabname + "_" + extra_networks_tabname + "_extra_search");
-
         if(_search_text) {
             // パスの区切り文字を正規化
             _search_text = _search_text.replace(/\\/g, '/');
             
             // SubDirチェックボックスの状態を確認
-            var checkbox = gradioApp().querySelector(`#${tabname}_pcm_subdirs_toggle`);
+            var checkbox = gradioApp().querySelector(`#${tabname}_pcm_subdirs_toaggle`);
             if (checkbox && !checkbox.checked && !_search_text.endsWith('$')) {
                 // SubDirにチェックが無い場合は$を付加
                 _search_text += '$';
             }
         }
-
-        search_input_elem.value = _search_text;
-        updateInput(search_input_elem);
+        PcmCardSearch.updateQuery(_tabname, "path", _search_text, true); // クエリを更新し、マッチ結果も更新
     }
 
     // If user clicks on the chevron, then we do not select the folder.
@@ -127,3 +359,6 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
     // 現在選択中のフォルダの更新
     pcmUpdateSelectedFolderHistory(tabname, event.target);
 }
+
+// 初期化
+pcmWaitForContent('#txt2img_promptcards_extra_refresh', PcmCardSearch.initialize);
