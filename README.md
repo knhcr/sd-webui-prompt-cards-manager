@@ -26,6 +26,7 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/03/22
+  - Added shortcut keys for Category switch in PromptCards tab ([keys](#keyboard-shortcut)).
   - Improved Mini Gallery functionality.
 
 * 2025/03/20
@@ -126,9 +127,15 @@ Note that this extension does not have features to automatically generate prompt
 
 ![example](./docs/images/tree.png)
 
+### Keyboard Shortcut
+  - `Ctrl + 1 ~ 9` : You can switch Category 1st to 9th from above listed in tree view.
+  - `Ctrl + 0` / `Alt + 0` : You can Undo / Redo for Category switching.
+
+
 ### Control Belt
 * `SubDir` checkbox toggles whether to display cards in subfolders of the selected folder or not.
 * `ShowDirName` checkbox toggles whether to display each card's folder path or not.
+
 
 ![ShowDirName](./docs/images/showDirName.png)
 
