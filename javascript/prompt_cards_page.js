@@ -622,6 +622,7 @@ function pcmCardPageDoUndoRedo(tabIndex, isUndoRedo){
 /** Ctrl + 数字キー, Alt + 0 コールバック登録 */
 window.addEventListener('keydown', (event)=>{
     if(event.ctrlKey && /^\d$/.test(event.key)){
+        event.preventDefault();
         // 現在のタブ
         let tabIndex = -1;
         let elem = gradioApp().querySelector('#tab_txt2img');
@@ -641,6 +642,7 @@ window.addEventListener('keydown', (event)=>{
         }
 
     } else if(event.altKey && event.key === '0'){
+        event.preventDefault();
         // 現在のタブ
         let tabIndex = -1;
         let elem = gradioApp().querySelector('#tab_txt2img');
