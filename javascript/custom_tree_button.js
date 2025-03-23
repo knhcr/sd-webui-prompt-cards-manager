@@ -72,25 +72,43 @@ class PcmCardSearch {
                 }
                 const json = await res.json();  // {<org_name>: {path: <search_terms>, prompt: <prompt>, desc: <description>}, ... }
 
-                PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${Object.keys(json).length} cards in JSON data`);
+                const cards_length_json = Object.keys(json).length;
+                PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${cards_length_json} cards in JSON`);
 
-                let cards = {};
-                await pcmSleepAsync(500); // a1111 標準処理による DOM の更新を待つ
+                let cards_length_dom = 0;
+
+                let isTimeout = true;
+                let i = 0;
+                for (i = 0; i < 150; i++){
+                    // a1111 標準処理による DOM の更新を待つ (100ms ごと, 最大15秒)
+                    await pcmSleepAsync(100); 
+                    cards_length_dom = gradioApp().querySelectorAll(`#${tabname}_promptcards_cards .card`).length;
+                    if (cards_length_json === cards_length_dom){
+                        isTimeout = false;
+                        break;
+                    }
+                }
+                if (isTimeout){
+                    PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: timeout: ${cards_length_json} cards in JSON, but ${cards_length_dom} cards in DOM`);
+                    return;
+                }
+                PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: waited ${(i+1)*100} ms`);
 
                 // ページ上の全カードの DOM の hash テーブルを構築
                 const card_doms = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards .card`));
                 const card_doms_hash = {}
                 for (const elem of card_doms){
                     const orgname = elem.querySelector(".name").getAttribute("orgname");
-                    PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${orgname} in DOM`);
+                    // PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${orgname} in DOM`);
                     card_doms_hash[orgname] = elem;
                 }
 
                 PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${Object.keys(card_doms_hash).length} cards in DOM`);
 
                 // カード情報を取得し、DOM 要素をマッピング
+                let cards = {};
                 for (const orgname in json){
-                    PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${orgname} in JSON`);
+                    //PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${orgname} in JSON`);
                     const card = PcmCardSearch.getDefaultCard();
                     card.path = json[orgname].path;
                     card.prompt = json[orgname].prompt;
@@ -277,7 +295,7 @@ class PcmCardSearch {
             for(const key of Object.keys(PcmCardSearch.cards[tabname])){
                 const card = PcmCardSearch.cards[tabname][key];
                 const visible = match.includes(card);
-                PCM_DEBUG_PRINT(`pcmCardSearch.updateDom ${tabname} : key: ${key}, visible: ${visible}`);
+                //PCM_DEBUG_PRINT(`pcmCardSearch.updateDom ${tabname} : key: ${key}, visible: ${visible}`);
                 card.elem.classList.toggle("hidden", !visible);
             }
         } catch (error) {
