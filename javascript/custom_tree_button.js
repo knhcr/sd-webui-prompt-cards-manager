@@ -169,17 +169,16 @@ class PcmCardSearch {
         if(tabname!=='txt2img' && tabname!=='img2img') return;
         if(!force && PcmCardSearch.previousQueries[tabname].prompt === PcmCardSearch.queries[tabname].prompt) return;
 
-        let ret = [];
+        let ret = Object.values(PcmCardSearch.cards);
         if(PcmCardSearch.queries[tabname].prompt.length == 0) {
-            PcmCardSearch.tmpMatch[tabname].prompt = Object.values(PcmCardSearch.cards);
-            return;
-        }
-
-        for(const card of Object.values(PcmCardSearch.cards)){
-            for(const p of PcmCardSearch.queries[tabname].prompt){
-                if(card.prompt.indexOf(p) != -1){
-                    ret.push(card);
-                    break;
+            // do nothing
+        } else {
+            for(const card of Object.values(PcmCardSearch.cards)){
+                for(const query of PcmCardSearch.queries[tabname].prompt){
+                    if(card.prompt.indexOf(query) === -1){
+                        ret = ret.filter(c => c !== card);
+                        break;
+                    }
                 }
             }
         }
@@ -194,17 +193,16 @@ class PcmCardSearch {
         if(tabname!=='txt2img' && tabname!=='img2img') return;
         if(!force && PcmCardSearch.previousQueries[tabname].desc === PcmCardSearch.queries[tabname].desc) return;
 
-        let ret = [];
+        let ret = Object.values(PcmCardSearch.cards);
         if(PcmCardSearch.queries[tabname].desc.length == 0) {
-            PcmCardSearch.tmpMatch[tabname].desc = Object.values(PcmCardSearch.cards);
-            return;
-        }
-
-        for(const card of Object.values(PcmCardSearch.cards)){
-            for(const d of PcmCardSearch.queries[tabname].desc){
-                if(card.desc.indexOf(d) != -1){
-                    ret.push(card);
-                    break;
+            // do nothing
+        } else {
+            for(const card of Object.values(PcmCardSearch.cards)){
+                for(const query of PcmCardSearch.queries[tabname].desc){
+                    if(card.desc.indexOf(query) === -1){
+                        ret = ret.filter(c => c !== card);
+                        break;
+                    }
                 }
             }
         }
