@@ -17,7 +17,7 @@ class PcmCardSearch {
     /** card オブジェクトの初期値 */ 
     static getDefaultCard(){
         return {
-            path: "", // カードの path
+            path: "", // カードの path (末尾は $ が付与)
             prompt: "", // カードの prompt (lower case)
             desc: "", // カードの description (lower case)
             elem: null // 対象カードの DOM
@@ -120,11 +120,52 @@ class PcmCardSearch {
                 PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${Object.keys(cards).length} cards updated for ${tabname}`);
                 PcmCardSearch.cards[tabname] = cards;
 
+                const tmpQuery = PcmCardSearch.queries[tabname];
+                PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: tmpQuery: path = ${tmpQuery.path}, prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
+
                 PCM_DEBUG_PRINT(`pcmCardSearch.clearQuery called`);
                 PcmCardSearch.clearQuery(tabname);
 
                 // ツリービューのアイテムにタイトルをセット
                 pcmTreeViewItemsSetTitle(tabname);
+
+                // 更新前にクエリがセットされていた場合は、再度クエリをセットしなおしてマッチ状態に適用
+                const tmpPath = tmpQuery.path;
+                if (tmpPath !== null && tmpPath !== undefined && tmpPath.length > 0){
+                    // 更新後もセットされていたPathが有効な場合
+                    //  - 更新後のフォルダ名一覧に存在するか
+                    //    + ディレクトリツリーはパスの途中のフォルダもノードとして存在する
+                    //    + 従ってフォルダ名としてマッチするか否かで有効性を確認する
+                    // カード情報の全パスから $ を外して/に付け替えた集合
+                    let all_paths = new Set(Object.values(PcmCardSearch.cards[tabname]).map(o=>o.path.slice(0, -1)+'/')); // [`prompt_curds/subdir/subdir`, ...]
+
+                    let checkPath = tmpPath;
+                    if (checkPath.endsWith('$')) checkPath = checkPath.slice(0, -1);
+                    checkPath += '/';
+                    let isValidPath = false;
+                    for (const path of all_paths){
+                        if (path.startsWith(checkPath)){
+                            isValidPath = true;
+                            break;
+                        }
+                    }
+                    if (isValidPath){
+                        PcmCardSearch.updateQuery(tabname, "path", tmpPath, false);
+                        PcmCardSearch.updateQuery(tabname, "prompt", tmpQuery.prompt.join(" "), false);
+                        PcmCardSearch.updateQuery(tabname, "desc", tmpQuery.desc.join(" "), false);
+                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: previous query : path = ${tmpPath}, prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
+                        await pcmSleepAsync(300); // a1111 標準のコールバックが hidden を更新するためその終了を待機
+                        PcmCardSearch.updateMatch(tabname, true);
+                    }
+                }else{
+                    // 検索クエリのみがセットされていた場合
+                    if (tmpQuery.prompt.length > 0 || tmpQuery.desc.length > 0){
+                        PcmCardSearch.updateQuery(tabname, "prompt", tmpQuery.prompt.join(" "), false);
+                        PcmCardSearch.updateQuery(tabname, "desc", tmpQuery.desc.join(" "), false);
+                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: previous query : prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
+                        PcmCardSearch.updateMatch(tabname, true);
+                    }
+                }
             } catch (error) {
                 console.error(`pcmCardSearch.updateCards failed: ${error}`);
                 console.error(error.stack);
