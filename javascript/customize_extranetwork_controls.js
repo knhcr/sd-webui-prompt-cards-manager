@@ -17,6 +17,18 @@ const pcmAddSearchTextboxPrompt = ()=>{
         controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
     
     }
+
+    // register to tag autocomplete
+    if (typeof getTextAreas === 'function') {
+      if (!thirdParty["prompt-card-manager"]) {
+        thirdParty["prompt-card-manager"] = {
+          "base": "#txt2img_promptcards_controls",
+          "hasIds": true,
+          "selectors": ["#txt2img_promptcards_extra_search_prompt"]
+        };
+      }
+    }    
+
 }
 
 /** search textbox : Description
