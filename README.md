@@ -25,6 +25,9 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/03/23
+  - Added two textboxes for card search (Prompt search and Description search).
+
 * 2025/03/22
   - Added shortcut keys for Category switch in PromptCards tab ([keys](#keyboard-shortcut)).
   - Improved Mini Gallery functionality.
@@ -133,8 +136,12 @@ Note that this extension does not have features to automatically generate prompt
 
 
 ### Control Belt
-* `SubDir` checkbox toggles whether to display cards in subfolders of the selected folder or not.
-* `ShowDirName` checkbox toggles whether to display each card's folder path or not.
+  - `SubDir` checkbox toggles whether to display cards in subfolders of the selected folder or not.
+  - `ShowDirName` checkbox toggles whether to display each card's folder path or not.
+  - `Prompt Search` textbox filters cards by Prompt text of cards.
+    + Both whitespace and comma work as word separator. (AND condition)
+  - `Description Search` textbox filters cards by Description text of cards.
+    + Whitespace works as word separator. (AND condition)
 
 
 ![ShowDirName](./docs/images/showDirName.png)
