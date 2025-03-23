@@ -91,18 +91,12 @@ class PromptCardsPage(ExtraNetworksPage):
             os.makedirs(img_folder_path, exist_ok=True)
             return
 
-        valid_image_paths = []
-        for root, _, files in filter_walk(self.img_folder_path, ignore_dot_starts=shared.opts.prompt_cards_manager_ignore_dot_starts):
-            for filename in files:
-                if os.path.splitext(filename)[1].lower() in ('.png', '.jpg', '.jpeg', '.webp'):
-                    valid_image_paths.append(os.path.join(root, filename))
-        
         # 不要なキャッシュ情報を全削除
-        CacheInfo.cleanup_unused_caches(valid_image_paths)
+        CacheInfo.cleanup_unused_caches()
         CacheInfo.save_cache_info()
 
         index = 0
-        for img_full_path in valid_image_paths:
+        for img_full_path in CacheInfo.get_all_image_paths():
             # self.folder_path からの相対パス（"prompt_cards" 含まず)
             # e.g "xxx.png", "sub1\yyy.png" (後で正規化)
             rel_path = os.path.relpath(img_full_path, img_folder_path)

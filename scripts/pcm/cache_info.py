@@ -2,10 +2,12 @@ import os
 import sys
 import json
 import time
+from modules import shared
 from scripts.pcm.constants import image_folder, thumbs_folder, cache_info_file, extension_root_path, endpoint_base
 from PIL import Image
 import base64
 import traceback
+from scripts.pcm.utility import filter_walk
 
 
 class CacheInfo:
@@ -131,7 +133,7 @@ class CacheInfo:
                 cls.cache_info[thumbs_name] = {
                     'mtime': image_mtime,
                     'image_path': image_path,
-                    'rel_path': rel_path,
+                    'rel_path': rel_path, # image_folder からの相対パス
                     'last_access': time.time(),
                     'image_resolution': image_resolution,
                 }
@@ -143,11 +145,31 @@ class CacheInfo:
             print(f"Error updating cache for {image_path}", file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
             return None
-
         
     @classmethod
-    def cleanup_unused_caches(cls, valid_image_paths):
+    def update_all_caches(cls):
+        ''' 全キャッシュを更新する '''
+        for image_path in cls.get_all_image_paths():
+            rel_path = os.path.relpath(image_path, os.path.join(extension_root_path, image_folder))
+            cls.update_cache(image_path, rel_path)
+        cls.cleanup_unused_caches()
+
+    @classmethod
+    def get_all_image_paths(cls):
+        ''' 全ての画像ファイルのパスを返す '''
+        valid_image_paths = []
+        img_folder_path = os.path.join(extension_root_path, image_folder)
+        for root, _, files in filter_walk(img_folder_path, ignore_dot_starts=shared.opts.prompt_cards_manager_ignore_dot_starts):
+            for filename in files:
+                if os.path.splitext(filename)[1].lower() in ('.png', '.jpg', '.jpeg', '.webp'):
+                    valid_image_paths.append(os.path.join(root, filename))
+        return valid_image_paths
+
+    @classmethod
+    def cleanup_unused_caches(cls):
         ''' 存在しない画像のキャッシュを削除する '''
+        valid_image_paths = cls.get_all_image_paths()
+
         current_thumbs = set([cls.get_thumbnail_name(x) for x in valid_image_paths])
         cached_thumbs = set(cls.cache_info.keys())
         

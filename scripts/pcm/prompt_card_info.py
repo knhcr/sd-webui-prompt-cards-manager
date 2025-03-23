@@ -58,6 +58,8 @@ class PromptCardInfoManager:
         '''
         ret = {}
         # 全カードを探索して情報を取得
+        # この時点でキャッシュが最新に更新されていないため
+        CacheInfo.update_all_caches()
         for thumbs_name in CacheInfo.cache_info:
             card_info = cls.get_card_info(thumbs_name, is_refresh=False).card_info
 
@@ -69,6 +71,8 @@ class PromptCardInfoManager:
             search_path += "$"
 
             org_name = html.escape(os.path.splitext(rel_path)[0])
+
+            DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info_for_search org_name: {org_name}")
 
             ret[org_name] = {
                 "path": search_path,
