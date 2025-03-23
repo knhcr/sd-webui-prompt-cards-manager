@@ -510,6 +510,21 @@ pcmWaitForContent('#txt2img_promptcards_extra_refresh', ()=>{
     }
 });
 
+/** Extra Networks Tab Button Callback */
+pcmWaitForContent('#txt2img_extra_tabs', async ()=>{
+    await pcmSleepAsync(200);
+    for (const tabname of ['txt2img', 'img2img']){
+        let elem = pcmGetElementBySelectorAndText(`#${tabname}_extra_tabs button`, 'PromptCards');
+        if(elem){
+            elem.addEventListener('click', (event)=>{
+                if (!elem.classList.contains('selected')){
+                    PcmCardSearch.updateCards(tabname);
+                }
+            });
+        }
+    }
+});
+
 /** ツリービューのアイテムにタイトルをセット
  * @param {string} tabname "txt2img" or "img2img" or null (全てのタブ)
 */
