@@ -26,7 +26,9 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/03/23
+  - Improved display style
   - Added two textboxes for card search (Prompt search and Description search).
+  - bug fix
 
 * 2025/03/22
   - Added shortcut keys for Category switch in PromptCards tab ([keys](#keyboard-shortcut)).
