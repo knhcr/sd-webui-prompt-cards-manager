@@ -71,7 +71,7 @@ class PcmCardSearch {
                     elem:{"txt2img": card_elems_t2i_hash[orgname], "img2img": card_elems_i2i_hash[orgname]}
                 };
             }
-            
+
             PcmCardSearch.cards = cards;
             PcmCardSearch.clearQuery();
         } catch (error) {
@@ -95,8 +95,12 @@ class PcmCardSearch {
         if(type=="path"){
             PcmCardSearch.queries[tabname][type] = query;
         }else if(type=="prompt"){
+            query = query.replaceAll(",", " ");
+            query = query.replace(/\s+/g, ' ');
+            query = query.trim();
             PcmCardSearch.queries[tabname][type] = query.split(' ');
         }else if(type=="desc"){
+            query = query.replace(/\s+/g, ' ');
             PcmCardSearch.queries[tabname][type] = query.split(' ');
         }
 
