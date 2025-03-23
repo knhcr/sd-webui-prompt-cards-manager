@@ -295,53 +295,6 @@
     font-size: 0.9em;
 }
 
-/*-------------------------------------------------------------------*/
-/* Subdir Toggle */
-/* コントロールの整列 */
-.extra-networks-controls-div #txt2img_promptcards_controls,
-.extra-networks-controls-div #img2img_promptcards_controls{
-    display: flex;
-    align-items: center;
-    gap: 0.5rem; /* 要素間の間隔 */
-}
-
-/* ラベル */
-.pcm-subdir-toggle-label,
-.pcm-dirname-toggle-label {
-    color: var(--body-text-color);
-    margin-right: 4px;
-    cursor: pointer;
-}
-
-/* チェックボックス */
-.pcm-checkbox {
-    width: 1.2em;
-    height: 1.2em;
-    border: 2px solid var(--checkbox-border-color);
-    border-radius: 4px;
-    margin-right: 5px;
-    cursor: pointer;
-    position: relative;
-    top: 1px;
-    background-color: var(--link-text-color);
-    background-color: transparent;
-    border-color: var(--checkbox-border-color);
-    cursor: pointer;
-}
-
-/* チェックボックス */
-.pcm-checkbox:checked {
-    background-color: var(--link-text-color);
-    border-color: var(--link-text-color);
-}
-
-/* 検索入力欄の幅を調整 */
-#txt2img_extra_tabs .extra-network-control--search-text,
-#img2img_extra_tabs .extra-network-control--search-text
-{
-    width: 300px;
-}
-
 /* ---------------------------------------------------- */
 /* ExtraNetworksのTreeView */
 
@@ -403,6 +356,55 @@
 div > #txt2img_promptcards_extra_search, div:has(> #txt2img_promptcards_extra_search),
 div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_search){
     display:none;
+}
+
+/* コントロールの整列 */
+.extra-networks-controls-div #txt2img_promptcards_controls,
+.extra-networks-controls-div #img2img_promptcards_controls{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* 要素間の間隔 */
+}
+
+/* ラベル */
+.pcm-checkbox-label {
+    color: var(--body-text-color);
+    margin-left: 5px;
+    cursor: pointer;
+}
+
+/* チェックボックス */
+.pcm-checkbox {
+    width: 1.2em;
+    height: 1.2em;
+    border: 2px solid var(--checkbox-border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+    background-color: var(--link-text-color);
+    background-color: transparent;
+    border-color: var(--checkbox-border-color);
+    cursor: pointer;
+}
+
+/* チェックボックス */
+.pcm-checkbox:checked {
+    background-color: var(--link-text-color);
+    border-color: var(--link-text-color);
+}
+
+/* 検索入力欄の幅を調整 */
+#txt2img_extra_tabs .extra-network-control--search-text,
+#img2img_extra_tabs .extra-network-control--search-text
+{
+    width: 320px;
+}
+
+/* 不要なボタン */
+.extra-networks-controls-div #txt2img_promptcards_extra_sort,
+.extra-networks-controls-div #txt2img_promptcards_extra_sort_dir{
+    display: none;
 }
 
 /*--------------------------------------*/

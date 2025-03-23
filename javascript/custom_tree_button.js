@@ -206,7 +206,7 @@ class PcmCardSearch {
             PcmCardSearch.#updateMatchPath(tabname, force);
             PcmCardSearch.#updateMatchPrompt(tabname, force);
             PcmCardSearch.#updateMatchDesc(tabname, force);
-            PcmCardSearch.#updateDom(tabname);
+            PcmCardSearch.updateDom(tabname);
         }
     }
 
@@ -282,7 +282,7 @@ class PcmCardSearch {
     }
 
     /** マッチ結果のDOMへの反映 */
-    static #updateDom(tabname){
+    static updateDom(tabname){
         if(tabname!=='txt2img' && tabname!=='img2img') return;
 
         let match = PcmCardSearch.tmpMatch[tabname].path.filter( card =>

@@ -63,6 +63,7 @@ const pcmAddSubdirToggleCheckbox = ()=>{
         const label = document.createElement('label');
         label.textContent = 'SubDir:';
         label.classList.add('pcm-subdir-toggle-label');
+        label.classList.add('pcm-checkbox-label');
         controlsDiv.prepend(label); // 先頭に追加
         
         // サブフォルダ表示切替チェックボックス
@@ -90,6 +91,7 @@ const pcmAddDirnameToggleCheckbox = ()=>{
         const label = document.createElement('label');
         label.textContent = 'ShowDir:';
         label.classList.add('pcm-dirname-toggle-label');
+        label.classList.add('pcm-checkbox-label');
         controlsDiv.prepend(label); // 先頭に追加
         
         // フォルダ名表示切替チェックボックス
@@ -134,6 +136,7 @@ const pcmAddShowDescToggleCheckbox = ()=>{
         const label = document.createElement('label');
         label.textContent = 'ShowDesc:';
         label.classList.add('pcm-desc-toggle-label');
+        label.classList.add('pcm-checkbox-label');
         controlsDiv.prepend(label); // 先頭に追加
         
         // フォルダ名表示切替チェックボックス
