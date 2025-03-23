@@ -314,9 +314,7 @@
 }
 
 /* チェックボックス */
-#txt2img_pcm_subdirs_toggle, #img2img_pcm_subdirs_toggle,
-#txt2img_pcm_dirname_toggle, #img2img_pcm_dirname_toggle
-{
+.pcm-checkbox {
     width: 1.2em;
     height: 1.2em;
     border: 2px solid var(--checkbox-border-color);
@@ -332,9 +330,7 @@
 }
 
 /* チェックボックス */
-#txt2img_pcm_subdirs_toggle:checked, #img2img_pcm_subdirs_toggle:checked,
-#txt2img_pcm_dirname_toggle:checked, #img2img_pcm_dirname_toggle:checked
-{
+.pcm-checkbox:checked {
     background-color: var(--link-text-color);
     border-color: var(--link-text-color);
 }

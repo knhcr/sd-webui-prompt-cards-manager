@@ -68,6 +68,7 @@ const pcmAddSubdirToggleCheckbox = ()=>{
         // サブフォルダ表示切替チェックボックス
         const subdirCheckbox = document.createElement('input');
         subdirCheckbox.type = 'checkbox';
+        subdirCheckbox.classList.add('pcm-checkbox');
         const checkboxId = `${tabname}_pcm_subdirs_toggle`;
         subdirCheckbox.id = checkboxId;
         label.htmlFor = checkboxId;
@@ -87,7 +88,7 @@ const pcmAddDirnameToggleCheckbox = ()=>{
         const controlsDiv = gradioApp().querySelector(selector);
         // ラベル
         const label = document.createElement('label');
-        label.textContent = 'ShowDirName:';
+        label.textContent = 'ShowDir:';
         label.classList.add('pcm-dirname-toggle-label');
         controlsDiv.prepend(label); // 先頭に追加
         
@@ -96,6 +97,7 @@ const pcmAddDirnameToggleCheckbox = ()=>{
         dirnameCheckbox.type = 'checkbox';
         const checkboxId = `${tabname}_pcm_dirname_toggle`;
         dirnameCheckbox.id = checkboxId;
+        dirnameCheckbox.classList.add('pcm-checkbox');
         label.htmlFor = checkboxId;
         dirnameCheckbox.classList.add('gr-checkbox', 'gr-text-input');
         dirnameCheckbox.checked = false;
@@ -122,12 +124,51 @@ function _pcmRefreshHideDirName(tabname, extra_networks_tabname) {
 
 /* --------------------------------------------------------------------------------------*/
 
+/** show description toggle checkbox */
+const pcmAddShowDescToggleCheckbox = ()=>{
+    for (let tabname of ['txt2img', 'img2img']){
+        const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        PCM_DEBUG_PRINT(`pcm_add_dirname_toggle_checkbox called : ${selector}`);
+        const controlsDiv = gradioApp().querySelector(selector);
+        // ラベル
+        const label = document.createElement('label');
+        label.textContent = 'ShowDesc:';
+        label.classList.add('pcm-desc-toggle-label');
+        controlsDiv.prepend(label); // 先頭に追加
+        
+        // フォルダ名表示切替チェックボックス
+        const descCheckbox = document.createElement('input');
+        descCheckbox.type = 'checkbox';
+        const checkboxId = `${tabname}_pcm_desc_toggle`;
+        descCheckbox.id = checkboxId;
+        descCheckbox.classList.add('pcm-checkbox');
+        label.htmlFor = checkboxId;
+        descCheckbox.classList.add('gr-checkbox', 'gr-text-input');
+        descCheckbox.checked = true;
+        descCheckbox.addEventListener('change', function() {
+            _pcmRefreshShowDesc(tabname);
+        });
+        controlsDiv.insertBefore(descCheckbox, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
+    }
+}
+
+/** show description toggle callback, also called when refresh btn clicked */
+function _pcmRefreshShowDesc(tabname) {
+    const isShow = gradioApp().querySelector(`#${tabname}_pcm_desc_toggle`).checked;
+    const cardDescs = gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .card .description`);
+    for (let cardDesc of cardDescs){
+        cardDesc.classList.toggle('hidden', !isShow);
+    }
+}
+/* --------------------------------------------------------------------------------------*/
+
 // checkbox 追加 (onUiLoaded では早すぎるため要素を監視)
 pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', ()=>{
     pcmAddSearchTextboxDesc();
     pcmAddSearchTextboxPrompt();
     pcmAddSubdirToggleCheckbox();
     pcmAddDirnameToggleCheckbox();
+    pcmAddShowDescToggleCheckbox();
 });
 
 // HideDirName : refresh btn の callback にも追加
