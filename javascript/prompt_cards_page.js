@@ -1,23 +1,7 @@
 /** 最後にクリックされたカード名 (thumbs_name) */
 let pcmLastClickedCard = "";
 
-/** 現在のカテゴリのフォルダオブジェクトの配列
- *  - [[folder_obj, folder_obj, ...], [folder_obj, folder_obj, ...]]
- *  - 一つ目の配列は t2i, 二つ目の配列は i2i
- *  - Ctrl + 数字キー でカテゴリ切り替えに使用
- *  - カードリフレッシュ時に更新
-*/
-let pcmCategoryFolders = [[],[]];
-
-/** 選択したフォルダの履歴 
- *   - 配列は t2i, i2i の順 */
-let pcmSelectedFolderHistory = [[null], [null]]; // 選択した要素の履歴(新しい順)
-let pcmSelectedFolderHistoryIndex = [0, 0]; // Undo/Redo 用現在のインデックス
-let pcmSelectedFolderHistoryIndexMax = 20; // 履歴の最大長
-let pcmSelectedFolderHistoryIsEventUndoRedo = 0; // Undo :-1, Redo:1, 通常のclick イベント: 0
-
-/**
- * Prompt Cards Manager カードのクリックハンドラー
+/** Prompt Cards Manager カードのクリックハンドラー
  * カード情報をプロンプトに反映
  * @param {Event} event
  * @param {string} tabname
@@ -148,8 +132,7 @@ async function pcmCardClick(event, tabname, thumbsName) {
     window.scrollTo(scrollPosition.x, scrollPosition.y);
 }
 
-/**
- * Prompt Cards Manager の send CNET, send CNET and Mask ボタンのクリックハンドラー
+/** Prompt Cards Manager の send CNET, send CNET and Mask ボタンのクリックハンドラー
  * CNET画像をプロンプトに反映
  * @param {Event} event
  * @param {string} tabname
@@ -240,8 +223,7 @@ function pcmGeneratePrompt(currentText, text, category="", isReplace=true){
 }
 
 
-/**
- * 画像ファイルとマスクファイルを取得
+/** 画像ファイルとマスクファイルを取得
  * @param {string} thumbsName
  * @param {string} maskSuffix {image_path_stem}{mask_suffix}.{image_path_ext} を取得, マスク不要時は null
  * @returns {[string, string]} 画像ファイルとマスクファイルのData URI (Base64), 存在しない場合は配列要素は null
@@ -268,8 +250,7 @@ async function pcmGetImageAndMask(thumbsName, maskSuffix){
 }
 
 
-/**
- * ControlNetへの画像ドラッグ＆ドロップをエミュレート 
+/** ControlNetへの画像ドラッグ＆ドロップをエミュレート 
  * [TODO] i2i の場合 Upload independent control image をチェックする必要あり
  *       (そもそもi2iでCNetまで使うような画像修正掛ける時にこの機能は使わないと思うので要らんかも)
  * @param {string} dataUri data:${mimetype};base64,${img_base64}
@@ -300,8 +281,7 @@ async function pcmDropImageToCnet(dataUri, index = 0, tabname = "txt2img", is_ma
 }
 
 
-/**
- * ControlNetへの画像ドラッグ＆ドロップをエミュレート (forge builtin CNET の場合)
+/** ControlNetへの画像ドラッグ＆ドロップをエミュレート (forge builtin CNET の場合)
  * @param {string} dataUri data:${mimetype};base64,${img_base64}
  * @param {number} index ControlNet のインデックス
  * @param {string} tabname タブ名 (txt2img, img2img)
@@ -526,8 +506,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
 }
 
 
-/**
- * ControlNetへの画像ドラッグ＆ドロップをエミュレート (github extension の CNET の場合)
+/** ControlNetへの画像ドラッグ＆ドロップをエミュレート (github extension の CNET の場合)
  * @param {string} dataUri data:${mimetype};base64,${img_base64}
  * @param {number} index ControlNet のインデックス
  * @param {string} tabname タブ名 (txt2img, img2img)
@@ -538,19 +517,21 @@ async function pcmDropImageToCnetExtension(dataUri, index = 0, tabname = "txt2im
     return;
 }
 
-/** カテゴリリストの更新 */
-function pcmCardPageRefreshCategoryList(){
-    for (const [idx, tabName] of ["txt2img", "img2img"].entries()){
-        const folderList = gradioApp().querySelectorAll(`#${tabName}_promptcards_tree > ul > li > ul >li > .tree-list-content-dir`);
-        pcmCategoryFolders[idx] = Array.from(folderList);
-    }
-}
 
-/** フォルダクリックした履歴の更新 (連続して同じフォルダをクリックした場合はスキップ)
+/** 選択したフォルダの履歴 
+ *   - 配列は t2i, i2i の順 */
+let pcmSelectedFolderHistory = [[null], [null]]; // 選択した要素の履歴(新しい順), 各要素は searchPath (末尾に $ は付かない)
+let pcmSelectedFolderHistoryIndex = [0, 0]; // Undo/Redo 用現在のインデックス
+let pcmSelectedFolderHistoryIndexMax = 40; // 履歴の最大長
+let pcmSelectedFolderHistoryIsEventUndoRedo = 0; // Undo :-1, Redo:1, 通常のclick イベント: 0
+
+
+/** dir tree のフォルダクリック時の履歴更新処理 
+ *  - 連続して同じフォルダをクリックした場合はスキップ
  * @param {string} tabname タブ名 (txt2img, img2img)
- * @param {Element} elem 最新の選択フォルダ DOM element
+ * @param {string} searchPath 最新の選択フォルダ のsearchPath (末尾の $ は本処理内で除去される)
 */
-function pcmUpdateSelectedFolderHistory(tabname, elem){
+function pcmUpdateSelectedFolderHistory(tabname, searchPath){
     let tabIndex;
     if (tabname === "txt2img"){
         tabIndex = 0;
@@ -560,13 +541,15 @@ function pcmUpdateSelectedFolderHistory(tabname, elem){
         return;
     }
 
-    const targetArray = pcmSelectedFolderHistory[tabIndex];
+    PCM_DEBUG_PRINT(`pcmUpdateSelectedFolderHistory tabIndex: ${tabIndex}, searchPath: ${searchPath}`);
+    const historyArray = pcmSelectedFolderHistory[tabIndex];
 
-    // Undo/Redo からのイベントの場合
+    // Undo/Redo から来た場合, history index だけを更新して終了
     if(pcmSelectedFolderHistoryIsEventUndoRedo !== 0){
         let tmp = pcmSelectedFolderHistoryIndex[tabIndex] + pcmSelectedFolderHistoryIsEventUndoRedo;
-        if(tmp < 0 || tmp >= targetArray.length){
+        if(tmp < 0 || tmp >= historyArray.length){
             // ここには来ないが念のため
+            PCM_DEBUG_PRINT(`pcmUpdateSelectedFolderHistory tabIndex: ${tabIndex}, illegal index`);
         }else{
             pcmSelectedFolderHistoryIndex[tabIndex] = tmp;
         }
@@ -574,102 +557,196 @@ function pcmUpdateSelectedFolderHistory(tabname, elem){
         return;
     }
 
-    // 通常のクリックイベントの場合
-    if(targetArray[0] === elem) return; // 連続して同じフォルダをクリックした場合はスキップ
+    // 通常のクリックイベントの場合,現在の history index が 0 になるように更新
     if(pcmSelectedFolderHistoryIndex[tabIndex] > 0){
-        // Undo状態からのクリックの場合履歴を枝刈り
-        targetArray.splice(0, pcmSelectedFolderHistoryIndex[tabIndex]); // 現在のインデックスより前の要素を削除
-        pcmSelectedFolderHistoryIndex[tabIndex] = 0; // 現在のインデックスを0に戻す
+        // 今の index よりも新しい履歴は削除
+        historyArray.splice(0, pcmSelectedFolderHistoryIndex[tabIndex]);
+        pcmSelectedFolderHistoryIndex[tabIndex] = 0; // 現在のインデックスを0に
     }
-    
-    if(targetArray.length >= pcmSelectedFolderHistoryIndexMax){
-        targetArray.pop();
+    // 今いるフォルダと違うフォルダのクリックだった場合は履歴に追加
+    if(historyArray[0] !== searchPath){
+        if (historyArray.length >= pcmSelectedFolderHistoryIndexMax){
+            historyArray.pop();
+        }
+        if (searchPath.endsWith('$')) searchPath = searchPath.slice(0, -1);
+        historyArray.unshift(searchPath);
     }
-    targetArray.unshift(elem);
 }
 
-/** Ctrl + [1-9] でカテゴリ切り替えの click を発火
- * @param {number} number 押下キーの数字 (1-9)
- * @param {number} tabIndex タブインデックス (0: txt2img, 1: img2img)
+/** 数字指定で dir tree のフォルダの click event を発火
+ *   - 上の並びから {number} 個目のカテゴリをクリック (0スタート)
+ *   - 現在の選択場所が既に当該カテゴリ内の何れかだった場合はカテゴリ内の次のフォルダを選択(循環)
+ * @param {number} number 数字
+ * @param {number} tabname タブ名 (txt2img, img2img)
 */
-function pcmCardPageSwitchCategory(number, tabIndex){
-    if(number < 1 || number > 9) return;
-    if (number > pcmCategoryFolders[tabIndex].length) return;
+function pcmCardPageSwitchCategory(number, tabname){
+    let target = null;
+    let categorieElems = gradioApp().querySelectorAll(`#${tabname}_promptcards_tree > ul > li > ul > li[data-tree-entry-type="dir"]`);
+    if (categorieElems.length <= number) return;
+    const targetCategoryElem = categorieElems[number];
+    let targetChildren = Array.from(targetCategoryElem.querySelectorAll(`li[data-tree-entry-type="dir"]`)); // 子孫のフォルダノード全て
+    
+    let tabIndex;
+    if (tabname === "txt2img") tabIndex = 0;
+    else if (tabname === "img2img") tabIndex = 1;
+    else return;
 
-    const target = pcmCategoryFolders[tabIndex][number-1];
-    if(!target) return;
-    target.click(); // クリック履歴の更新は custom_tree_button.js のディレクトリ click event で発生するため不要
+    const currentPath = pcmSelectedFolderHistory[tabIndex][pcmSelectedFolderHistoryIndex[tabIndex]];
+    PCM_DEBUG_PRINT(`pcmCardPageSwitchCategory tabname: ${tabname}, currentPath: ${currentPath}`);
+    if (currentPath === null){
+        target = targetCategoryElem;
+    }else{
+        // currentPath 
+        let currentElem = pcmSearchPathToDirTreeElement(currentPath, tabname);
+        if(!currentElem){
+            target = targetCategoryElem;
+        }
+        else{
+            if (currentElem === targetCategoryElem){
+                if (targetChildren.length > 0){
+                    target = targetChildren[0];
+                }else{
+                    return; // カテゴリノードしかなく既に選択済みの場合何もせず終了
+                }
+            }else{
+                const tmpIndex = targetChildren.indexOf(currentElem); // 現在のノードが子孫の何番目か
+                if(tmpIndex>=0){
+                    if(tmpIndex < targetChildren.length - 1){
+                        target = targetChildren[tmpIndex + 1];
+                    }else{
+                        target = targetCategoryElem; // 子孫の末尾の場合はカテゴリノードに戻る
+                    }
+                }else{
+                    target = targetCategoryElem; // 現在のカテゴリにも子孫にも含まれないノードの場合はカテゴリノード
+                }
+            }
+        }
+    }
+    target.querySelector(`:scope > .tree-list-content`).click();
 }
 
 /** Ctrl + 0, Alt + 0 で Undo/Redo の click を発火
  *   - クリック履歴の更新は custom_tree_button.js のディレクトリ click event で発生するため不要
- * @param {number} tabIndex タブインデックス (0: txt2img, 1: img2img)
+ * @param {string} tabname タブ名 (txt2img, img2img)
  * @param {number} isUndoRedo 1: Undo, -1: Redo
 */
-function pcmCardPageDoUndoRedo(tabIndex, isUndoRedo){
+function pcmCardPageDoUndoRedo(tabname, isUndoRedo){
+    let tabIndex;
+    if (tabname === "txt2img") tabIndex = 0;
+    else if (tabname === "img2img") tabIndex = 1;
+    else return;
+
     let nextIndex = pcmSelectedFolderHistoryIndex[tabIndex] + isUndoRedo;
-    if(nextIndex < 0 || nextIndex >= pcmSelectedFolderHistory[tabIndex].length){
+    if(nextIndex < 0 || nextIndex >= pcmSelectedFolderHistory[tabIndex].length ){
         pcmSelectedFolderHistoryIsEventUndoRedo = 0; // 念のため
         return;
     }
     pcmSelectedFolderHistoryIsEventUndoRedo = isUndoRedo;
-    if(pcmSelectedFolderHistory[tabIndex][nextIndex]){
-        pcmSelectedFolderHistory[tabIndex][nextIndex].click(); // クリック履歴の更新は custom_tree_button.js のディレクトリ click event で発生するため不要
+    const searchText = pcmSelectedFolderHistory[tabIndex][nextIndex];
+    const elem = pcmSearchPathToDirTreeElement(searchText, tabname);
+    if(!elem){
+        // DOM 上に既に存在しない場合 ( refresh がちゃんと呼べていれば個々には来ない筈)
+        PCM_DEBUG_PRINT(`pcmCardPageDoUndoRedo tabname: ${tabname}, searchText: ${searchText} not found in DOM`);
+        pcmSelectedFolderHistoryIndex[tabIndex] = nextIndex;
+        return;
     }
+    elem.querySelector(`:scope> .tree-list-content`).click();
 }
 
 
-/** Ctrl + 数字キー, Alt + 0 コールバック登録 */
+/** Ctrl + 数字キー, Alt + 0 コールバック登録
+ *   - 数字キーは 1-9 まで -> -1 して 0-8 にマッピング
+*/
 window.addEventListener('keydown', (event)=>{
     if(event.ctrlKey && /^\d$/.test(event.key)){
         event.preventDefault();
+
         // 現在のタブ
-        let tabIndex = -1;
+        let tabname;
         let elem = gradioApp().querySelector('#tab_txt2img');
         if(elem && elem.style.display === 'block'){
-            tabIndex = 0; // "txt2img"
+            tabname = "txt2img";
         }else{
             elem = gradioApp().querySelector('#tab_img2img');
             if(elem && elem.style.display === 'block'){
-                tabIndex = 1; // "img2img"
+                tabname = "img2img";
             }
         }
-        if(tabIndex === -1) return;
+        if(!tabname) return;
         if(event.key === '0'){
-            pcmCardPageDoUndoRedo(tabIndex, 1); // Undo
+            pcmCardPageDoUndoRedo(tabname, 1); // Undo
         }else{
-            pcmCardPageSwitchCategory(parseInt(event.key,10), tabIndex); // カテゴリクリック
+            pcmCardPageSwitchCategory(parseInt(event.key,10)-1, tabname); // カテゴリクリック
         }
 
     } else if(event.altKey && event.key === '0'){
         event.preventDefault();
+
         // 現在のタブ
-        let tabIndex = -1;
+        let tabname;
         let elem = gradioApp().querySelector('#tab_txt2img');
         if(elem && elem.style.display === 'block'){
-            tabIndex = 0; // "txt2img"
+            tabname = "txt2img";
         }else{
             elem = gradioApp().querySelector('#tab_img2img');
             if(elem && elem.style.display === 'block'){
-                tabIndex = 1; // "img2img"
+                tabname = "img2img";
             }
         }
-        if(tabIndex === -1) return;
-        pcmCardPageDoUndoRedo(tabIndex, -1); // Redo
+        if(!tabname) return;
+        pcmCardPageDoUndoRedo(tabname, -1); // Redo
     }    
 });
 
-/** Ctrl + 数字キー 処理の初期化
- *   - リフレッシュボタンにカテゴリリストの更新処理追加
- *   - pcmCategoryFolders 初期化
- */
-pcmWaitForContent('#txt2img_promptcards_tree .tree-list-content-dir', async ()=>{
-    gradioApp().querySelector('#txt2img_promptcards_extra_refresh').addEventListener('click', (event)=>{
-        pcmCardPageRefreshCategoryList();
-    });
-    gradioApp().querySelector('#img2img_promptcards_extra_refresh').addEventListener('click', (event)=>{
-        pcmCardPageRefreshCategoryList();
-    });
-    pcmCardPageRefreshCategoryList();
-});
 
+/** dir tree util: search path -> フォルダ要素 (<li>), 無ければ null
+ *   - Clickable 要素は <li> 直下の ':scope > .tree-list-content'
+*/
+function pcmSearchPathToDirTreeElement(path, tabname){
+    // 各 <li> がノード, 属性 data-tree-entry-type="dir" がディレクトリタイプ
+    //   - 直下の '> .tree-list-content' が clickable 要素 
+    //   - 二つ下の '> span.tree-list-item-label' の textContent がノードの表示名 (trim() 必須)
+    const dirs = path.split('/');
+
+    let layer0 = gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li`);
+    if(!layer0) return null;
+
+    let tmpLayer = layer0;
+    let isFound = false;
+    for (const dir of dirs.slice(1)){ // root dir はスキップして子孫からチェック
+        isFound = false;
+        const nextLayers = tmpLayer.querySelectorAll(`:scope > ul > li[data-tree-entry-type="dir"]`);
+        for (const nextLayer of nextLayers){
+            if(nextLayer.querySelector(`:scope > .tree-list-content > span.tree-list-item-label`).textContent.trim() === dir){
+                tmpLayer = nextLayer;
+                isFound = true;
+                tmpLayer = nextLayer;
+                break;
+            }
+        }
+        if(!isFound) return null;
+    }
+    return tmpLayer;
+}
+
+/** dir tree util: フォルダ要素 (<li>) -> search path
+ *   - Clickable 要素は <li> 直下の ':scope > .tree-list-content'
+ *     + event から呼ぶときは event.target.parentElement を引数にすること
+*/
+function pcmDirTreeElementToSearchPath(elem){
+    try{
+        let tmpLayer = elem; // <li>
+        let ret = tmpLayer.querySelector(`:scope > .tree-list-content > span.tree-list-item-label`).textContent.trim();
+    
+        while(tmpLayer){
+            tmpLayer = tmpLayer.parentElement.parentElement; // <li>
+            if(tmpLayer.tagName !== 'LI') break;
+            ret = tmpLayer.querySelector(`:scope > .tree-list-content > span.tree-list-item-label`).textContent.trim() + '/' + ret;
+        }
+        return ret;
+    }catch(error){
+        PCM_DEBUG_PRINT(`pcmDirTreeElementToSearchPath error`, error);
+        PCM_DEBUG_PRINT(error.stack);
+        return "";
+    }
+}

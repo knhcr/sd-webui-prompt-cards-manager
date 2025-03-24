@@ -2,10 +2,6 @@
 class PcmCardSearch {
     static isInitialized = {"txt2img": false, "img2img": false};
 
-    static async initialize(){                
-        // この時点ではカード一覧が無いので、カード情報の初期化は初回の updateMatch() 呼び出し時に遅延して行う
-    }
-
     /** それぞれ {"org_name": card, ...}
      * t2i と i2i で elem 以外は同一の値のため無駄があるが、
      * a1111 標準の t2i と i2i のカード管理は独立していて、
@@ -309,7 +305,7 @@ class PcmCardSearch {
                 PcmCardSearch.tmpMatch[tabname].desc.includes(orgname));
         
         PCM_DEBUG_PRINT(`pcmCardSearch.updateDom ${tabname} : match: ${match.length}`);
-        PCM_DEBUG_PRINT(`pcmCardSearch.updateDom ${tabname} : match: ${match}`);
+        // PCM_DEBUG_PRINT(`pcmCardSearch.updateDom ${tabname} : match: ${match}`);
 
         try {
             // 基本いまあるカードは全部表示して、マッチしない物を非表示にする方針で処理
@@ -320,7 +316,7 @@ class PcmCardSearch {
                 if(nameElem){
                     const orgname = nameElem.getAttribute("orgname");
                     if(orgname){
-                        PCM_DEBUG_PRINT(`pcmCardSearch.updateDom ${tabname} : orgname: ${orgname}`);
+                        // PCM_DEBUG_PRINT(`pcmCardSearch.updateDom ${tabname} : orgname: ${orgname}`);
                         if (!match.includes(orgname)){
                             visible = false;
                         }
@@ -461,7 +457,7 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
     }
 
     // 現在選択中のフォルダの更新
-    pcmUpdateSelectedFolderHistory(tabname, event.target);
+    pcmUpdateSelectedFolderHistory(tabname, pcmDirTreeElementToSearchPath(event.target.parentElement));
 }
 
 /** subdir toggle callback */
@@ -544,15 +540,24 @@ pcmWaitForContent('#txt2img_promptcards_extra_refresh', ()=>{
     }
 });
 
-/** Extra Networks Tab Button Callback */
+/** Extra Networks の PromptCards タブボタン Callback */
 pcmWaitForContent('#txt2img_extra_tabs', async ()=>{
     await pcmSleepAsync(200);
     for (const tabname of ['txt2img', 'img2img']){
         let elem = pcmGetElementBySelectorAndText(`#${tabname}_extra_tabs button`, 'PromptCards');
         if(elem){
             elem.addEventListener('click', (event)=>{
-                if (!elem.classList.contains('selected')){
-                    PcmCardSearch.updateCards(tabname);
+                if (!elem.classList.contains('selected')){ // PromptCards タブの外から PromptCards タブに入ってくる場合
+                    // 初回だけカードリスト更新し、ルートノードを expand
+                    if (!PcmCardSearch.isInitialized[tabname]){
+                        PcmCardSearch.updateCards(tabname);
+                        // 一応現れるまで待つ
+                        pcmWaitForContent(`#${tabname}_promptcards_tree > ul > li`, ()=>{
+                            const rootElem = gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li > div`);
+                            if(!rootElem) return;
+                            rootElem.click();
+                        });
+                    }
                 }
             });
         }
