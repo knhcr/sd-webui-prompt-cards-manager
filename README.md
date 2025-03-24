@@ -26,7 +26,7 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/03/25
-  - Improved `Ctrl - <0-9>` shortcut key's behavior
+  - Improved `Ctrl - <0-9>` shortcut key's behavior ([keys](#keyboard-shortcut)).
   - bug fix
 
 * 2025/03/23
