@@ -298,9 +298,9 @@ class PromptCardInfoEditorUi:
         try:
             thumbs_name = filename_input.split("$")[0]
             card_info = {
-                'description': description,
-                'prompt': prompt,
-                'negative_prompt': negative_prompt,
+                'description': description.strip(),
+                'prompt': prompt.strip(),
+                'negative_prompt': negative_prompt.strip(),
                 'isReplace': isReplace,
                 'enableCnet': enableCnet,
                 'apply_resolution': apply_resolution,
