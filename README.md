@@ -25,6 +25,10 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/03/25
+  - Improved `Ctrl - <0-9>` shortcut key's behavior
+  - bug fix
+
 * 2025/03/23
   - Improved display style
   - Added two textboxes for card search (Prompt search and Description search).
@@ -133,7 +137,7 @@ Note that this extension does not have features to automatically generate prompt
 ![example](./docs/images/tree.png)
 
 ### Keyboard Shortcut
-  - `Ctrl + 1 ~ 9` : You can switch Category 1st to 9th from above listed in tree view.
+  - `Ctrl + 1 ~ 9` : You can switch Category 1st to 9th from above listed in tree view. By pressing continuously, you can traverse the subfolders of the target category.
   - `Ctrl + 0` / `Alt + 0` : You can Undo / Redo for Category switching.
 
 

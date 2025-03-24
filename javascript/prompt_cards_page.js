@@ -706,6 +706,8 @@ function pcmSearchPathToDirTreeElement(path, tabname){
     // 各 <li> がノード, 属性 data-tree-entry-type="dir" がディレクトリタイプ
     //   - 直下の '> .tree-list-content' が clickable 要素 
     //   - 二つ下の '> span.tree-list-item-label' の textContent がノードの表示名 (trim() 必須)
+    PCM_DEBUG_PRINT(`pcmSearchPathToDirTreeElement path: ${path}`);
+    if (path === null) return null;
     const dirs = path.split('/');
 
     let layer0 = gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li`);
