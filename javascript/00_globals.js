@@ -53,6 +53,21 @@ const pcmWaitForContent = (selector,cb)=>{
     }
 }
 
+/** 指定されたセレクタに一致する要素が存在するまで待機し、対象エレメントを返す。無ければnull
+ *  @param {string} selector セレクタ
+ *  @param {number} timeout 最大待機時間 (デフォルト2000ms, 0: 無限待機)
+ *  @return {Element} 対象エレメント
+*/
+const pcmQuerySelectorAsync = async (selector, timeout=2000)=>{
+    let content = gradioApp().querySelector(selector);
+    let wait_ms = 0;
+    while (!content && (timeout === 0 || wait_ms < timeout)){
+        await pcmSleepAsync(100);
+        wait_ms += 100;
+        content = gradioApp().querySelector(selector);
+    }
+    return content;
+}
 
 /** 要素を取得、無ければエラーメッセージを吐いてnullを返す */
 const pcmGetElement = (selector, base_elem = gradioApp(), suppressError = false) => {

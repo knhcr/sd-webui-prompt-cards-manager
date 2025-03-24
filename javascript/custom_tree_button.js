@@ -199,7 +199,7 @@ class PcmCardSearch {
      * @param {string} tabname "txt2img" or "img2img" or null (全てのタブ)
      * @param {boolean} force 前回マッチ時からクエリに変更が無くても再度マッチ処理するか (デフォルトfalse)
      */
-    static updateMatch(tabname, force=false){
+    static async updateMatch(tabname, force=false){
         let targetTabs = ["txt2img", "img2img"]
         if(tabname === null){
             // do nothing (全てのタブ)
@@ -211,7 +211,7 @@ class PcmCardSearch {
         }
 
         for (const tabname of targetTabs){
-            if(!PcmCardSearch.isInitialized[tabname]) PcmCardSearch.updateCards(tabname);
+            if(!PcmCardSearch.isInitialized[tabname]) await PcmCardSearch.updateCards(tabname);
 
             PcmCardSearch.#updateMatchPath(tabname, force);
             PcmCardSearch.#updateMatchPrompt(tabname, force);
@@ -457,7 +457,11 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
     }
 
     // 現在選択中のフォルダの更新
-    pcmUpdateSelectedFolderHistory(tabname, pcmDirTreeElementToSearchPath(event.target.parentElement));
+    let dirElem = null;
+    if (event.target.tagName === 'SPAN') dirElem = event.target.parentElement.parentElement;
+    else if (event.target.tagName === 'DIV') dirElem = event.target.parentElement;
+    else return; // ここには来ない
+    pcmUpdateSelectedFolderHistory(tabname, pcmDirTreeElementToSearchPath(dirElem));
 }
 
 /** subdir toggle callback */
@@ -544,25 +548,52 @@ pcmWaitForContent('#txt2img_promptcards_extra_refresh', ()=>{
 pcmWaitForContent('#txt2img_extra_tabs', async ()=>{
     await pcmSleepAsync(200);
     for (const tabname of ['txt2img', 'img2img']){
-        let elem = pcmGetElementBySelectorAndText(`#${tabname}_extra_tabs button`, 'PromptCards');
+        const elem = pcmGetElementBySelectorAndText(`#${tabname}_extra_tabs button`, 'PromptCards');
         if(elem){
-            elem.addEventListener('click', (event)=>{
+            elem.addEventListener('click', async (event)=>{
                 if (!elem.classList.contains('selected')){ // PromptCards タブの外から PromptCards タブに入ってくる場合
-                    // 初回だけカードリスト更新し、ルートノードを expand
+                    PCM_DEBUG_PRINT(`pcmPromptCardsOnClick: ${tabname} clicked.`);
                     if (!PcmCardSearch.isInitialized[tabname]){
-                        PcmCardSearch.updateCards(tabname);
-                        // 一応現れるまで待つ
-                        pcmWaitForContent(`#${tabname}_promptcards_tree > ul > li`, ()=>{
-                            const rootElem = gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li > div`);
-                            if(!rootElem) return;
-                            rootElem.click();
+                        PCM_DEBUG_PRINT(`pcmPromptCardsOnClick: ${tabname} : first time.`);
+                        // 初回はカードリスト更新し、ルートノードを expand
+                        await PcmCardSearch.updateCards(tabname);
+                        // 一応DOMに現れるまで待つ
+                        const rootElem = await pcmQuerySelectorAsync(`#${tabname}_promptcards_tree > ul > li > div`)
+                        if(!rootElem) return;
+                        rootElem.click();
+                        
+                        // 2回目以降のクリックでは、カードの hidden 属性が全て削除されるので DOM Update を行う処理を追加する
+                        //   - 別タブに移動すると、カレントのタブ要素 (button) は削除されて再生成される模様 (eventListner も属性も毎回消える)
+                        //   - 親要素のアイテム追加を mutationObserver で監視してその都度 イベントリスナーを張り付ける
+                        let o = new MutationObserver((ms)=>{
+                            const elem = pcmGetElementBySelectorAndText(`#${tabname}_extra_tabs button`, 'PromptCards');
+                            if(elem){
+                                // 初期化済みマークを付けて現在のDOM要素には既に event ハンドラが張られているか否かの目印とする
+                                if (!elem.hasAttribute('pcm-onclick-set')){
+                                    elem.toggleAttribute('pcm-onclick-set', true);
+                                    elem.addEventListener('click', async ()=>{
+                                        // どのタブか判定してDOM更新
+                                        for (const tabname of ['txt2img', 'img2img']){
+                                            const container = document.querySelector(`#${tabname}_extra_tabs > .tab-nav`);
+                                            if (container && container.contains(ms[0].target)){
+                                                PCM_DEBUG_PRINT(`pcmPromptCards Tab OnClick: ${tabname}`);
+                                                await pcmSleepAsync(200);
+                                                PcmCardSearch.updateDom(tabname);
+                                                return;
+                                            }
+                                        }
+                                    });
+                                }
+                            }
                         });
+                        o.observe(document.querySelector(`#${tabname}_extra_tabs > .tab-nav`), {childList: true, subtree: false});
                     }
                 }
             });
         }
     }
 });
+
 
 /** ツリービューのアイテムにタイトルをセット
  * @param {string} tabname "txt2img" or "img2img" or null (全てのタブ)

@@ -736,6 +736,7 @@ function pcmSearchPathToDirTreeElement(path, tabname){
 function pcmDirTreeElementToSearchPath(elem){
     try{
         let tmpLayer = elem; // <li>
+        PCM_DEBUG_PRINT(`pcmDirTreeElementToSearchPath tmpLayer.tagName: ${tmpLayer.tagName}`);
         let ret = tmpLayer.querySelector(`:scope > .tree-list-content > span.tree-list-item-label`).textContent.trim();
     
         while(tmpLayer){
