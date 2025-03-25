@@ -422,6 +422,12 @@ div:has(> .pcm_mini_gallery_subseed_input){
     margin-top: 2px;
 }
 
+/* subseed 非表示時の半透明化 */
+#pcm_mini_gallery_seed_row_subseed_column.unchecked,
+#pcm_mini_gallery_subseed_strength.unchecked{
+    opacity: 0.3;
+}
+
 /* -- cnet -- */
 #pcm_mini_gallery_cnet_group{
     margin-top: -2px;
