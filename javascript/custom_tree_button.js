@@ -91,8 +91,8 @@ class PcmCardSearch {
                 PCM_DEBUG_PRINT(`pcmCardSearch.clearQuery called`);
                 PcmCardSearch.clearQuery(tabname);
 
-                // ツリービューのアイテムにタイトルをセット
-                pcmTreeViewItemsSetTitle(tabname);
+                pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
+                pcmTreeViewSetLeafDirMark(tabname); // ツリービューの葉ノードにマークをセット
 
                 // 更新前にクエリがセットされていた場合は、再度クエリをセットしなおしてマッチ状態に適用
                 const tmpPath = tmpQuery.path;
@@ -391,6 +391,13 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
 
     function _expand_or_collapse(_ul, _btn) {
         // Expands <ul> if it is collapsed, collapses otherwise. Updates button attributes.
+        
+        // 葉ノードの場合何もしない
+        const li = _btn.closest('li.tree-list-item');
+        if (li.classList.contains('pcm-tree-view-leaf-dir')){
+            return;
+        }
+
         if (_ul.hasAttribute("hidden")) {
             _ul.removeAttribute("hidden");
             _btn.dataset.expanded = "";
@@ -600,16 +607,10 @@ pcmWaitForContent('#txt2img_extra_tabs', async ()=>{
 */
 pcmTreeViewItemsSetTitle = (tabname=null)=>{
     PCM_DEBUG_PRINT(`pcmTreeViewItemsSetTitle called : ${tabname}`);
-    let targetTabs = ["txt2img", "img2img"]
-    if(tabname === null){
-        // do nothing (全てのタブ)
-    }
-    else if (tabname === "txt2img"){
-        targetTabs = ["txt2img"];
-    }
-    else if (tabname === "img2img"){
-        targetTabs = ["img2img"];
-    }
+    let targetTabs = [];
+    if(tabname === null) targetTabs = ["txt2img", "img2img"];
+    else if (tabname === "txt2img") targetTabs = ["txt2img"];
+    else if (tabname === "img2img") targetTabs = ["img2img"];
 
     for (const tabname of targetTabs){
         const elems = gradioApp().querySelectorAll(`#${tabname}_promptcards_tree .tree-list-content.tree-list-content-dir`);
@@ -621,6 +622,36 @@ pcmTreeViewItemsSetTitle = (tabname=null)=>{
                 title = path.split('/').slice(-1)[0];
             }
             elem.setAttribute('title', title);
+        }
+    }
+}
+
+/** ツリービューの葉ノードにマークとして pcm-tree-view-leaf-dir class をセットし、chevron のクラスを tree-list-leaf-chevron に変更
+ * 
+ * @param {string} tabname "txt2img" or "img2img" or null (全てのタブ)
+*/
+pcmTreeViewSetLeafDirMark = (tabname=null)=>{
+    PCM_DEBUG_PRINT(`pcmTreeViewSetLeafDirMark called : ${tabname}`);
+    let targetTabs = [];
+    if(tabname === null) targetTabs = ["txt2img", "img2img"];
+    else if (tabname === "txt2img") targetTabs = ["txt2img"];
+    else if (tabname === "img2img") targetTabs = ["img2img"];
+
+    for (const tabname of targetTabs){
+        const elems = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_tree li.tree-list-item[data-tree-entry-type="dir"]`));
+        for (const elem of elems){
+            // 直下の ul > li に data-tree-entry-type="dir" があるか
+            const children = Array.from(elem.querySelectorAll(':scope > ul > li[data-tree-entry-type="dir"]'));
+            let hasChildren = true;
+            if(children.length === 0) hasChildren = false;
+            elem.classList.toggle('pcm-tree-view-leaf-dir', !hasChildren);
+            if(!hasChildren){
+                const chevron = elem.querySelector('i.tree-list-item-action-chevron');
+                if(chevron){
+                    chevron.classList.add('tree-list-leaf-chevron');
+                    chevron.classList.remove('tree-list-item-action-chevron');
+                }
+            }
         }
     }
 }

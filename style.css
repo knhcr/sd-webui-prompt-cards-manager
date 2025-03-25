@@ -304,6 +304,11 @@
     display: none;
 }
 
+/* 葉ノードのマーク */
+.tree-list-leaf-chevron{
+    margin-right:9px;
+}
+
 /* ツリービューの幅 */
 #txt2img_promptcards_tree{
     /*min-width: 260px;
