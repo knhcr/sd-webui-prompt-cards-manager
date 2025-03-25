@@ -27,6 +27,42 @@ class MiniGallery:
             }
         """),
 
+        # Seed : Mini Gallery -> Default Gallery
+        "seed": Template("""
+            function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                pcmUpdateDefaultGallerySeed(inputs[0]);
+                return inputs;
+            }
+        """),
+
+        # Seed Extra Checkbox : Mini Gallery -> Default Gallery
+        "seed_extra_cb": Template("""
+            function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                pcmUpdateDefaultGallerySeedExtraCb(inputs[0]);
+                return inputs;
+            }
+        """),
+
+        # V.Seed : Mini Gallery -> Default Gallery
+        "subseed": Template("""
+            function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                pcmUpdateDefaultGallerySeedExtra(inputs[0]);
+                return inputs;
+            }
+        """),
+
+        # V.Seed Strength : Mini Gallery -> Default Gallery
+        "subseed_strength": Template("""
+            function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                pcmUpdateDefaultGallerySeedExtraStrength(inputs[0]);
+                return inputs;
+            }
+        """),
+
         # CNet Enabled : Mini Gallery -> CNet Unit 0 
         "cnet_enabled": Template("""
             async function(...args){
@@ -91,12 +127,12 @@ class MiniGallery:
                             with gr.Row(elem_id="pcm_mini_gallery_seed_row_seed_column_row"):
                                 self.seed_input = gr.Number(label="Seed", value=-1, elem_id="pcm_mini_gallery_seed_input", elem_classes="pcm_mini_gallery_seed_input")
                                 self.seed_rnd = gr.Button(value="🎲", elem_id="pcm_mini_gallery_seed_rnd", elem_classes="pcm_mini_gallery_seed_btn")
-                                self.seed_prev = gr.Button(value="♻️", elem_id="pcm_mini_gallery_seed_prev", elem_classes="pcm_mini_gallery_seed_btn")
+                                self.seed_reuse = gr.Button(value="♻️", elem_id="pcm_mini_gallery_seed_reuse", elem_classes="pcm_mini_gallery_seed_btn")
                         with gr.Column(elem_id="pcm_mini_gallery_seed_row_subseed_column"):
                             with gr.Row(elem_id="pcm_mini_gallery_seed_row_subseed_column_row"):
                                 self.subseed_input = gr.Number(label="V.seed", value=-1, elem_id="pcm_mini_gallery_subseed_input", elem_classes="pcm_mini_gallery_seed_input")
                                 self.subseed_rnd = gr.Button(value="🎲", elem_id="pcm_mini_gallery_subseed_rnd", elem_classes="pcm_mini_gallery_seed_btn")
-                                self.subseed_prev = gr.Button(value="♻️", elem_id="pcm_mini_gallery_subseed_prev", elem_classes="pcm_mini_gallery_seed_btn")
+                                self.subseed_reuse = gr.Button(value="♻️", elem_id="pcm_mini_gallery_subseed_reuse", elem_classes="pcm_mini_gallery_seed_btn")
                     with gr.Row(elem_id="pcm_mini_gallery_subseed_row2"):
                         self.subseed_checkbox = gr.Checkbox(label="Extra", elem_id="pcm_mini_gallery_subseed_checkbox")
                         self.subseed_strength = gr.Slider(label="V.strength", elem_id="pcm_mini_gallery_subseed_strength",
@@ -152,6 +188,48 @@ class MiniGallery:
             inputs = height_slider_inputs,
             outputs = [],
             _js = MiniGallery._js_pipelines['height_slider'].substitute(num_inputs=len(width_slider_inputs)),
+        )
+
+        # Generation タブの Seed 更新
+        seed_inputs = [self.seed_input]
+        self.seed_input.change(
+            fn=lambda x: x,
+            inputs = seed_inputs,
+            outputs = [],
+            _js = MiniGallery._js_pipelines['seed'].substitute(num_inputs=len(seed_inputs)),
+        )
+
+        # Generation タブの Seed Extra Checkbox 更新
+        seed_extra_cb_inputs = [self.subseed_checkbox]
+        self.subseed_checkbox.change(
+            fn=lambda x: x,
+            inputs = seed_extra_cb_inputs,
+            outputs = [],
+            _js = MiniGallery._js_pipelines['seed_extra_cb'].substitute(num_inputs=len(seed_extra_cb_inputs)),
+        )
+
+        # Generation タブの V.Seed 更新
+        subseed_inputs = [self.subseed_input]
+        self.subseed_input.change(
+            fn=lambda x: x,
+            inputs = subseed_inputs,
+            outputs = [],
+            _js = MiniGallery._js_pipelines['subseed'].substitute(num_inputs=len(subseed_inputs)),
+        )
+
+        # Generation タブの V.Seed Strength 更新
+        subseed_strength_inputs = [self.subseed_strength]
+        self.subseed_strength.change(
+            fn=lambda x: x,
+            inputs = subseed_strength_inputs,
+            outputs = [],
+            _js = MiniGallery._js_pipelines['subseed_strength'].substitute(num_inputs=len(subseed_strength_inputs)),
+        )
+        self.subseed_strength.release(
+            fn=lambda x: x,
+            inputs = subseed_strength_inputs,
+            outputs = [],
+            _js = MiniGallery._js_pipelines['subseed_strength'].substitute(num_inputs=len(subseed_strength_inputs)),
         )
 
         # Generation タブの CNet Unit 0 の cnet_enabled 更新
