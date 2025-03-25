@@ -83,7 +83,25 @@ class MiniGallery:
                     with gr.Column(scale=1, elem_id="pcm_mini_gallery_resolution_button_column"):
                         self.switch_btn = gr.Button(value="⇅", elem_id="pcm_mini_gallery_switch_btn",
                                                     variant="secondary", width=35, min_width=30)
-                    
+            
+            with gr.Group(elem_id="pcm_mini_gallery_seed_group"):
+                with gr.Column(scale=1, elem_id="pcm_mini_gallery_seed_column"):
+                    with gr.Row(elem_id="pcm_mini_gallery_seed_row"):
+                        with gr.Column(elem_id="pcm_mini_gallery_seed_row_seed_column"):
+                            with gr.Row(elem_id="pcm_mini_gallery_seed_row_seed_column_row"):
+                                self.seed_input = gr.Number(label="Seed", value=-1, elem_id="pcm_mini_gallery_seed_input", elem_classes="pcm_mini_gallery_seed_input")
+                                self.seed_rnd = gr.Button(value="🎲", elem_id="pcm_mini_gallery_seed_rnd", elem_classes="pcm_mini_gallery_seed_btn")
+                                self.seed_prev = gr.Button(value="♻️", elem_id="pcm_mini_gallery_seed_prev", elem_classes="pcm_mini_gallery_seed_btn")
+                        with gr.Column(elem_id="pcm_mini_gallery_seed_row_subseed_column"):
+                            with gr.Row(elem_id="pcm_mini_gallery_seed_row_subseed_column_row"):
+                                self.subseed_input = gr.Number(label="V.seed", value=-1, elem_id="pcm_mini_gallery_subseed_input", elem_classes="pcm_mini_gallery_seed_input")
+                                self.subseed_rnd = gr.Button(value="🎲", elem_id="pcm_mini_gallery_subseed_rnd", elem_classes="pcm_mini_gallery_seed_btn")
+                                self.subseed_prev = gr.Button(value="♻️", elem_id="pcm_mini_gallery_subseed_prev", elem_classes="pcm_mini_gallery_seed_btn")
+                    with gr.Row(elem_id="pcm_mini_gallery_subseed_row2"):
+                        self.subseed_checkbox = gr.Checkbox(label="Extra", elem_id="pcm_mini_gallery_subseed_checkbox")
+                        self.subseed_strength = gr.Slider(label="V.strength", elem_id="pcm_mini_gallery_subseed_strength",
+                                                          minimum=0.0, maximum=1.0, step=0.01, value=0.0)
+
             with gr.Group(elem_id="pcm_mini_gallery_cnet_group"):
                 self.cnet_enabled = gr.Checkbox(label="t2i CNet Unit 0 Enabled", elem_id="pcm_mini_gallery_cnet_enabled",
                                                value=False, interactive=True)

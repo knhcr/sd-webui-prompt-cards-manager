@@ -316,7 +316,23 @@
 /* ---------------------------------------------------- */
 /* Mini Gallery */
 #pcm_mini_gallery_column{
-    gap: 10px;
+    gap: 9px;
+}
+
+/* -- resolution -- */
+/* slider */
+#pcm_mini_gallery_width{
+    margin-top: 4px;
+}
+#pcm_mini_gallery_height{
+    margin-top: -5px;
+}
+
+/* slider */
+#pcm_mini_gallery_width label,
+#pcm_mini_gallery_height label{
+    margin-bottom: -7px;
+    margin-top: 2px;
 }
 
 #pcm_mini_gallery_resolution_row{
@@ -342,14 +358,86 @@
     transform: translateY(-50%);
 }
 
-/*#pcm_mini_gallery_width,#pcm_mini_gallery_height,*/
+/* -- subseed -- */
+#pcm_mini_gallery_seed_group{
+    margin-top: -2px;
+    margin-bottom: -7px;
+}
+
+#pcm_mini_gallery_seed_row > div,
+#pcm_mini_gallery_subseed_row > div{
+    min-width: 0 !important;
+}
+
+/* subseed 入力ボックス */
+div:has(> .pcm_mini_gallery_seed_input),
+div:has(> .pcm_mini_gallery_subseed_input){
+    flex: none !important;
+    min-width: 0 !important;
+    width: 90px;
+}
+
+/* subseed 入力ボックス */
+.pcm_mini_gallery_seed_input input {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
+
+/* subseed ボタンのサイズ */
+.pcm_mini_gallery_seed_btn{
+    flex: none!important;
+    width: 25px;
+    min-width: 0!important;
+    height: 30px;
+    border-radius: 6px!important;
+    padding-left: 1px!important;
+    padding-right: 1px!important;
+    padding-top: 1px!important;
+    padding-bottom: 1px!important;
+    margin-top: 13px!important;
+    margin-left: 3px!important;
+}
+
+/* subseed 下段 */
+#pcm_mini_gallery_subseed_row2 > div{
+    min-width: 0 !important;
+}
+
+#pcm_mini_gallery_subseed_checkbox{
+    min-width: 0!important;
+    padding-left:95px!important;
+    padding-top:5px!important;
+}
+
+/* slider */
+#pcm_mini_gallery_subseed_strength {
+    margin-top: 3px;
+}
+
+/* slider */
+#pcm_mini_gallery_subseed_strength label{
+    margin-bottom: -7px;
+    margin-top: 2px;
+}
+
+/* -- cnet -- */
+#pcm_mini_gallery_cnet_group{
+    margin-top: -2px;
+    margin-bottom: -7px;
+}
+
 #pcm_mini_gallery_cnet_weight, #pcm_mini_gallery_cnet_end_step{
     min-width: 0 !important;
 }
 
-#pcm_mini_gallery_cnet_group{
-    margin-top: -8px;
+/* slider */
+#pcm_mini_gallery_cnet_weight label, #pcm_mini_gallery_cnet_end_step label{
+    margin-bottom: -7px;
+    margin-top: 2px;
 }
+
 
 /*--------------------------------------*/
 /* control belt */
