@@ -16,6 +16,29 @@ const pcmGetGradioComponentByElemId = (elem_id) => {
     return window.gradio_config.components.find(c => c.props && c.props.elem_id === elem_id);
 }
 
+/** opts.<キー名> の値を取得 (OnUiLoaded のタイミングが早いため、設定値の初期化を待つ場合に用いる)
+ *  @param {string} key キー名
+ *  @return {any} 値
+ *  @param {number} timeout 最大待機時間 (デフォルト2000ms, 0: 無限待機)
+ */
+const pcmGetOptValueAsync = async (key, timeout=2000) => {
+    let time = 0;
+    let ret = undefined;
+    while(time < timeout){
+        ret = opts[key];
+        if (ret !== undefined) break;
+        await pcmSleepAsync(100);
+        time += 100;
+    }
+    if (time >= timeout){
+        console.error(`pcmGetOptValueAsync timeout: ${key}`);
+        return null;
+    }
+
+    PCM_DEBUG_PRINT(`pcmGetOptValueAsync: ${key} ${ret}`);
+    return ret;
+}
+
 
 /** elem_id から Gradio のコンポーネントオブジェクトを取得
  *  全てのオブジェクトを配列で返す

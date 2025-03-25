@@ -289,7 +289,7 @@ async function pcmDropImageToCnet(dataUri, index = 0, tabname = "txt2img", is_ma
  */
 async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", is_mask = false){
     const cnetModel = opts.prompt_cards_manager_default_controlnet_models;
-    const cnetPreprocessor = opts.prompt_cards_manager_default_controlnet_preprocessor; // [TODO]
+    const cnetPreprocessor = opts.prompt_cards_manager_default_controlnet_preprocessor;
     const controlWeight = opts.prompt_cards_manager_default_controlnet_weight;
     const startingControlStep = opts.prompt_card_manager_default_controlnet_starting_control_step;
     const endingControlStep = opts.prompt_cards_manager_default_controlnet_ending_control_step;

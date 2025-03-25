@@ -2,7 +2,6 @@ import os
 import gradio as gr
 from urllib.parse import unquote
 from modules import script_callbacks
-from modules import shared
 from scripts.pcm.constants import DEBUG_PRINT
 from string import Template
 

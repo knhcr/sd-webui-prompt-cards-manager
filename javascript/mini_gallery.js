@@ -1,18 +1,26 @@
 /** Mini Gallery の初期化 */
 async function pcmSetupMiniGallery(){
-    // ミニギャラリーが非表示になっている場合は非表示にして終了
-    const isShow = await pcmGetMiniGalleryIsShow();
-    if (!isShow) {
-        const galleryColumn = gradioApp().querySelector('#pcm_mini_gallery_column');
-        if (galleryColumn) galleryColumn.parentElement.parentElement.style.display = 'none';
-        return;
-    }
+    // Settings の取得
+    const [isShowImage, isShowResolution, isShowSeed, isShowCnet] = await Promise.all([
+        pcmGetOptValueAsync('prompt_cards_manager_gallery_show_image'),
+        pcmGetOptValueAsync('prompt_cards_manager_gallery_show_resolution'),
+        pcmGetOptValueAsync('prompt_cards_manager_gallery_show_seed'),
+        pcmGetOptValueAsync('prompt_cards_manager_gallery_show_cnet_values')
+    ]);
 
-    // ミニギャラリー Show Cnet が False になっている場合
-    const isShowCnet = opts.prompt_cards_manager_show_cnet_values_in_mini_gallery;
-    if (!isShowCnet){
-        const cnetGroup = gradioApp().querySelector('#pcm_mini_gallery_cnet_group');
-        if (cnetGroup) cnetGroup.style.display = 'none';
+    const top_container = gradioApp().querySelector('#pcm_mini_gallery_column'); // ミニギャラリー全体
+    const container_image = gradioApp().querySelector('#pcm_mini_gallery'); // 画像
+    const container_resolution = gradioApp().querySelector('#pcm_mini_gallery_resolution_group'); // 解像度
+    const container_seed = gradioApp().querySelector('#pcm_mini_gallery_seed_group'); // シード
+    const container_cnet = gradioApp().querySelector('#pcm_mini_gallery_cnet_group'); // ControlNet
+
+    if([!isShowImage, !isShowResolution, !isShowSeed, !isShowCnet].every(Boolean)){
+        if (top_container) top_container.style.display = 'none';
+    }else{
+        if (!isShowImage && container_image) container_image.style.display = 'none';
+        if (!isShowResolution && container_resolution) container_resolution.style.display = 'none';
+        if (!isShowSeed && container_seed) container_seed.style.display = 'none';
+        if (!isShowCnet && container_cnet) container_cnet.style.display = 'none';
     }
 
     document.querySelector("#pcm_mini_gallery_switch_btn").setAttribute("title", "Switch width/height");
@@ -125,7 +133,7 @@ async function pcmSetupMiniGallery(){
     const seedRandomBtn = gradioApp().querySelector('#txt2img_seed_row button#txt2img_random_seed');
     if (seedRandomBtn){
         seedRandomBtn.addEventListener('click', async (e)=>{
-            await pcmSleepAsync(100);
+            await pcmSleepAsync(50);
             pcmUpdateMiniGalleryControlValues({update_seed: true});
         });
     }
@@ -134,7 +142,7 @@ async function pcmSetupMiniGallery(){
     const seedReuseBtn = gradioApp().querySelector('#txt2img_seed_row button#txt2img_reuse_seed');
     if (seedReuseBtn){
         seedReuseBtn.addEventListener('click', async (e)=>{
-            await pcmSleepAsync(100);
+            await pcmSleepAsync(50);
             pcmUpdateMiniGalleryControlValues({update_seed: true});
         });
     }
@@ -143,7 +151,7 @@ async function pcmSetupMiniGallery(){
     const seedExtraRandomBtn = gradioApp().querySelector('#txt2img_seed_extras button#txt2img_random_subseed');
     if (seedExtraRandomBtn){
         seedExtraRandomBtn.addEventListener('click', async (e)=>{
-            await pcmSleepAsync(100);
+            await pcmSleepAsync(50);
             pcmUpdateMiniGalleryControlValues({update_seed_extra: true});
         });
     }
@@ -152,24 +160,10 @@ async function pcmSetupMiniGallery(){
     const seedExtraReuseBtn = gradioApp().querySelector('#txt2img_seed_extras button#txt2img_reuse_subseed');
     if (seedExtraReuseBtn){
         seedExtraReuseBtn.addEventListener('click', async (e)=>{
-            await pcmSleepAsync(100);
+            await pcmSleepAsync(50);
             pcmUpdateMiniGalleryControlValues({update_seed_extra: true});
         });
     }
-}
-
-/** OnUiLoaded のタイミングはかなり早いので Settings の初期化が完了するまで待機して結果を返す */
-async function pcmGetMiniGalleryIsShow(){
-    if (opts.prompt_cards_manager_show_mini_gallery === undefined) {
-        for (let i = 0; i < 50; i++){
-            await pcmSleepAsync(100);
-            if (opts.prompt_cards_manager_show_mini_gallery !== undefined){
-                break;
-            }
-        }
-    }
-    PCM_DEBUG_PRINT(`pcmIsMiniGalleryShowOption: prompt_cards_manager_show_mini_gallery ${opts.prompt_cards_manager_show_mini_gallery}`);
-    return opts.prompt_cards_manager_show_mini_gallery;
 }
 
 /** 画像生成を監視して Mini Gallery に画像を転送 */
@@ -446,40 +440,47 @@ function pcmRegisterGenerationConditionsCallbacks(){
     }); 
    
     // CNet
-    const isShowCnet = opts.prompt_cards_manager_show_cnet_values_in_mini_gallery;
-    if (isShowCnet){
-        // CNet Enabled
-        if (cnet_enabled_dg){
-            cnet_enabled_dg.addEventListener('change', (e)=>{
-                pcmUpdateMiniGalleryControlValues({update_cnet_enabled: true});
-            });
-        }
+    //  - CNet Enabled
+    if (cnet_enabled_dg){
+        cnet_enabled_dg.addEventListener('change', (e)=>{
+            pcmUpdateMiniGalleryControlValues({update_cnet_enabled: true});
+        });
+    }
 
-        // CNet Weight (Number box)
-        if (cnet_weight_dg_num){
-            cnet_weight_dg_num.addEventListener('change', (e)=>{
-                pcmUpdateMiniGalleryControlValues({update_cnet_weight: true});
-            });
-        }
+    //  - CNet Weight (Number box)
+    if (cnet_weight_dg_num){
+        cnet_weight_dg_num.addEventListener('change', (e)=>{
+            pcmUpdateMiniGalleryControlValues({update_cnet_weight: true});
+        });
+    }
 
-        // CNet Weight (Range slider)
-        if (cnet_weight_dg_range){
-            cnet_weight_dg_range.addEventListener('change', (e)=>{
-                pcmUpdateMiniGalleryControlValues({update_cnet_weight: true});
-            });
-        }
+    //  - CNet Weight (Range slider)
+    if (cnet_weight_dg_range){
+        cnet_weight_dg_range.addEventListener('change', (e)=>{
+            pcmUpdateMiniGalleryControlValues({update_cnet_weight: true});
+        });
+    }
 
-        // CNet End Step (Number box)
-        if (cnet_end_step_dg_num){
-            cnet_end_step_dg_num.addEventListener('change', (e)=>{
-                pcmUpdateMiniGalleryControlValues({update_cnet_end_step: true});
-            });
-        }
+    //  - CNet End Step (Number box)
+    if (cnet_end_step_dg_num){
+        cnet_end_step_dg_num.addEventListener('change', (e)=>{
+            pcmUpdateMiniGalleryControlValues({update_cnet_end_step: true});
+        });
+    }
 
-        // CNet End Step (Range slider)
-        if (cnet_end_step_dg_range){
-            cnet_end_step_dg_range.addEventListener('change', (e)=>{
-                pcmUpdateMiniGalleryControlValues({update_cnet_end_step: true});
+    //  - CNet End Step (Range slider)
+    if (cnet_end_step_dg_range){
+        cnet_end_step_dg_range.addEventListener('change', (e)=>{
+            pcmUpdateMiniGalleryControlValues({update_cnet_end_step: true});
+        });
+    }
+
+    // Seed/Subseed random/reuse button
+    for (const btn of [seed_dg_rnd_btn, seed_dg_reuse_btn, seed_dg_extra_rnd_btn, seed_dg_extra_reuse_btn]){
+        if (btn){
+            btn.addEventListener('click', async (e)=>{
+                await pcmSleepAsync(175); // reuse はかなり遅めに反映されるため少し待つ必要あり
+                pcmUpdateMiniGalleryControlValues({update_seed: true});
             });
         }
     }
@@ -585,46 +586,41 @@ function pcmUpdateMiniGalleryControlValues({
     }
  
     // CNet
-    const isShowCnet = opts.prompt_cards_manager_show_cnet_values_in_mini_gallery;
-    if (isShowCnet){
-        // CNet Enabled
-        if (update_cnet_enabled){
-            const cnet_enabled = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_enable_checkbox");
-            if(cnet_enabled){
-                const cnet_enabled_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_enabled input[type="checkbox"]');
-                if(cnet_enabled_mg){
-                    if (cnet_enabled.props.value !== cnet_enabled_mg.checked){
-                        cnet_enabled_mg.checked = cnet_enabled.props.value;
-                        updateInput(cnet_enabled_mg);
-                    }
+    //  - CNet Enabled
+    if (update_cnet_enabled){
+        const cnet_enabled = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_enable_checkbox");
+        if(cnet_enabled){
+            const cnet_enabled_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_enabled input[type="checkbox"]');
+            if(cnet_enabled_mg){
+                if (cnet_enabled.props.value !== cnet_enabled_mg.checked){
+                    cnet_enabled_mg.checked = cnet_enabled.props.value;
+                    updateInput(cnet_enabled_mg);
                 }
             }
         }
-
-        // CNet Weight
-        if (update_cnet_weight){
-            const cnet_weight = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_control_weight_slider");
-            if(cnet_weight){
-                const cnet_weight_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_weight input[type="number"]');
-                if(cnet_weight_mg){
-                    if (cnet_weight.props.value !== cnet_weight_mg.value){
-                        cnet_weight_mg.value = cnet_weight.props.value;
-                        updateInput(cnet_weight_mg);
-                    }
+    }
+    //  - CNet Weight
+    if (update_cnet_weight){
+        const cnet_weight = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_control_weight_slider");
+        if(cnet_weight){
+            const cnet_weight_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_weight input[type="number"]');
+            if(cnet_weight_mg){
+                if (cnet_weight.props.value !== cnet_weight_mg.value){
+                    cnet_weight_mg.value = cnet_weight.props.value;
+                    updateInput(cnet_weight_mg);
                 }
             }
-        }   
-
-        // CNet End Step
-        if (update_cnet_end_step){
-            const cnet_end_step = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_ending_control_step_slider");
-            if(cnet_end_step){
-                const cnet_end_step_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_end_step input[type="number"]');
-                if(cnet_end_step_mg){
-                    if (cnet_end_step.props.value !== cnet_end_step_mg.value){
-                        cnet_end_step_mg.value = cnet_end_step.props.value;
-                        updateInput(cnet_end_step_mg);
-                    }
+        }
+    }   
+    //  - CNet End Step
+    if (update_cnet_end_step){
+        const cnet_end_step = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_ending_control_step_slider");
+        if(cnet_end_step){
+            const cnet_end_step_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_end_step input[type="number"]');
+            if(cnet_end_step_mg){
+                if (cnet_end_step.props.value !== cnet_end_step_mg.value){
+                    cnet_end_step_mg.value = cnet_end_step.props.value;
+                    updateInput(cnet_end_step_mg);
                 }
             }
         }

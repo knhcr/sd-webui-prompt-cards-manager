@@ -7,16 +7,28 @@ def on_ui_settings():
     section = ("prompt_cards_manager", "Prompt Cards Manager")
 
     # show mini gallery (needs reload ui)
-    shared.opts.add_option("prompt_cards_manager_show_mini_gallery", shared.OptionInfo(
-        True, "Mini Gallery : Enable (Completely disapper Mini Gallery)",
+    shared.opts.add_option("prompt_cards_manager_gallery_show_image", shared.OptionInfo(
+        True, "Mini Gallery : Show Image Gallery",
         section=section
-    ).needs_restart())
+    ))
 
-    # show cnet values in mini gallery
-    shared.opts.add_option("prompt_cards_manager_show_cnet_values_in_mini_gallery", shared.OptionInfo(
+    # show mini gallery resolution
+    shared.opts.add_option("prompt_cards_manager_gallery_show_resolution", shared.OptionInfo(
+        True, "Mini Gallery : Show Resolution",
+        section=section
+    ))
+
+    # show mini gallery seed
+    shared.opts.add_option("prompt_cards_manager_gallery_show_seed", shared.OptionInfo(
+        True, "Mini Gallery : Show Seed",
+        section=section
+    ))
+
+    # show mini gallery cnet values
+    shared.opts.add_option("prompt_cards_manager_gallery_show_cnet_values", shared.OptionInfo(
         True, "Mini Gallery : Show ControlNet Parameters",
         section=section
-    ).needs_restart())
+    ))
 
     # ignore dot starts
     shared.opts.add_option("prompt_cards_manager_ignore_dot_starts", shared.OptionInfo(
