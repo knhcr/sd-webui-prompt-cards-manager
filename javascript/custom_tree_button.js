@@ -389,8 +389,21 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
     // We use this to detect if the chevron was clicked.
     var true_targ = event.target;
 
-    function _expand_or_collapse(_ul, _btn) {
+    function _expand_or_collapse(_ul, _btn, _tabname) {
         // Expands <ul> if it is collapsed, collapses otherwise. Updates button attributes.
+
+        // ルートノードが閉じていれば問答無用で開く
+        const rootElem = gradioApp().querySelector(`#${_tabname}_promptcards_tree > ul > li`);
+        const rootUL = rootElem.querySelector('ul');
+        PCM_DEBUG_PRINT(`!! called:`);
+        if (rootUL.hasAttribute("hidden")){
+            PCM_DEBUG_PRINT(`!! Root Element is hidden.`);
+            if(_ul !== rootUL){
+                PCM_DEBUG_PRINT(`!! called.`);
+                rootElem.querySelector(':scope > div.tree-list-content').dataset.expanded = "";
+                rootUL.removeAttribute("hidden");
+            }
+        }
         
         // 葉ノードの場合何もしない
         const li = _btn.closest('li.tree-list-item');
@@ -440,24 +453,36 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
         PcmCardSearch.updateQuery(_tabname, "path", _search_text, true); // クエリを更新し、マッチ結果も更新
     }
 
+    // オリジナル条件は複雑すぎて意味不明
     // If user clicks on the chevron, then we do not select the folder.
     if (true_targ.matches(".tree-list-item-action--leading, .tree-list-item-action-chevron")) {
-        _expand_or_collapse(ul, btn);
+        _expand_or_collapse(ul, btn, tabname);
     } else {
         // User clicked anywhere else on the button.
         if ("selected" in btn.dataset && !(ul.hasAttribute("hidden"))) {
             // If folder is select and open, collapse and deselect button.
-            _expand_or_collapse(ul, btn);
+            _expand_or_collapse(ul, btn, tabname);
             //delete btn.dataset.selected;
             //_update_search(tabname, extra_networks_tabname, "");
         } else if (!(!("selected" in btn.dataset) && !(ul.hasAttribute("hidden")))) {
             // If folder is open and not selected, then we don't collapse; just select.
             // NOTE: Double inversion sucks but it is the clearest way to show the branching here.
-            _expand_or_collapse(ul, btn);
+            _expand_or_collapse(ul, btn, tabname);
             _select_button(btn, tabname, extra_networks_tabname);
             _update_search(tabname, extra_networks_tabname, btn.dataset.path);
         } else {
             // All other cases, just select the button.
+            PCM_DEBUG_PRINT(`!! called Fall through`);
+            
+            // 詳しい条件不明だが、途中でルートノードを閉じた場合に、数字キーで内部をクリックすると、一回目は必ずここに来る
+            // ルートノードが collapse してる場合はここで開く必要あり
+            if(gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li > ul`).hasAttribute("hidden")){
+                _expand_or_collapse(
+                    gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li > ul`),
+                    gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li > div`),
+                    tabname);
+            }
+            
             _select_button(btn, tabname, extra_networks_tabname);
             _update_search(tabname, extra_networks_tabname, btn.dataset.path);
         }
