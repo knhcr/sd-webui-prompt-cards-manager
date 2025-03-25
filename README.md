@@ -26,6 +26,7 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/03/25
+  - Added Seed Controller to Mini Gallery. Now you can select hide or show for each controls.
   - Improved `Ctrl - <0-9>` shortcut key's behavior ([keys](#keyboard-shortcut)).
   - bug fix
 
@@ -154,7 +155,7 @@ Note that this extension does not have features to automatically generate prompt
 
 ### Mini Gallery
   - At the right side of prompt textarea, you can always see a small gallery which shows the image generation result.
-  - The resolution sliders and CNet checkbox is syncronized with those of Generation tab.
+  - All of the values are syncronized with those of Generation tab.
   - If you don't need this gallery, uncheck `Settings` > `Show Mini Gallery` option.
 
 ![MiniGellery](./docs/images/mini%20gallery.png)
