@@ -28,6 +28,7 @@ Note that this extension does not have features to automatically generate prompt
 * 2025/03/25
   - Added Seed Controller to Mini Gallery. Now you can select hide or show for each controls.
   - Improved `Ctrl - <0-9>` shortcut key's behavior ([keys](#keyboard-shortcut)).
+  - Improved directory tree view's appearance
   - bug fix
 
 * 2025/03/23
