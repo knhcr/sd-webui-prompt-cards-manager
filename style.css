@@ -319,6 +319,14 @@
     gap: 9px;
 }
 
+#pcm_mini_gallery_resolution_group,
+#pcm_mini_gallery_seed_group
+{
+    border-bottom-width: 1px !important;
+    border-radius: 0px; 
+    border-color: rgb(55,65,81);
+}
+
 /* -- resolution -- */
 /* slider */
 #pcm_mini_gallery_width{
