@@ -23,7 +23,7 @@ async function pcmSetupMiniGallery(){
         if (!isShowCnet && container_cnet) container_cnet.style.display = 'none';
     }
 
-    document.querySelector("#pcm_mini_gallery_switch_btn").setAttribute("title", "Switch width/height");
+    gradioApp().querySelector("#pcm_mini_gallery_switch_btn").setAttribute("title", "Switch width/height");
 
     // 初期値の同期
     pcmUpdateMiniGalleryControlValues({update_width: true, update_height: true});
