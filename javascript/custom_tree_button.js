@@ -48,15 +48,34 @@ class PcmCardSearch {
      * @param {string} tabname "txt2img" or "img2img" or null (全てのタブ)
     */
     static async updateCards(tabname=null){
-        let targetTabs = ["txt2img", "img2img"]
-        if(tabname === null){
-            // do nothing (全てのタブ)
-        }
-        else if (tabname === "txt2img"){
-            targetTabs = ["txt2img"];
-        }
+        let targetTabs = []
+        if(tabname === null) targetTabs = ["txt2img", "img2img"];
+        else if(tabname === "txt2img") targetTabs = ["txt2img"];
+        else if(tabname === "img2img") targetTabs = ["img2img"];
 
         for (const tabname of targetTabs){
+            // a1111 によってカードの DOM が全削除されてから追加されるのを裏で監視
+            const pDomUpadated = new Promise((resolve, reject) => {
+                const obs = new MutationObserver(async (ms, o) => {
+                    for(const m of ms){
+                        if( m.type === "childList" && m.addedNodes.length > 0 ){ // card が追加されたらその時点で終了
+                            PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} DOM Updated`);
+                            await pcmSleepAsync(150); // 念のため少し待つ
+                            o.disconnect();
+                            resolve();
+                            return;
+                        }
+                    }
+                    return; // 外れだった場合解決しない
+                });
+                // タイムアウトを設定しておく
+                setTimeout(() => {
+                    obs.disconnect();
+                    reject(new Error("a1111 DOM update timeout"));
+                }, 10000); // timeout 10秒
+                obs.observe(gradioApp().querySelector(`#${tabname}_promptcards_cards`), {childList: true});
+            });
+    
             PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} called, isInitialized: ${PcmCardSearch.isInitialized[tabname]}`);
             if(!PcmCardSearch.isInitialized[tabname]) PcmCardSearch.isInitialized[tabname] = true;
             try {
@@ -129,11 +148,11 @@ class PcmCardSearch {
                         PcmCardSearch.updateQuery(tabname, "prompt", tmpQuery.prompt.join(" "), false);
                         PcmCardSearch.updateQuery(tabname, "desc", tmpQuery.desc.join(" "), false);
                         PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: previous query : prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
-                        
-                        await pcmSleepAsync(300); // a1111 標準のコールバックが hidden を更新するためその終了を待機
-                        PcmCardSearch.updateMatch(tabname, true);
                     }
                 }
+
+                await pDomUpadated; // DOM の更新を待機
+                PcmCardSearch.updateMatch(tabname, true);
             } catch (error) {
                 console.error(`pcmCardSearch.updateCards failed: ${error}`);
                 console.error(error.stack);
