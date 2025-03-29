@@ -6,6 +6,7 @@ from modules import shared
 from scripts.pcm.constants import image_folder, thumbs_folder, cache_info_file, extension_root_path, endpoint_base
 from PIL import Image
 import base64
+import hashlib
 import traceback
 from scripts.pcm.utility import filter_walk
 import threading
@@ -97,12 +98,24 @@ class CacheInfo:
 
     @classmethod
     def get_thumbnail_name(cls, image_path):
-        ''' オリジナル画像のフルパスからサムネイルファイルのファイル名を生成して返す。
-            ファイル名は self.img_folder_path からの相対パスを url-safe base64 エンコードした値。
-            拡張子は jpg 固定。
+        ''' オリジナル画像のフルパスからサムネイルファイルのファイル名を生成して返す。拡張子は jpg 固定。
+            ファイル名は image_path の self.img_folder_path からの相対パス (foo/bar/baz.png) を下記のように処理する:
+             - 1. foo/bar/baz.png を url-safe base64 エンコード
+                  その値が最大文字列長 116 を超えない場合、末尾に '.jpg' を付与して返す
+             - 2. 1.の結果が 116 を超える場合は、1.の結果の先頭から 116 文字を取り出す。
+                  さらに、1.の結果を sha256 ハッシュした値の先頭 12 文字を生成。
+                  {base64_path[:116]}-{sha256_hash[:12]}.jpg を返す
         '''
         rel_path = os.path.relpath(image_path, os.path.join(extension_root_path, image_folder))
-        return base64.urlsafe_b64encode(rel_path.encode('utf-8')).decode('utf-8') + '.jpg'
+        ret = None
+        base64_path = base64.urlsafe_b64encode(rel_path.encode('utf-8')).decode('utf-8')
+        if len(base64_path) <= 116:
+            ret = base64_path + '.jpg'
+        else:
+            ret = base64_path[:116]
+            sha256_hash = hashlib.sha256(base64_path.encode('utf-8')).hexdigest()[:12]
+            ret += '-' + sha256_hash + '.jpg'
+        return ret
 
     
     @classmethod
