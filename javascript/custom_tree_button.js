@@ -71,8 +71,9 @@ class PcmCardSearch {
                 // タイムアウトを設定しておく
                 setTimeout(() => {
                     obs.disconnect();
-                    reject(new Error("a1111 DOM update timeout"));
-                }, 60000); // timeout 60秒
+                    resolve();
+                    PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} a1111 DOM Update timeout`);
+                }, 15000); // timeout 15秒
                 obs.observe(gradioApp().querySelector(`#${tabname}_promptcards_cards`), {childList: true});
             });
     
