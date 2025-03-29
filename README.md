@@ -25,6 +25,9 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/03/30
+  - bug fix. Changed to trim thumbnail cache file name when the original file's path length is too long.
+
 * 2025/03/27
   - bug fix. Stabilized around Card refresh function.
 
