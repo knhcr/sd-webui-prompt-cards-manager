@@ -4,6 +4,7 @@
 const pcmAddSearchTextboxPrompt = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        PCM_DEBUG_PRINT(`pcm_add_search_textbox_prompt called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
 
         let elem = document.createElement('div');
@@ -37,6 +38,7 @@ const pcmAddSearchTextboxPrompt = ()=>{
 const pcmAddSearchTextboxDesc = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        PCM_DEBUG_PRINT(`pcm_add_search_textbox_desc called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
 
         let elem = document.createElement('div');
@@ -58,6 +60,7 @@ const pcmAddSearchTextboxDesc = ()=>{
 const pcmAddSubdirToggleCheckbox = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        PCM_DEBUG_PRINT(`pcm_add_subdir_toggle_checkbox called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
         // ラベル
         const label = document.createElement('label');
@@ -130,7 +133,7 @@ function _pcmRefreshHideDirName(tabname, extra_networks_tabname) {
 const pcmAddShowDescToggleCheckbox = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
-        PCM_DEBUG_PRINT(`pcm_add_dirname_toggle_checkbox called : ${selector}`);
+        PCM_DEBUG_PRINT(`pcm_add_show_desc_toggle_checkbox called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
         // ラベル
         const label = document.createElement('label');
@@ -165,6 +168,42 @@ function _pcmRefreshShowDesc(tabname) {
 }
 /* --------------------------------------------------------------------------------------*/
 
+/** image fit checkbox */
+const pcmAddImageFitCheckbox = ()=>{
+    for (let tabname of ['txt2img', 'img2img']){
+        const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        PCM_DEBUG_PRINT(`pcm_add_image_fit_checkbox called : ${selector}`);
+        const controlsDiv = gradioApp().querySelector(selector);
+        // ラベル
+        const label = document.createElement('label');
+        label.textContent = 'ImageFit:';
+        label.classList.add('pcm-image-fit-label');
+        label.classList.add('pcm-checkbox-label');
+        controlsDiv.prepend(label); // 先頭に追加
+        
+        // フォルダ名表示切替チェックボックス
+        const imageFitCheckbox = document.createElement('input');
+        imageFitCheckbox.type = 'checkbox';
+        const checkboxId = `${tabname}_pcm_image_fit_toggle`;
+        imageFitCheckbox.id = checkboxId;
+        imageFitCheckbox.classList.add('pcm-checkbox');
+        label.htmlFor = checkboxId;
+        imageFitCheckbox.classList.add('gr-checkbox', 'gr-text-input');
+        imageFitCheckbox.checked = false;
+        imageFitCheckbox.addEventListener('change', function() {
+            const cards = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .card > img`));
+            for (let card of cards){
+                card.classList.toggle('fit-contain', imageFitCheckbox.checked);
+            }
+        });
+        controlsDiv.insertBefore(imageFitCheckbox, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
+    }
+}
+
+/* --------------------------------------------------------------------------------------*/
+
+
+
 // checkbox 追加 (onUiLoaded では早すぎるため要素を監視)
 pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', ()=>{
     pcmAddSearchTextboxDesc();
@@ -172,6 +211,7 @@ pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', 
     pcmAddSubdirToggleCheckbox();
     pcmAddDirnameToggleCheckbox();
     pcmAddShowDescToggleCheckbox();
+    pcmAddImageFitCheckbox();
 });
 
 // HideDirName : refresh btn の callback にも追加
