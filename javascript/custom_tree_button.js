@@ -139,9 +139,6 @@ class PcmCardSearch {
                         PcmCardSearch.updateQuery(tabname, "prompt", tmpQuery.prompt.join(" "), false);
                         PcmCardSearch.updateQuery(tabname, "desc", tmpQuery.desc.join(" "), false);
                         PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: previous query : path = ${tmpPath}, prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
-                        
-                        await pcmSleepAsync(300); // a1111 標準のコールバックが hidden を更新するためその終了を待機
-                        PcmCardSearch.updateMatch(tabname, true);
                     }
                 }else{
                     // 検索クエリのみがセットされていた場合
@@ -153,6 +150,7 @@ class PcmCardSearch {
                 }
 
                 await pDomUpadated; // DOM の更新を待機
+                await pcmSleepAsync(300); // a1111 標準のコールバックが hidden を更新するためその終了を待機
                 PcmCardSearch.updateMatch(tabname, true);
             } catch (error) {
                 console.error(`pcmCardSearch.updateCards failed: ${error}`);
