@@ -25,11 +25,11 @@ class PromptCardInfoManager:
     def get_card_info(cls, thumbs_name, is_refresh=True):
         cls.refresh_card_info_dict()
 
-        # カード情報が無い場合は新規作成
+        # カード情報がメモリに無い場合は新規作成
         if thumbs_name not in cls.__card_info_dict:
             #DEBUG_PRINT(f"PromptCardInfoManager card initialize: {thumbs_name}")
             cls.__card_info_dict[thumbs_name] = PromptCardInfo(thumbs_name)
-        # カード情報がある場合は更新
+        # カード情報が既にメモリにある場合、必要なら更新
         elif is_refresh:
             #DEBUG_PRINT(f"PromptCardInfoManager card refresh: {thumbs_name}")
             cls.__card_info_dict[thumbs_name].load_card_info_from_file()
@@ -120,13 +120,13 @@ class PromptCardInfo:
             raise ValueError(f"image_path not found in CacheInfo: {self.thumbs_name}")
         self.image_path = image_path
 
-        # self.card_info
-        self.card_info : dict = PromptCardInfo.__get_default_card_info()
-
         # self.category
         rel_path = CacheInfo.cache_info[self.thumbs_name].get('rel_path', '')
         self.category = rel_path.split(os.path.sep)[0] if os.path.sep in rel_path else ''
 
+        # self.card_info, self.has_card_info
+        self.card_info : dict = PromptCardInfo.__get_default_card_info()
+        self.has_card_info = False # JSON ファイルが存在しない場合は False (txt のみ存在する場合も False)
         self.load_card_info_from_file()
 
 
@@ -141,6 +141,7 @@ class PromptCardInfo:
             if os.path.exists(card_info_path):
                 with open(card_info_path, 'r', encoding="utf-8") as f:
                     tmp = json.load(f)
+                    self.has_card_info = True
             else:
                 card_info_path = self.image_path.rsplit('.', 1)[0] + '.txt'
                 if os.path.exists(card_info_path):

@@ -39,6 +39,12 @@
     display: none;
 }
 
+/* カード情報がないカード */
+.card.no-card-info {
+    border-width: 3px;
+    border-color: #ffff00;
+}
+
 /*-------------------------------------------------------------------*/
 /* モーダル背景オーバーレイ*/
 .pcm-pie-overlay {

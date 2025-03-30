@@ -5,7 +5,7 @@ import html
 import traceback
 from scripts.pcm.constants import image_folder, templates_folder, endpoint_base, extension_root_path
 from scripts.pcm.cache_info import CacheInfo
-from scripts.pcm.prompt_card_info import PromptCardInfoManager
+from scripts.pcm.prompt_card_info import PromptCardInfoManager, PromptCardInfo
 from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.utility import filter_walk
 
@@ -154,11 +154,12 @@ class PromptCardsPage(ExtraNetworksPage):
         preview = item.get("preview", None)
         background_image = f'<img src="{html.escape(preview)}" class="preview" loading="lazy">' if preview else ''
         
-        # カスタムカード用のボタン群
-        cnet_enabled = PromptCardInfoManager.get_card_info(thumbs_name).card_info.get(
-            "enableCnet", shared.opts.prompt_cards_manager_default_cnet_enabled)
+        # カード情報
+        card_info : PromptCardInfo = PromptCardInfoManager.get_card_info(thumbs_name)
 
-        # CNET 送信ボタン
+        # カスタムカード用のボタン群
+        cnet_enabled = card_info.card_info.get("enableCnet", shared.opts.prompt_cards_manager_default_cnet_enabled)
+        #  - CNET 送信ボタン
         classes = "pcm-send-with-cnet-button card-button pcm-svg-icon"
         if not cnet_enabled:
             classes += " cnet-disabled"
@@ -167,8 +168,7 @@ class PromptCardsPage(ExtraNetworksPage):
             tabname=tabname,
             thumbs_name=thumbs_name,
         )
-
-        # CNET マスク送信ボタン
+        #  - CNET マスク送信ボタン
         classes = "pcm-send-with-cnet-mask-button card-button pcm-svg-icon"
         if not cnet_enabled:
             classes += " cnet-disabled"
@@ -178,7 +178,7 @@ class PromptCardsPage(ExtraNetworksPage):
             thumbs_name=thumbs_name,
             mask_suffix="M[0]", # [TODO] とりあえず版
         )
-
+        #  - カード情報編集ボタン
         info_edit_button = self.btn_info_edit_tpl.format(
             tabname=tabname,
             thumbs_name=thumbs_name
@@ -214,6 +214,7 @@ class PromptCardsPage(ExtraNetworksPage):
             "info_edit_button": info_edit_button,
             "orgName": org_name, # hideDirName 用 (相対パス付きファイル名)
             "baseName": base_name, # hideDirName 用 (ファイル名のみ)
+            "noCardInfo": "" if card_info.has_card_info else " no-card-info", # カード情報がない場合は div.card に "no-card-info" クラスを付与
         }
         
         # template が渡されなかった場合は辞書を返す (TreeView生成処理)
