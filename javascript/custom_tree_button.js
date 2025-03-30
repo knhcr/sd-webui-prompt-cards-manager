@@ -288,7 +288,7 @@ class PcmCardSearch {
         PcmCardSearch.tmpMatch[tabname].prompt = ret;
     }
 
-    /** Description マッチ
+    /** Description マッチ : カードパス(カード名含む)、プロンプト、Description のいずれかにマッチするか否か
      * @param {string} tabname "txt2img" or "img2img"
      * @param {boolean} force 前回マッチ時からクエリに変更が無くても再度マッチ処理するか (デフォルトfalse)
      */
@@ -302,9 +302,11 @@ class PcmCardSearch {
         } else {
             for(const orgname of Object.keys(PcmCardSearch.cards[tabname])){
                 const card = PcmCardSearch.cards[tabname][orgname];
+                let text = card.path + " " + card.prompt + " " + card.desc;
+                text = text.trim().toLowerCase();
                 for(const query of PcmCardSearch.queries[tabname].desc){
                     // 積条件なので一つでも外れたら除外
-                    if(card.desc.indexOf(query) === -1){
+                    if(text.indexOf(query) === -1){
                         ret = ret.filter(c => c !== orgname);
                         break;
                     }

@@ -13,7 +13,9 @@ const pcmAddSearchTextboxPrompt = ()=>{
         elem2.id = `${tabname}_promptcards_extra_search_prompt`;
         elem2.classList.add('extra-network-control--search-text');
         elem2.type = 'search';
-        elem2.placeholder = 'Prompt Search';
+        elem2.placeholder = 'Search from Prompt';
+        elem2.title = 'Search from card prompt.\n' +
+                    'White spaces and commas are both treated as word separators.';
         elem.appendChild(elem2);
         controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
     
@@ -47,7 +49,11 @@ const pcmAddSearchTextboxDesc = ()=>{
         elem2.id = `${tabname}_promptcards_extra_search_desc`;
         elem2.classList.add('extra-network-control--search-text');
         elem2.type = 'search';
-        elem2.placeholder = 'Description Search';
+        elem2.placeholder = 'Search from Path & Prompt & Desc';
+        elem2.title = 'Search from path and prompt and description.\n' +
+                    'If one of them matches, the card will be shown.\n' + 
+                    'Only white spaces are treated as word separators.';
+
         elem.appendChild(elem2);
         controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
     
