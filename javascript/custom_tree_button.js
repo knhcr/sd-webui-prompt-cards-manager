@@ -43,8 +43,13 @@ class PcmCardSearch {
    
     /** カードデータを更新 (カード情報をサーバから取得し、DOM 要素へのハンドラも更新)
      * リフレッシュボタン経由の場合は tabname も受け取る
-     *  - a1111標準のコールバックは、クリック元のタブのカードしか一切更新しない
-     *  - 従って Update の処理を分ける必要あり
+     *   - a1111標準のコールバックは、クリック元のタブのカードしか更新しないため t2i と i2i は別々に管理する
+     * リフレッシュ時は、カードに変化があるかどうかで DOM の挙動が変わる
+     *   - カードに変化が無い : div.card だけが全削除されてから再生成される
+     *   - カードに変化がある : さらにその上の tree-view も内包する DOM 要素全体が削除されて再生成される
+     *     -> ここで監視せず別で監視する
+     * #txt2img_promptcards_cards_html.block > div.wrap が読み込み中の半透明の画面暗転エフェクトの実体
+     *   - リフレッシュ中は class に translucent が付与され、読み込み終了後に削除される
      * @param {string} tabname "txt2img" or "img2img" or null (全てのタブ)
     */
     static async updateCards(tabname=null){
@@ -54,27 +59,39 @@ class PcmCardSearch {
         else if(tabname === "img2img") targetTabs = ["img2img"];
 
         for (const tabname of targetTabs){
-            // a1111 によってカードの DOM が全削除されてから追加されるのを裏で監視
+            // a1111 による DOM の更新が走るのを監視
             const pDomUpadated = new Promise((resolve, reject) => {
-                const obs = new MutationObserver(async (ms, o) => {
+                const wrapDiv = gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block > div.wrap`);
+                if(!wrapDiv) reject(new Error(`pcmCardSearch.updateCards: ${tabname} div.wrap not found`));
+                
+                let isStarted = false; // div.wrap に translucent が付与されたら true
+                const obsWrapDiv = new MutationObserver(async (ms, o) => {
                     for(const m of ms){
-                        if( m.type === "childList" && m.addedNodes.length > 0 ){ // card が追加されたらその時点で終了
-                            PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} DOM Updated`);
-                            await pcmSleepAsync(150); // 念のため少し待つ
+                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} ${m.type} ${m.attributeName}`);
+                        if(!isStarted && wrapDiv.classList.contains("translucent")){
+                            isStarted = true;
+                            PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} DOM Update started`);
+                            return;
+                        }
+                        else if(isStarted && !wrapDiv.classList.contains("translucent")){
+                            PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} DOM Update finished`);
                             o.disconnect();
+                            await pcmSleepAsync(150); // 念のため少し待つ                            
                             resolve();
                             return;
                         }
                     }
-                    return; // 外れだった場合解決しない
+                    return; // 関係なかった場合
                 });
-                // タイムアウトを設定しておく
+                // 念のためタイムアウトを設定しておく
                 setTimeout(() => {
-                    obs.disconnect();
-                    resolve();
-                    PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} a1111 DOM Update timeout`);
-                }, 15000); // timeout 15秒
-                obs.observe(gradioApp().querySelector(`#${tabname}_promptcards_cards`), {childList: true});
+                    obsWrapDiv.disconnect();
+                    reject(new Error(`pcmCardSearch.updateCards: ${tabname} a1111 DOM Update timeout`));
+                }, 6000);
+                obsWrapDiv.observe(
+                    gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block`),
+                    {childList: true, subtree: true});
+
             });
     
             PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} called, isInitialized: ${PcmCardSearch.isInitialized[tabname]}`);
@@ -149,9 +166,13 @@ class PcmCardSearch {
                     }
                 }
 
-                await pDomUpadated; // DOM の更新を待機
-                await pcmSleepAsync(300); // a1111 標準のコールバックが hidden を更新するためその終了を待機
-                PcmCardSearch.updateMatch(tabname, true);
+                try{
+                    await pDomUpadated; // DOM の更新を待機
+                    PcmCardSearch.updateMatch(tabname, true);
+                }catch(error){
+                    PCM_DEBUG_PRINT(`${error}`); // タイムアウトの場合は無視
+                }
+                
             } catch (error) {
                 console.error(`pcmCardSearch.updateCards failed: ${error}`);
                 console.error(error.stack);
@@ -415,11 +436,11 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
         // ルートノードが閉じていれば問答無用で開く
         const rootElem = gradioApp().querySelector(`#${_tabname}_promptcards_tree > ul > li`);
         const rootUL = rootElem.querySelector('ul');
-        PCM_DEBUG_PRINT(`!! called:`);
+        //PCM_DEBUG_PRINT(`!! called:`);
         if (rootUL.hasAttribute("hidden")){
-            PCM_DEBUG_PRINT(`!! Root Element is hidden.`);
+            //PCM_DEBUG_PRINT(`!! Root Element is hidden.`);
             if(_ul !== rootUL){
-                PCM_DEBUG_PRINT(`!! called.`);
+                //PCM_DEBUG_PRINT(`!! called.`);
                 rootElem.querySelector(':scope > div.tree-list-content').dataset.expanded = "";
                 rootUL.removeAttribute("hidden");
             }
@@ -492,7 +513,7 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
             _update_search(tabname, extra_networks_tabname, btn.dataset.path);
         } else {
             // All other cases, just select the button.
-            PCM_DEBUG_PRINT(`!! called Fall through`);
+            //PCM_DEBUG_PRINT(`!! called Fall through`);
             
             // 詳しい条件不明だが、途中でルートノードを閉じた場合に、数字キーで内部をクリックすると、一回目は必ずここに来る
             // ルートノードが collapse してる場合はここで開く必要あり
