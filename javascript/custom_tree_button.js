@@ -47,9 +47,11 @@ class PcmCardSearch {
      * リフレッシュ時は、カードに変化があるかどうかで DOM の挙動が変わる
      *   - カードに変化が無い : div.card だけが全削除されてから再生成される
      *   - カードに変化がある : さらにその上の tree-view も内包する DOM 要素全体が削除されて再生成される
-     *     -> ここで監視せず別で監視する
+     * -> ここで監視せず以下で監視する
      * #txt2img_promptcards_cards_html.block > div.wrap が読み込み中の半透明の画面暗転エフェクトの実体
      *   - リフレッシュ中は class に translucent が付与され、読み込み終了後に削除される
+     *   - ただし、起動時、初回に別タブから Prompt Cards タブを開いた場合に走る updateCards は translucent は付与されないため補足できない
+     *     -> updateCards の処理がタイムアウト待ちで止まってしまうため初回タブクリックによる更新は無しに変更
      * @param {string} tabname "txt2img" or "img2img" or null (全てのタブ)
     */
     static async updateCards(tabname=null){
@@ -60,6 +62,7 @@ class PcmCardSearch {
 
         for (const tabname of targetTabs){
             // a1111 による DOM の更新が走るのを監視
+            let isTimeout = false;
             const pDomUpadated = new Promise((resolve, reject) => {
                 const wrapDiv = gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block > div.wrap`);
                 if(!wrapDiv) reject(new Error(`pcmCardSearch.updateCards: ${tabname} div.wrap not found`));
@@ -67,7 +70,7 @@ class PcmCardSearch {
                 let isStarted = false; // div.wrap に translucent が付与されたら true
                 const obsWrapDiv = new MutationObserver(async (ms, o) => {
                     for(const m of ms){
-                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} ${m.type} ${m.attributeName}`);
+                        //PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} ${m.type} ${m.attributeName}`);
                         if(!isStarted && wrapDiv.classList.contains("translucent")){
                             isStarted = true;
                             PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} DOM Update started`);
@@ -86,8 +89,9 @@ class PcmCardSearch {
                 // 念のためタイムアウトを設定しておく
                 setTimeout(() => {
                     obsWrapDiv.disconnect();
-                    reject(new Error(`pcmCardSearch.updateCards: ${tabname} a1111 DOM Update timeout`));
-                }, 6000);
+                    isTimeout = true;
+                    resolve();
+                }, 30000);
                 obsWrapDiv.observe(
                     gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block`),
                     {childList: true, subtree: true});
@@ -166,12 +170,8 @@ class PcmCardSearch {
                     }
                 }
 
-                try{
-                    await pDomUpadated; // DOM の更新を待機
-                    PcmCardSearch.updateMatch(tabname, true);
-                }catch(error){
-                    PCM_DEBUG_PRINT(`${error}`); // タイムアウトの場合は無視
-                }
+                await pDomUpadated; // DOM の更新を待機
+                if(!isTimeout) PcmCardSearch.updateMatch(tabname, true);
                 
             } catch (error) {
                 console.error(`pcmCardSearch.updateCards failed: ${error}`);
@@ -431,34 +431,7 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
     var true_targ = event.target;
 
     function _expand_or_collapse(_ul, _btn, _tabname) {
-        // Expands <ul> if it is collapsed, collapses otherwise. Updates button attributes.
-
-        // ルートノードが閉じていれば問答無用で開く
-        const rootElem = gradioApp().querySelector(`#${_tabname}_promptcards_tree > ul > li`);
-        const rootUL = rootElem.querySelector('ul');
-        //PCM_DEBUG_PRINT(`!! called:`);
-        if (rootUL.hasAttribute("hidden")){
-            //PCM_DEBUG_PRINT(`!! Root Element is hidden.`);
-            if(_ul !== rootUL){
-                //PCM_DEBUG_PRINT(`!! called.`);
-                rootElem.querySelector(':scope > div.tree-list-content').dataset.expanded = "";
-                rootUL.removeAttribute("hidden");
-            }
-        }
-        
-        // 葉ノードの場合何もしない
-        const li = _btn.closest('li.tree-list-item');
-        if (li.classList.contains('pcm-tree-view-leaf-dir')){
-            return;
-        }
-
-        if (_ul.hasAttribute("hidden")) {
-            _ul.removeAttribute("hidden");
-            _btn.dataset.expanded = "";
-        } else {
-            _ul.setAttribute("hidden", "");
-            delete _btn.dataset.expanded;
-        }
+        // not used
     }
 
     function _remove_selected_from_all() {
@@ -494,36 +467,43 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
         PcmCardSearch.updateQuery(_tabname, "path", _search_text, true); // クエリを更新し、マッチ結果も更新
     }
 
-    // オリジナル条件は複雑すぎて意味不明
-    // If user clicks on the chevron, then we do not select the folder.
+    
+    // シェブロン をクリック : expand / collapse のトグルのみ
     if (true_targ.matches(".tree-list-item-action--leading, .tree-list-item-action-chevron")) {
-        _expand_or_collapse(ul, btn, tabname);
-    } else {
-        // User clicked anywhere else on the button.
+        if (ul.hasAttribute("hidden")){
+            pcmExpandDirItem(tabname, btn.closest('li.tree-list-item'), true);
+        } else {
+            pcmCollapseDirItem(tabname, btn.closest('li.tree-list-item'));
+        }
+    } 
+    // ボタン部分をクリック
+    else {
+        const li = btn.closest('li.tree-list-item');
+
+        // 選択中 かつ 展開中 => 折り畳む (当該フォルダのみ)
         if ("selected" in btn.dataset && !(ul.hasAttribute("hidden"))) {
-            // If folder is select and open, collapse and deselect button.
-            _expand_or_collapse(ul, btn, tabname);
-            //delete btn.dataset.selected;
-            //_update_search(tabname, extra_networks_tabname, "");
-        } else if (!(!("selected" in btn.dataset) && !(ul.hasAttribute("hidden")))) {
-            // If folder is open and not selected, then we don't collapse; just select.
-            // NOTE: Double inversion sucks but it is the clearest way to show the branching here.
-            _expand_or_collapse(ul, btn, tabname);
+            pcmCollapseDirItem(tabname, li);
+            //_select_button(btn, tabname, extra_networks_tabname);
+            //_update_search(tabname, extra_networks_tabname, btn.dataset.path);
+        } 
+
+        // 非選択中 かつ 展開中 => 選択 (念のため再帰的展開も実施)
+        else if (!("selected" in btn.dataset) && !(ul.hasAttribute("hidden"))) {
+            pcmExpandDirItem(tabname, li, true);
             _select_button(btn, tabname, extra_networks_tabname);
             _update_search(tabname, extra_networks_tabname, btn.dataset.path);
-        } else {
-            // All other cases, just select the button.
-            //PCM_DEBUG_PRINT(`!! called Fall through`);
-            
-            // 詳しい条件不明だが、途中でルートノードを閉じた場合に、数字キーで内部をクリックすると、一回目は必ずここに来る
-            // ルートノードが collapse してる場合はここで開く必要あり
-            if(gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li > ul`).hasAttribute("hidden")){
-                _expand_or_collapse(
-                    gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li > ul`),
-                    gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li > div`),
-                    tabname);
-            }
-            
+        }
+
+        // 選択中 かつ 折り畳み中 => 展開 (念のため再帰的展開)
+        else if ("selected" in btn.dataset && (ul.hasAttribute("hidden"))){
+            pcmExpandDirItem(tabname, li, true);
+            //_select_button(btn, tabname, extra_networks_tabname);
+            //_update_search(tabname, extra_networks_tabname, btn.dataset.path);
+        }
+
+        // 非選択中 かつ 折り畳み中 => 展開して選択 (念のため再帰的展開)
+        else {
+            pcmExpandDirItem(tabname, li, true);
             _select_button(btn, tabname, extra_networks_tabname);
             _update_search(tabname, extra_networks_tabname, btn.dataset.path);
         }
@@ -536,6 +516,62 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
     else return; // ここには来ない
     pcmUpdateSelectedFolderHistory(tabname, pcmDirTreeElementToSearchPath(dirElem));
 }
+
+
+/** ツリービューのディレクトリアイテムを展開する
+ * @param {string} tabname "txt2img" or "img2img"
+ * @param {any} target Elemnt or str (CSS Selector) of 'li.tree-list-item' element
+ * @param {boolean} recursive ルートノードから再帰的に展開するか (デフォルトfalse)
+ */
+function pcmExpandDirItem(tabname, target, recursive=false){
+    if(typeof target === 'string'){
+        target = gradioApp().querySelector(target);
+    }
+    if(!target) return;
+    
+    if(target.classList.contains('pcm-tree-view-leaf-dir')){
+        // 葉ノードの場合は何もしない
+    } else{
+        const elemUL = target.querySelector(':scope > ul');
+        const elemDiv = target.querySelector(':scope > div.tree-list-content');
+        if(!elemUL || !elemDiv) return;
+        if(elemUL.hasAttribute("hidden")) elemUL.removeAttribute("hidden");
+        elemDiv.dataset.expanded = "";
+    }
+
+    if(recursive){
+        const container = gradioApp().querySelector(`#${tabname}_promptcards_tree`);
+        if(!container) return;
+
+        const parent = target.parentElement.parentElement;
+        if(!parent || parent.tagName !== 'LI' || !container.contains(parent)) return;
+
+        pcmExpandDirItem(tabname, parent, recursive);
+    }
+}
+
+
+/** ツリービューのディレクトリアイテムを折り畳む
+ * @param {string} tabname "txt2img" or "img2img"
+ * @param {any} target Elemnt or str (CSS Selector) of 'li.tree-list-item' element
+ */
+function pcmCollapseDirItem(tabname, target){
+    if(typeof target === 'string'){
+        target = gradioApp().querySelector(target);
+    }
+    if(!target) return;
+    
+    if(target.classList.contains('pcm-tree-view-leaf-dir')){
+        // 葉ノードの場合は何もしない
+    } else{
+        const elemUL = target.querySelector(':scope > ul');
+        const elemDiv = target.querySelector(':scope > div.tree-list-content');
+        if(!elemUL || !elemDiv) return;
+        if(!elemUL.hasAttribute("hidden")) elemUL.setAttribute("hidden", "");
+        delete elemDiv.dataset.expanded;
+    }
+}
+
 
 /** subdir toggle callback */
 function pcmToggleSubdirs(tabname) {
@@ -628,11 +664,13 @@ pcmWaitForContent('#txt2img_extra_tabs', async ()=>{
                     PCM_DEBUG_PRINT(`pcmPromptCardsOnClick: ${tabname} clicked.`);
                     if (!PcmCardSearch.isInitialized[tabname]){
                         PCM_DEBUG_PRINT(`pcmPromptCardsOnClick: ${tabname} : first time.`);
-                        // 初回はカードリスト更新し、ルートノードを expand
-                        await PcmCardSearch.updateCards(tabname);
+                        // 初回はカードリスト更新し、ルートノードを expand -> 一旦無し
+                        //await PcmCardSearch.updateCards(tabname);
+
                         // 一応DOMに現れるまで待つ
                         const rootElem = await pcmQuerySelectorAsync(`#${tabname}_promptcards_tree > ul > li > div`)
                         if(!rootElem) return;
+                        PCM_DEBUG_PRINT(`pcmPromptCardsOnClick: ${tabname} : 1st rootElem clickd !!!!`);
                         rootElem.click();
                         
                         // 2回目以降のクリックでは、カードの hidden 属性が全て削除されるので DOM Update を行う処理を追加する
@@ -650,7 +688,7 @@ pcmWaitForContent('#txt2img_extra_tabs', async ()=>{
                                             const container = document.querySelector(`#${tabname}_extra_tabs > .tab-nav`);
                                             if (container && container.contains(ms[0].target)){
                                                 PCM_DEBUG_PRINT(`pcmPromptCards Tab OnClick: ${tabname}`);
-                                                await pcmSleepAsync(200);
+                                                await pcmSleepAsync(50);
                                                 PcmCardSearch.updateDom(tabname);
                                                 return;
                                             }
@@ -693,7 +731,6 @@ pcmTreeViewItemsSetTitle = (tabname=null)=>{
 }
 
 /** ツリービューの葉ノードにマークとして pcm-tree-view-leaf-dir class をセットし、chevron のクラスを tree-list-leaf-chevron に変更
- * 
  * @param {string} tabname "txt2img" or "img2img" or null (全てのタブ)
 */
 pcmTreeViewSetLeafDirMark = (tabname=null)=>{
