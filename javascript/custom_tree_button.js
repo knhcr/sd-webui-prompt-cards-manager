@@ -132,9 +132,6 @@ class PcmCardSearch {
                 PCM_DEBUG_PRINT(`pcmCardSearch.clearQuery called`);
                 PcmCardSearch.clearQuery(tabname);
 
-                pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
-                pcmTreeViewSetLeafDirMark(tabname); // ツリービューの葉ノードにマークをセット
-
                 // 更新前にクエリがセットされていた場合は、再度クエリをセットしなおしてマッチ状態に適用
                 const tmpPath = tmpQuery.path;
                 let keptPath = null;
@@ -182,6 +179,9 @@ class PcmCardSearch {
                     const dirElem = pcmSearchPathToDirTreeElement(keptPath, tabname);
                     if(dirElem) pcmExpandDirItem(tabname, dirElem, true);
                 }
+
+                pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
+                pcmTreeViewSetLeafDirMark(tabname); // ツリービューの葉ノードにマークをセット
 
                 // 表示オプションの適用
                 pcmApplyShowOptions(tabname);
@@ -683,7 +683,8 @@ pcmWaitForContent('#txt2img_extra_tabs', async ()=>{
                         // 一応DOMに現れるまで待つ
                         const rootElem = await pcmQuerySelectorAsync(`#${tabname}_promptcards_tree > ul > li > div`)
                         if(!rootElem) return;
-                        PCM_DEBUG_PRINT(`pcmPromptCardsOnClick: ${tabname} : 1st rootElem clickd !!!!`);
+                        pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
+                        pcmTreeViewSetLeafDirMark(tabname); // ツリービューの葉ノードにマークをセット
                         rootElem.click();
                         
                         // 2回目以降のクリックでは、カードの hidden 属性が全て削除されるので DOM Update を行う処理を追加する
