@@ -137,6 +137,7 @@ class PcmCardSearch {
 
                 // 更新前にクエリがセットされていた場合は、再度クエリをセットしなおしてマッチ状態に適用
                 const tmpPath = tmpQuery.path;
+                let keptPath = null;
                 if (tmpPath !== null && tmpPath !== undefined && tmpPath.length > 0){
                     // 更新後もセットされていたPathが有効な場合
                     //  - 更新後のフォルダ名一覧に存在するか
@@ -156,6 +157,7 @@ class PcmCardSearch {
                         }
                     }
                     if (isValidPath){
+                        keptPath = tmpPath;
                         PcmCardSearch.updateQuery(tabname, "path", tmpPath, false);
                         PcmCardSearch.updateQuery(tabname, "prompt", tmpQuery.prompt.join(" "), false);
                         PcmCardSearch.updateQuery(tabname, "desc", tmpQuery.desc.join(" "), false);
@@ -171,8 +173,17 @@ class PcmCardSearch {
                 }
 
                 await pDomUpadated; // DOM の更新を待機
-                
+
+                // クエリの再適用
                 if(!isTimeout) PcmCardSearch.updateMatch(tabname, true);
+
+                // 検索パスを引き継いだ場合ツリーを展開
+                if(keptPath !== null){
+                    const dirElem = pcmSearchPathToDirTreeElement(keptPath, tabname);
+                    if(dirElem) pcmExpandDirItem(tabname, dirElem, true);
+                }
+
+                // 表示オプションの適用
                 pcmApplyShowOptions(tabname);
 
             } catch (error) {
