@@ -113,14 +113,14 @@ const pcmAddDirnameToggleCheckbox = ()=>{
         dirnameCheckbox.classList.add('gr-checkbox', 'gr-text-input');
         dirnameCheckbox.checked = false;
         dirnameCheckbox.addEventListener('change', function() {
-            _pcmRefreshHideDirName(tabname, 'promptcards');
+            _pcmRefreshHideDirName(tabname);
         });
         controlsDiv.insertBefore(dirnameCheckbox, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
     }
 }
 
 /** dirname toggle callback, also called when refresh btn clicked */
-function _pcmRefreshHideDirName(tabname, extra_networks_tabname) {
+function _pcmRefreshHideDirName(tabname) {
     const isShow = gradioApp().querySelector(`#${tabname}_pcm_dirname_toggle`).checked;
     const cardNames = gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .card .name`);
     for (let cardName of cardNames){
@@ -197,14 +197,21 @@ const pcmAddImageFitCheckbox = ()=>{
         imageFitCheckbox.classList.add('gr-checkbox', 'gr-text-input');
         imageFitCheckbox.checked = false;
         imageFitCheckbox.addEventListener('change', function() {
-            const cards = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .card > img`));
-            for (let card of cards){
-                card.classList.toggle('fit-contain', imageFitCheckbox.checked);
-            }
+            _pcmRefreshImageFit(tabname);
         });
         controlsDiv.insertBefore(imageFitCheckbox, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
     }
 }
+
+/** image fit toggle callback, also called when refresh btn clicked */
+function _pcmRefreshImageFit(tabname){
+    const imageFitCheckbox = gradioApp().querySelector(`#${tabname}_pcm_image_fit_toggle`);
+    const cards = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .card > img`));
+    for (let card of cards){
+        card.classList.toggle('fit-contain', imageFitCheckbox.checked);
+    }
+}
+
 
 /* --------------------------------------------------------------------------------------*/
 
@@ -223,9 +230,9 @@ pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', 
 // HideDirName : refresh btn の callback にも追加
 pcmWaitForContent('.tab-nav #txt2img_promptcards_extra_refresh', ()=>{
     gradioApp().querySelector('#txt2img_promptcards_extra_refresh').addEventListener(
-        'click', ()=>{_pcmRefreshHideDirName('txt2img', 'promptcards')});
+        'click', ()=>{_pcmRefreshHideDirName('txt2img')});
 });
 pcmWaitForContent('.tab-nav #img2img_promptcards_extra_refresh', ()=>{
     gradioApp().querySelector('#img2img_promptcards_extra_refresh').addEventListener(
-        'click', ()=>{_pcmRefreshHideDirName('img2img', 'promptcards')});
+        'click', ()=>{_pcmRefreshHideDirName('img2img')});
 });

@@ -171,8 +171,10 @@ class PcmCardSearch {
                 }
 
                 await pDomUpadated; // DOM の更新を待機
-                if(!isTimeout) PcmCardSearch.updateMatch(tabname, true);
                 
+                if(!isTimeout) PcmCardSearch.updateMatch(tabname, true);
+                pcmApplyShowOptions(tabname);
+
             } catch (error) {
                 console.error(`pcmCardSearch.updateCards failed: ${error}`);
                 console.error(error.stack);
@@ -757,4 +759,12 @@ pcmTreeViewSetLeafDirMark = (tabname=null)=>{
             }
         }
     }
+}
+
+
+/** 表示オプションの適用 : ShowDir, ShowDesc, ImageFit */
+pcmApplyShowOptions = (tabname)=>{
+    _pcmRefreshHideDirName(tabname);
+    _pcmRefreshShowDesc(tabname);
+    _pcmRefreshImageFit(tabname);
 }
