@@ -27,6 +27,7 @@ Note that this extension does not have features to automatically generate prompt
 ## Update History
 * 2025/03/31
   - Added yellow border to cards without card info json file.
+  - bug fix. around Card refresh function.
 
 * 2025/03/30
   - bug fix. Changed to trim thumbnail cache file name when the original file's path length is too long.
