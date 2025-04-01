@@ -8,10 +8,12 @@ import traceback
 from pathlib import Path
 from scripts.pcm.constants import image_folder, extension_root_path
 from scripts.pcm.cache_info import CacheInfo
+from scripts.pcm.category import CategoryAlias
 from scripts.pcm.constants import DEBUG_PRINT
 from base64 import b64encode
 from modules import shared
 import html
+
 class PromptCardInfoManager:
     """ プロンプトカード情報管理 """
 
@@ -37,7 +39,9 @@ class PromptCardInfoManager:
 
     @classmethod
     def refresh_card_info_dict(cls):
-        ''' 現状は不要なメモリを削除するのみ (データの読み直しはget_card_infoで個別に行う) '''
+        ''' 
+         - 不要なメモリを削除
+         - (カードの読み直しはget_card_infoで個別に行う) '''
         cls.__remove_unused_card_info()
 
     @classmethod
@@ -78,7 +82,7 @@ class PromptCardInfoManager:
                 "desc": card_info.get("description", "").lower()
             }
         return ret
-
+    
 
 class PromptCardInfo:
     """ プロンプトカード情報コンテナ """
@@ -119,7 +123,8 @@ class PromptCardInfo:
 
         # self.category
         rel_path = CacheInfo.cache_info[self.thumbs_name].get('rel_path', '')
-        self.category = rel_path.split(os.path.sep)[0] if os.path.sep in rel_path else ''
+        tmp_category = rel_path.split(os.path.sep)[0] if os.path.sep in rel_path else ''
+        self.category = CategoryAlias().get_aliases().get(tmp_category, tmp_category)
 
         # self.card_info, self.has_card_info
         self.card_info : dict = PromptCardInfo.__get_default_card_info() # JSON ファイルに書き込む情報そのもの
