@@ -204,25 +204,44 @@ function pcmGeneratePrompt(currentText, text, category="", isReplace=true){
 
         // 置換箇所が見つかった場合は置換
         if(mStart && mEnd && mStart.index < mEnd.index){
-            const startIndex = mStart.index;
-            const endIndex = mEnd.index + mEnd[0].length;
+            let startIndex = mStart.index;
+            let endIndex = mEnd.index + mEnd[0].length;
+
+            // 削除の場合
+            //   - 末尾に改行がある場合はそれも削除 (手で消してなければ通常存在)
+            //   - 上部に空行がある場合はそれも削除 (手で消してなければ通常存在)
+            if (insertText.length === 0){
+                if (currentText[endIndex] === '\n'){
+                    endIndex++;
+                }
+                if (currentText.length > 1 && startIndex > 0 &&
+                    currentText[startIndex-1] === '\n'){
+                    startIndex--;
+                }
+            }
+
             currentText = currentText.slice(0, startIndex) + insertText + currentText.slice(endIndex);
+            PCM_DEBUG_PRINT(`pcmGeneratePrompt currentText : ${currentText}`);
             return currentText;
         } else{
             // fall through
         }
     }
 
-    // 単純に追加する (現在のテキストが空でない場合、空行を挟む)
+    // 単純に追加する 
+    //  - 現在のテキストが空でない場合、上に空行を挟む
     if(currentText.length==0){
-        // do nothing
+        // 完全に空 - > do nothing
     } else if (!currentText.endsWith('\n')) {
+        // 改行無しで終了 -> 改行 + 空行
         currentText += '\n\n';
     } else if (!currentText.endsWith('\n\n') ) {
+        // 改行ありで終了 -> 空行
         currentText += '\n';
+    } else{
+        // 末尾に空行あり -> do nothing
     }
-    currentText += insertText + "\n"; // 装飾行 + 改行で終わる
-    return currentText;
+    return currentText + insertText + "\n"; // 装飾行 + 改行 を追加
 }
 
 
