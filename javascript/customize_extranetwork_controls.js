@@ -195,7 +195,7 @@ const pcmAddImageFitCheckbox = ()=>{
         imageFitCheckbox.classList.add('pcm-checkbox');
         label.htmlFor = checkboxId;
         imageFitCheckbox.classList.add('gr-checkbox', 'gr-text-input');
-        imageFitCheckbox.checked = false;
+        imageFitCheckbox.checked = true;
         imageFitCheckbox.addEventListener('change', function() {
             _pcmRefreshImageFit(tabname);
         });

@@ -686,6 +686,7 @@ pcmWaitForContent('#txt2img_extra_tabs', async ()=>{
                         pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
                         pcmTreeViewSetLeafDirMark(tabname); // ツリービューの葉ノードにマークをセット
                         rootElem.click();
+                        pcmApplyShowOptions(tabname); // 表示オプションの適用
                         
                         // 2回目以降のクリックでは、カードの hidden 属性が全て削除されるので DOM Update を行う処理を追加する
                         //   - 別タブに移動すると、カレントのタブ要素 (button) は削除されて再生成される模様 (eventListner も属性も毎回消える)

@@ -45,6 +45,12 @@
     border-color: #ffff00;
 }
 
+/* カードの表示 */
+#txt2img_promptcards_cards > .card > img,
+#img2img_promptcards_cards > .card > img{
+    background-color:#ffffff;
+}
+
 /*-------------------------------------------------------------------*/
 /* モーダル背景オーバーレイ*/
 .pcm-pie-overlay {
