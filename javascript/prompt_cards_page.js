@@ -221,7 +221,7 @@ function pcmGeneratePrompt(currentText, text, category="", isReplace=true){
             }
 
             currentText = currentText.slice(0, startIndex) + insertText + currentText.slice(endIndex);
-            PCM_DEBUG_PRINT(`pcmGeneratePrompt currentText : ${currentText}`);
+            // PCM_DEBUG_PRINT(`pcmGeneratePrompt currentText : ${currentText}`);
             return currentText;
         } else{
             // fall through
