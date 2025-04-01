@@ -25,6 +25,9 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/04/02
+  - Added category alias functionality. ([category alias](#assigning-category-name-for-each-folders))
+
 * 2025/03/31
   - Added yellow border to cards without card info json file.
   - bug fix. around Card refresh function.
@@ -37,7 +40,7 @@ Note that this extension does not have features to automatically generate prompt
 
 * 2025/03/25
   - Added Seed Controller to Mini Gallery. Now you can select hide or show for each controls.
-  - Improved `Ctrl - <0-9>` shortcut key's behavior ([keys](#keyboard-shortcut)).
+  - Improved `Ctrl - <0-9>` shortcut key's behavior ([shortcut keys](#keyboard-shortcut)).
   - Improved directory tree view's appearance
   - bug fix
 
@@ -47,7 +50,7 @@ Note that this extension does not have features to automatically generate prompt
   - bug fix
 
 * 2025/03/22
-  - Added shortcut keys for Category switch in PromptCards tab ([keys](#keyboard-shortcut)).
+  - Added shortcut keys for Category switch in PromptCards tab ([shortcut keys](#keyboard-shortcut)).
   - Improved Mini Gallery functionality.
 
 * 2025/03/20
@@ -100,11 +103,26 @@ Note that this extension does not have features to automatically generate prompt
 
 * Like LoRA, you can create subfolders to classify and manage cards more easily.
   - This extension treats the first-level folder name as the "**category**" of that card.
-
+    + You can assign category name for each folder separately other than its folder name.
 
 * After you placed images in the folder, press the refresh button in the top right of the PromptCards tab,
   the placed images will be displayed as cards.
 
+
+##### Assigning Category name for each folders
+* For example, when you creates `character_001` and `character_002` folders, and you want to assign category `character` to both of them.
+
+* How to assign
+  1. Create new empty text file in `promt_cards` folder, and set its name to `_category_alias.yaml`.
+  2. Write category name you want to assign into the text file in the format `"folder name": "category name"`, one per line.
+    - `*` matches any text.
+
+* e.g. : Assign `character` to all folders starting with `character_`, and `pose` to all folders with `pose_`.
+
+```yaml
+"character_*": "character"
+"pose_*": "pose"
+```
 
 
 #### Registering Prompts to Cards
