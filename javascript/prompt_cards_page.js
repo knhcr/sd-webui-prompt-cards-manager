@@ -36,6 +36,7 @@ async function pcmCardClick(event, tabname, thumbsName) {
         //  apply_resolution: False,
         //  resolution: {width: 1024, height: 1024} 
         //  category: 'pose', トップレベルフォルダ名
+        //  no_data: true/false, サーバにtxtもjsonも無い場合は true
         //}
         PCM_DEBUG_PRINT(`tab: ${tabname} pcmCardClick data`, JSON.stringify(data));
 
@@ -43,6 +44,8 @@ async function pcmCardClick(event, tabname, thumbsName) {
         console.error("pcmCardClick error", error);
         return;
     }
+
+    if ('no_data' in data && data.no_data) return;
 
     let selectorTmp = '';
     let elemTmp = null;

@@ -23,8 +23,6 @@ class PromptCardInfoManager:
 
     @classmethod
     def get_card_info(cls, thumbs_name, is_refresh=True):
-        cls.refresh_card_info_dict()
-
         # カード情報がメモリに無い場合は新規作成
         if thumbs_name not in cls.__card_info_dict:
             #DEBUG_PRINT(f"PromptCardInfoManager card initialize: {thumbs_name}")
@@ -32,6 +30,7 @@ class PromptCardInfoManager:
         # カード情報が既にメモリにある場合、必要なら更新
         elif is_refresh:
             #DEBUG_PRINT(f"PromptCardInfoManager card refresh: {thumbs_name}")
+            cls.refresh_card_info_dict()
             cls.__card_info_dict[thumbs_name].load_card_info_from_file()
         
         return cls.__card_info_dict[thumbs_name]
@@ -58,8 +57,7 @@ class PromptCardInfoManager:
         '''
         ret = {}
         # 全カードを探索して情報を取得
-        # この時点でキャッシュが最新に更新されていないため
-        CacheInfo.update_all_caches()
+        CacheInfo.update_all_caches() # この時点でキャッシュが最新に更新されていないため
         for thumbs_name in CacheInfo.cache_info:
             card_info = cls.get_card_info(thumbs_name, is_refresh=False).card_info
 
@@ -99,6 +97,7 @@ class PromptCardInfo:
                 'width': shared.opts.prompt_cards_manager_default_resolution_width,
                 'height': shared.opts.prompt_cards_manager_default_resolution_height
             },
+            'no_data': True, # json, txt のいずれも無い場合 True
             # 現状 category はカード情報ファイルのパスから生成し、データとしては保存しない
         }
         return __default_card_info
@@ -142,11 +141,14 @@ class PromptCardInfo:
                 with open(card_info_path, 'r', encoding="utf-8") as f:
                     tmp = json.load(f)
                     self.has_card_info = True
+                    tmp['no_data'] = False
             else:
                 card_info_path = self.image_path.rsplit('.', 1)[0] + '.txt'
                 if os.path.exists(card_info_path):
                     with open(card_info_path, 'r', encoding="utf-8") as f:
                         tmp['prompt'] = f.read()
+                        self.has_card_info = False # txt のみの場合は False (画像の枠線として未初期化を強調用)
+                        tmp['no_data'] = False # txt だけでもある場合は True (実際のプロンプトの処理用)
         except:
             print(f"Error loading prompt card info: {card_info_path}", file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
