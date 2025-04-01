@@ -12,3 +12,4 @@ memo/
 DEBUG_FLAG
 *.code-workspace
 *localdev*
+tests_dev/
