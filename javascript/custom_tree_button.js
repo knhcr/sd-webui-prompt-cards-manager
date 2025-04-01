@@ -37,6 +37,7 @@ class PcmCardSearch {
     };
 
     static cardsInfoUrl = `${PCM_API_ENDPOINT_BASE}/prompt-card-info-all-for-search`;
+    static refreshCategoryAliasUrl = `${PCM_API_ENDPOINT_BASE}/refresh-category-alias`;
 
     constructor(){
     }
@@ -57,6 +58,12 @@ class PcmCardSearch {
     static async updateCards(tabname=null){
         if(!["txt2img", "img2img"].includes(tabname)) return;
 
+        // カテゴリー Alias のリフレッシュ要求
+        const res = await fetch(PcmCardSearch.refreshCategoryAliasUrl);
+        if (!res.ok) {
+            console.error(`pcmCardSearch.updateCards failed: ${res.statusText}`);
+        }
+ 
         // a1111 による DOM の更新が走るのを監視
         let isTimeout = false;
         const pDomUpadated = new Promise((resolve, reject) => {

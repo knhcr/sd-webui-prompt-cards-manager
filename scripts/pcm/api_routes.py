@@ -6,6 +6,7 @@ from modules import script_callbacks
 from scripts.pcm.constants import thumbs_folder, endpoint_base, extension_root_path
 from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.prompt_card_info import PromptCardInfoManager
+from scripts.pcm.category import CategoryAlias
 
 
 class APIRoutes:
@@ -70,6 +71,12 @@ class APIRoutes:
             card_info = cls.card_info_manager.get_card_info(qs["thumbs_name"])
             ret = card_info.get_image_and_mask(mask_suffix = qs.get("mask_suffix", None))
             return JSONResponse(ret)
+        
+        @app.get(f"{endpoint_base}/refresh-category-alias")
+        async def refresh_category_alias(request: Request):
+            ''' サーバ内のカテゴリー Alias のリフレッシュを要求 '''
+            CategoryAlias().refresh_aliases()
+            return
 
 # Register to Gradio
 script_callbacks.on_app_started(lambda demo, app : APIRoutes.register_routes(app))
