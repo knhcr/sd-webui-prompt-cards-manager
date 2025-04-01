@@ -207,6 +207,8 @@ function pcmGeneratePrompt(currentText, text, category="", isReplace=true){
             const endIndex = mEnd.index + mEnd[0].length;
             currentText = currentText.slice(0, startIndex) + insertText + currentText.slice(endIndex);
             return currentText;
+        } else{
+            // fall through
         }
     }
 
@@ -218,7 +220,7 @@ function pcmGeneratePrompt(currentText, text, category="", isReplace=true){
     } else if (!currentText.endsWith('\n\n') ) {
         currentText += '\n';
     }
-    currentText += insertText;
+    currentText += insertText + "\n"; // 装飾行 + 改行で終わる
     return currentText;
 }
 
