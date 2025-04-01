@@ -27,6 +27,7 @@ Note that this extension does not have features to automatically generate prompt
 ## Update History
 * 2025/04/02
   - Added category alias functionality. ([category alias](#assigning-category-name-for-each-folders))
+  - bug fix.
 
 * 2025/03/31
   - Added yellow border to cards without card info json file.
