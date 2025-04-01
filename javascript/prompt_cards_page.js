@@ -36,7 +36,7 @@ async function pcmCardClick(event, tabname, thumbsName) {
         //  apply_resolution: False,
         //  resolution: {width: 1024, height: 1024} 
         //  category: 'pose', トップレベルフォルダ名
-        //  no_data: true/false, サーバにtxtもjsonも無い場合は true
+        //  has_some_data: true/false, サーバにtxtもjsonも無い場合は false
         //}
         PCM_DEBUG_PRINT(`tab: ${tabname} pcmCardClick data`, JSON.stringify(data));
 
@@ -45,11 +45,10 @@ async function pcmCardClick(event, tabname, thumbsName) {
         return;
     }
 
-    if ('no_data' in data && data.no_data) return;
+    if (!data.has_some_data) return;
 
     let selectorTmp = '';
     let elemTmp = null;
-    
     
     // 置換モードで同じカードを連続クリックした場合、置換ではなく削除し、最後にクリックされたカード名をリセット
     if (data.isReplace && pcmLastClickedCard === thumbsName){
@@ -59,7 +58,6 @@ async function pcmCardClick(event, tabname, thumbsName) {
     }else{
         pcmLastClickedCard = thumbsName; // 最後にクリックされたカード名を更新
     }
-
 
     // プロンプト更新
     if (data.isReplace || data.prompt){ // isReplace が True の場合は空でも置換, False の場合は空だとスキップ
