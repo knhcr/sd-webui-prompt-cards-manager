@@ -26,6 +26,8 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/04/02
+  - Added functionality for opening current card folder via Windows Explorer. (Windows Only)
+  - Changed card display option checkboxes to icon buttons.
   - Added category alias functionality. ([category alias](#assigning-category-name-for-each-folders))
   - bug fix.
 
@@ -173,13 +175,16 @@ Note that this extension does not have features to automatically generate prompt
 
 
 ### Control Belt
-  - `SubDir` checkbox toggles whether to display cards in subfolders of the selected folder or not.
-  - `ShowDirName` checkbox toggles whether to display each card's folder path or not.
+  - `Image Fit` button : whether to display card images fitted.
+  - `Show Description` button : whether to display cards' descriptions.
+  - `Show DirName` button : whether to display cards' folder path.
+  - `Show SubDir` button : whether to display the cards in subfolders of the selected folder.
   - `Prompt Search` textbox filters cards by Prompt text of cards.
     + Both whitespace and comma work as word separator. (AND condition)
   - `Description Search` textbox filters cards by Description text of cards.
     + Whitespace works as word separator. (AND condition)
-
+  - `Open Folder` button : open current card folder by Windows Explorer. (Windows Only)
+    + If you use a1111/forge remotely via network, disable this functionality from Settings.
 
 ![ShowDirName](./docs/images/showDirName.png)
 
@@ -235,3 +240,19 @@ Note that this extension does not have features to automatically generate prompt
 
 ## Settings
 * In the WebUI's Settings under `Uncategorized` > `Prompt Cards Manager`, you can configure various default values when loading new images and settings for when setting images to ControlNet
+
+
+# Credits
+This extension uses the folloing third-party resouces.
+
+## Icons
+* https://www.svgrepo.com/svg/485431/info-1, LICENSE: CC Attribution License, AUTHOR: Anastasia Savenko
+* https://www.svgrepo.com/svg/335585/lock-unlocked, LICENSE: MIT License, AUTHOR: BrightspaceUI
+* https://www.svgrepo.com/svg/335586/lock, LICENSE: MIT License, AUTHOR: BrightspaceUI
+* https://www.svgrepo.com/svg/524192/upload-square, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/524193/upload-twice-square, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/371822/details, LICENSE: MIT License, AUTHOR: vmware
+* https://www.svgrepo.com/svg/376060/file-tree, LICENSE: MIT License, AUTHOR: Gitlab
+* https://www.svgrepo.com/svg/435987/window, LICENSE: MIT License, AUTHOR: Flux Icons
+* https://www.svgrepo.com/svg/532815/folder-exclamation, LICENSE: CC Attribution License, AUTHOR: Dazzle UI
+* https://www.svgrepo.com/svg/525443/minimize-square-minimalistic, LICENSE: CC Attribution License, AUTHOR: Solar Icons

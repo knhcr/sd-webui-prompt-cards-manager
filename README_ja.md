@@ -26,6 +26,8 @@ etc.
 -----------------------------------------------------------------------------------------------------------------------------
 ## 更新履歴
 * 2025/04/02
+  - 開いているカードフォルダをエクスプローラで開くボタンをタブ右上に追加 (Windows Only)
+  - カード表示オプションをチェックボックスからアイコンに変更
   - カードのカテゴリにエイリアスを設定する機能を追加 ([カテゴリエイリアス](#フォルダ毎にカテゴリ名を明示的に指定))
   - bug fix.
 
@@ -170,12 +172,16 @@ etc.
   - `Ctrl + 0` / `Alt + 0` : カテゴリ切り替えの Undo / Redo が行えます
 
 ### コントロールベルト
-  - `SubDir` チェックボックス : 選択中のフォルダのサブフォルダのカードも表示するか否か
-  - `ShowDirName` チェックボックス : カードにフォルダ名も表示するか否か
-  - `Prompt Search` テキストボックス : カードに登録したプロンプトからマッチするものをフィルタリング
+  - `Image Fit` ボタン : カードの画像をフィットさせて表示するか否か
+  - `Show Description` ボタン : カードに Description を表示するか否か
+  - `Show DirName` ボタン : カードにフォルダ名も表示するか否か
+  - `Show SubDir` ボタン : 選択中のフォルダのサブフォルダのカードも表示するか否か
+  - `Prompt Search` ボタン : カードに登録したプロンプトからマッチするものをフィルタリング
     + 半角スペースと半角カンマの両方をセパレータとしてAND条件を指定可能
-  - `Description Search` テキストボックス : カードに登録した Description からマッチするものをフィルタリング
+  - `Multiple Search` テキストボックス : カードに登録した Description, Prompt, カードファイルのパス の何れかにマッチするものをフィルタリング
     + 半角スペースをセパレータとしてAND条件を指定可能
+  - `Open Folder` ボタン : 現在開いているカードフォルダをエクスプローラで開く (Windows Only)
+    + サーバをネットワークに公開してリモートから接続する形で利用している場合は Settings から機能を無効にしてください
 
 ![ShowDirName](./docs/images/showDirName.png)
 
@@ -231,5 +237,17 @@ etc.
 ## Settings
 * WebUI の Settings の `Uncategorized` > `Prompt Cards Manager` で新しい画像を読み込んだ際の各種デフォルト値や、ControlNet に画像をセットする際の値の設定が行えます
 
+# Credits
+This extension uses the folloing third-party resouces.
 
-
+## Icons
+* https://www.svgrepo.com/svg/485431/info-1, LICENSE: CC Attribution License, AUTHOR: Anastasia Savenko
+* https://www.svgrepo.com/svg/335585/lock-unlocked, LICENSE: MIT License, AUTHOR: BrightspaceUI
+* https://www.svgrepo.com/svg/335586/lock, LICENSE: MIT License, AUTHOR: BrightspaceUI
+* https://www.svgrepo.com/svg/524192/upload-square, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/524193/upload-twice-square, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/371822/details, LICENSE: MIT License, AUTHOR: vmware
+* https://www.svgrepo.com/svg/376060/file-tree, LICENSE: MIT License, AUTHOR: Gitlab
+* https://www.svgrepo.com/svg/435987/window, LICENSE: MIT License, AUTHOR: Flux Icons
+* https://www.svgrepo.com/svg/532815/folder-exclamation, LICENSE: CC Attribution License, AUTHOR: Dazzle UI
+* https://www.svgrepo.com/svg/525443/minimize-square-minimalistic, LICENSE: CC Attribution License, AUTHOR: Solar Icons
