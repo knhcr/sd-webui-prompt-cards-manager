@@ -74,7 +74,7 @@ class PromptCardInfoManager:
 
             org_name = html.escape(os.path.splitext(rel_path)[0])
 
-            DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info_for_search org_name: {org_name}")
+            #DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info_for_search org_name: {org_name}")
 
             ret[org_name] = {
                 "path": search_path,
