@@ -485,7 +485,18 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
     margin-right: -7px;
 }
 
+.pcm-control-belt-btn{
+    display: flex;
+    align-items:center;
+    width: 26px;
+    cursor: pointer;
+}
 
+
+.pcm-control-belt-btn:not(.enabled) > img.on,
+.pcm-control-belt-btn.enabled > img.off{
+    display: none;
+}
 
 /*#endregion Control Belt ------------------------------------*/
 
