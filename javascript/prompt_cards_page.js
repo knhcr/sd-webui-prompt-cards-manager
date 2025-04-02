@@ -228,6 +228,10 @@ function pcmGeneratePrompt(currentText, text, category="", isReplace=true){
         }
     }
 
+    if(insertText.length === 0){
+        return currentText;
+    }
+    
     // 単純に追加する 
     //  - 現在のテキストが空でない場合、上に空行を挟む
     if(currentText.length==0){
