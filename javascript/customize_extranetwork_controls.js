@@ -4,7 +4,7 @@
 const pcmAddSearchTextboxPrompt = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
-        PCM_DEBUG_PRINT(`pcm_add_search_textbox_prompt called : ${selector}`);
+        //PCM_DEBUG_PRINT(`pcm_add_search_textbox_prompt called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
 
         let elem = document.createElement('div');
@@ -17,7 +17,8 @@ const pcmAddSearchTextboxPrompt = ()=>{
         elem2.title = 'Search from card prompt.\n' +
                     'White spaces and commas are both treated as word separators.';
         elem.appendChild(elem2);
-        controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
+        //controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
+        controlsDiv.prepend(elem);
     
     }
 
@@ -40,7 +41,7 @@ const pcmAddSearchTextboxPrompt = ()=>{
 const pcmAddSearchTextboxDesc = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
-        PCM_DEBUG_PRINT(`pcm_add_search_textbox_desc called : ${selector}`);
+        //PCM_DEBUG_PRINT(`pcm_add_search_textbox_desc called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
 
         let elem = document.createElement('div');
@@ -55,8 +56,8 @@ const pcmAddSearchTextboxDesc = ()=>{
                     'Only white spaces are treated as word separators.';
 
         elem.appendChild(elem2);
-        controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
-    
+        //controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
+        controlsDiv.prepend(elem);
     }
 }
 
@@ -66,7 +67,7 @@ const pcmAddSearchTextboxDesc = ()=>{
 const pcmAddSubdirToggleCheckbox = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
-        PCM_DEBUG_PRINT(`pcm_add_subdir_toggle_checkbox called : ${selector}`);
+        //PCM_DEBUG_PRINT(`pcm_add_subdir_toggle_checkbox called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
         // ラベル
         const label = document.createElement('label');
@@ -89,12 +90,11 @@ const pcmAddSubdirToggleCheckbox = ()=>{
 }
 
 /* --------------------------------------------------------------------------------------*/
-
 /** dirname toggle checkbox */
 const pcmAddDirnameToggleCheckbox = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
-        PCM_DEBUG_PRINT(`pcm_add_dirname_toggle_checkbox called : ${selector}`);
+        //PCM_DEBUG_PRINT(`pcm_add_dirname_toggle_checkbox called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
         // ラベル
         const label = document.createElement('label');
@@ -134,12 +134,11 @@ function _pcmRefreshHideDirName(tabname) {
 }
 
 /* --------------------------------------------------------------------------------------*/
-
 /** show description toggle checkbox */
 const pcmAddShowDescToggleCheckbox = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
-        PCM_DEBUG_PRINT(`pcm_add_show_desc_toggle_checkbox called : ${selector}`);
+        //PCM_DEBUG_PRINT(`pcm_add_show_desc_toggle_checkbox called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
         // ラベル
         const label = document.createElement('label');
@@ -173,12 +172,11 @@ function _pcmRefreshShowDesc(tabname) {
     }
 }
 /* --------------------------------------------------------------------------------------*/
-
 /** image fit checkbox */
 const pcmAddImageFitCheckbox = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
-        PCM_DEBUG_PRINT(`pcm_add_image_fit_checkbox called : ${selector}`);
+        //PCM_DEBUG_PRINT(`pcm_add_image_fit_checkbox called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
         // ラベル
         const label = document.createElement('label');
@@ -212,13 +210,54 @@ function _pcmRefreshImageFit(tabname){
     }
 }
 
+/* --------------------------------------------------------------------------------------*/
+/** open folder button */
+const pcmAddOpenFolderButton = ()=>{
+    for (let tabname of ['txt2img', 'img2img']){
+        const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        //PCM_DEBUG_PRINT(`pcm_add_open_folder_button called : ${selector}`);
+        const controlsDiv = gradioApp().querySelector(selector);
+
+        // Open Folder Button
+        const openFolderButton = document.createElement('div');
+        openFolderButton.id = `${tabname}_pcm_open_folder_btn`;
+        openFolderButton.classList.add('pcm-open-folder-btn');
+        openFolderButton.innerHTML = `<img src="${PCM_API_ENDPOINT_BASE}/resources/window-svgrepo-com.svg" alt="Open Folder">`;
+        openFolderButton.title = 'Open Folder by Explorer (Windows Only)';
+        openFolderButton.addEventListener('click', function() {
+            _pcmOpenFolder(tabname);
+        });
+        controlsDiv.prepend(openFolderButton); // 先頭に追加
+    }
+}
+
+function _pcmOpenFolder(tabname){
+    PCM_DEBUG_PRINT(`pcmOpenFolder called : ${tabname}`);
+    let path = "";
+    let selected = gradioApp().querySelector(`#${tabname}_promptcards_tree .tree-list-content[data-selected]`);
+    if (selected){
+        selected = selected.parentElement;
+        path = pcmDirTreeElementToSearchPath(selected);
+        path = path.split('/').slice(1).join('/');
+    }else{
+        path = "";
+    }
+
+    const url = `${PCM_API_ENDPOINT_BASE}/open-folder?path=${path}`;
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+}
+
 
 /* --------------------------------------------------------------------------------------*/
 
-
-
 // checkbox 追加 (onUiLoaded では早すぎるため要素を監視)
 pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', ()=>{
+    pcmAddOpenFolderButton(); // 右端
     pcmAddSearchTextboxDesc();
     pcmAddSearchTextboxPrompt();
     pcmAddSubdirToggleCheckbox();

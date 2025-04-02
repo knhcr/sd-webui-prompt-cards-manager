@@ -182,6 +182,14 @@ def on_ui_settings():
         section=section
     ))
 
+    # open folder
+    shared.opts.add_option("prompt_cards_manager_open_folder_enabled", shared.OptionInfo(
+        True,
+        "Enable the button for opening the folder in Explorer (Windows Only).\n"+\
+        "!! IMPORTANT !! If you publicly open your a1111 server via the internet, never enable this option. This is for local only.",
+        section=section
+    ))
+
 
 # コールバック登録
 script_callbacks.on_ui_settings(on_ui_settings)

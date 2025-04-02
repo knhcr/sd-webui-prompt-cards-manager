@@ -9,7 +9,6 @@ from scripts.pcm.prompt_card_info import PromptCardInfoManager, PromptCardInfo
 from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.utility import filter_walk
 
-
 class PromptCardsPage(ExtraNetworksPage):
     """ PromptCards タブのページ, 標準のExtraNetworksPageを無理矢理再利用 """
 
@@ -282,3 +281,23 @@ class PromptCardsPage(ExtraNetworksPage):
 # ページを登録
 script_callbacks.on_before_ui(lambda : ui_extra_networks.register_page(PromptCardsPage()))
 
+
+def open_folder_win(path: str):
+    ''' Explorer でフォルダを開く (Windows Only)
+    path: フォルダのパス (image_folder からの相対パス, sep は '/')
+    '''
+    if not shared.opts.prompt_cards_manager_open_folder_enabled:
+        return
+    base_path = os.path.normpath(os.path.join(extension_root_path, image_folder))
+    if not os.path.exists(base_path):
+        return
+    target = os.path.normpath(os.path.join(base_path, path))
+    if not os.path.exists(target):
+        target = base_path
+
+    try:
+        DEBUG_PRINT(f"open_folder_win target: {target}")
+        os.startfile(target)
+    except Exception as e:
+        print(f"PromptCardsManager: Folder Open Error: {e}")
+        print(traceback.format_exc())

@@ -1,58 +1,5 @@
-/* カスタムボタンに影を追加 */
-.pcm-svg-icon > svg {
-    filter: drop-shadow(4px 4px 6px rgba(0, 0, 0, 0.5));
-}
-
-/* ホバー時のアイコン切り替え */
-.pcm-send-with-cnet-button .normal-icon,
-.pcm-send-with-cnet-mask-button .normal-icon,
-.pcm-info-edit-button .normal-icon {
-    display: inline-block;
-}
-
-.pcm-send-with-cnet-button .hover-icon,
-.pcm-send-with-cnet-mask-button .hover-icon,
-.pcm-info-edit-button .hover-icon {
-    display: none;
-}
-
-.pcm-send-with-cnet-button:hover .normal-icon,
-.pcm-send-with-cnet-mask-button:hover .normal-icon,
-.pcm-info-edit-button:hover .normal-icon {
-    display: none;
-}
-
-.pcm-send-with-cnet-button:hover .hover-icon,
-.pcm-send-with-cnet-mask-button:hover .hover-icon,
-.pcm-info-edit-button:hover .hover-icon {
-    display: inline-block;
-}
-
-/* CNet 無効のカードは CNet ボタンを非表示にする */
-.cnet-disabled.pcm-send-with-cnet-button,
-.cnet-disabled.pcm-send-with-cnet-mask-button {
-    display: none;
-}
-
-/* CNet Mask は現状未実装 [TODO] */
-.pcm-send-with-cnet-mask-button {
-    display: none;
-}
-
-/* カード情報がないカード */
-.card.no-card-info {
-    border-width: 3px;
-    border-color: #ffff00;
-}
-
-/* カードの表示 */
-#txt2img_promptcards_cards > .card > img,
-#img2img_promptcards_cards > .card > img{
-    background-color:#ffffff;
-}
-
-/*-------------------------------------------------------------------*/
-/* モーダル背景オーバーレイ*/
+/*#region Card Editor Modal ------------------------------------*/
+/* 背景オーバーレイ */
 .pcm-pie-overlay {
     position: fixed;
     top: 0;
@@ -307,9 +254,9 @@
     font-size: 0.9em;
 }
 
-/* ---------------------------------------------------- */
-/* ExtraNetworksのTreeView */
+/*#endregion Card Editor Modal ------------------------------------*/
 
+/*#region ExtraNetworks : TreeView ------------------------------------*/
 /* ファイルアイテム非表示 */
 #txt2img_promptcards_tree .tree-list-item[data-tree-entry-type="file"],
 #img2img_promptcards_tree .tree-list-item[data-tree-entry-type="file"] {
@@ -329,9 +276,9 @@
     width: 300px;
     flex: none;
 }
+/*#endregion ExtraNetworks : TreeView ------------------------------------*/
 
-/* ---------------------------------------------------- */
-/* Mini Gallery */
+/*#region Mini Gallery ------------------------------------*/
 #pcm_mini_gallery_column{
     gap: 9px;
 }
@@ -344,7 +291,7 @@
     border-color: rgb(55,65,81);
 }
 
-/* -- resolution -- */
+/*#region Mini Gallery : resolution ------------------------------------*/
 /* slider */
 #pcm_mini_gallery_width{
     margin-top: 4px;
@@ -382,8 +329,9 @@
     top: 50%;
     transform: translateY(-50%);
 }
+/*#endregion Mini Gallery : resolution ------------------------------------*/   
 
-/* -- subseed -- */
+/*#region Mini Gallery : subseed ------------------------------------*/
 #pcm_mini_gallery_seed_group{
     margin-top: -2px;
     margin-bottom: -7px;
@@ -452,8 +400,9 @@ div:has(> .pcm_mini_gallery_subseed_input){
 #pcm_mini_gallery_subseed_strength.unchecked{
     opacity: 0.3;
 }
+/*#endregion Mini Gallery : subseed ------------------------------------*/
 
-/* -- cnet -- */
+/*#region Mini Gallery : cnet ------------------------------------*/
 #pcm_mini_gallery_cnet_group{
     margin-top: -2px;
     margin-bottom: -7px;
@@ -468,16 +417,20 @@ div:has(> .pcm_mini_gallery_subseed_input){
     margin-bottom: -7px;
     margin-top: 2px;
 }
+/*#endregion Mini Gallery : cnet ------------------------------------*/
 
+/*#endregion Mini Gallery ------------------------------------*/
 
-/*--------------------------------------*/
-/* control belt */
+/*#region Control Belt ------------------------------------*/
+/* hide default UI */
 div > #txt2img_promptcards_extra_search, div:has(> #txt2img_promptcards_extra_search),
-div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_search){
+div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_search),
+.extra-networks-controls-div #txt2img_promptcards_extra_sort,
+.extra-networks-controls-div #txt2img_promptcards_extra_sort_dir{
     display:none;
 }
 
-/* コントロールの整列 */
+/* belt layout */
 .extra-networks-controls-div #txt2img_promptcards_controls,
 .extra-networks-controls-div #img2img_promptcards_controls{
     display: flex;
@@ -485,14 +438,15 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
     gap: 0.5rem; /* 要素間の間隔 */
 }
 
-/* ラベル */
+/*#region Control Belt : checkbox ------------------------------------*/
+/* checkbox label */
 .pcm-checkbox-label {
     color: var(--body-text-color);
     margin-left: 5px;
     cursor: pointer;
 }
 
-/* チェックボックス */
+/* checkbox */
 .pcm-checkbox {
     width: 1.2em;
     height: 1.2em;
@@ -506,12 +460,11 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
     border-color: var(--checkbox-border-color);
     cursor: pointer;
 }
-
-/* チェックボックス */
 .pcm-checkbox:checked {
     background-color: var(--link-text-color);
     border-color: var(--link-text-color);
 }
+/*#endregion Control Belt : checkbox ------------------------------------*/
 
 /* 検索入力欄の幅を調整 */
 #txt2img_extra_tabs .extra-network-control--search-text,
@@ -520,30 +473,93 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
     width: 320px;
 }
 
-/* 不要なボタン */
-.extra-networks-controls-div #txt2img_promptcards_extra_sort,
-.extra-networks-controls-div #txt2img_promptcards_extra_sort_dir{
+/* button */
+#txt2img_pcm_open_folder_btn, #img2img_pcm_open_folder_btn{
+    display: flex;
+    align-items:center;
+    width: 26px;
+    cursor: pointer;
+}
+
+#txt2img_promptcards_extra_tree_view{
+    margin-right: -7px;
+}
+
+
+
+/*#endregion Control Belt ------------------------------------*/
+
+/*#region Card Design ------------------------------------*/
+/*#region Card Design : custom button ------------------------------------*/
+/* カスタムボタンに影を追加 */
+.pcm-svg-icon > svg {
+    filter: drop-shadow(4px 4px 6px rgba(0, 0, 0, 0.5));
+}
+
+/* ホバー時のアイコン切り替え */
+.pcm-send-with-cnet-button .normal-icon,
+.pcm-send-with-cnet-mask-button .normal-icon,
+.pcm-info-edit-button .normal-icon {
+    display: inline-block;
+}
+
+.pcm-send-with-cnet-button .hover-icon,
+.pcm-send-with-cnet-mask-button .hover-icon,
+.pcm-info-edit-button .hover-icon {
     display: none;
 }
 
-/*--------------------------------------*/
-/* card design */
-/* text */
+.pcm-send-with-cnet-button:hover .normal-icon,
+.pcm-send-with-cnet-mask-button:hover .normal-icon,
+.pcm-info-edit-button:hover .normal-icon {
+    display: none;
+}
+
+.pcm-send-with-cnet-button:hover .hover-icon,
+.pcm-send-with-cnet-mask-button:hover .hover-icon,
+.pcm-info-edit-button:hover .hover-icon {
+    display: inline-block;
+}
+
+/* CNet 無効のカードは CNet ボタンを非表示にする */
+.cnet-disabled.pcm-send-with-cnet-button,
+.cnet-disabled.pcm-send-with-cnet-mask-button {
+    display: none;
+}
+
+/* CNet Mask は現状未実装 [TODO] */
+.pcm-send-with-cnet-mask-button {
+    display: none;
+}
+/*#endregion Card Design : custom button ------------------------------------*/
+
+/* カード情報がないカード */
+.card.no-card-info {
+    border-width: 3px;
+    border-color: #ffff00;
+}
+
+/* カードテキスト部分 */
 :root{
     --card-name-font-size: 16px;
     --card-desc-color: #dbc09f;
 }
-
 #txt2img_promptcards_cards .name{
     font-size: var(--card-name-font-size);
 }
-
 #txt2img_promptcards_cards .description{
     color: var(--card-desc-color);
 }
 
-/* image fit */
+/* 画像の表示 */
+#txt2img_promptcards_cards > .card > img,
+#img2img_promptcards_cards > .card > img{
+    background-color:#ffffff;
+}
+
+/* 画像の fit */
 #txt2img_promptcards_cards .card > img.fit-contain,
 #img2img_promptcards_cards .card > img.fit-contain{
     object-fit: contain !important;
 }
+/*#endregion Card Design ------------------------------------*/

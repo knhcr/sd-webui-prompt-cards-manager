@@ -7,6 +7,7 @@ from scripts.pcm.constants import thumbs_folder, endpoint_base, extension_root_p
 from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.prompt_card_info import PromptCardInfoManager
 from scripts.pcm.category import CategoryAlias
+from scripts.pcm.prompt_cards_page_ui import open_folder_win
 
 
 class APIRoutes:
@@ -76,6 +77,15 @@ class APIRoutes:
         async def refresh_category_alias(request: Request):
             ''' サーバ内のカテゴリー Alias のリフレッシュを要求 '''
             CategoryAlias().refresh_aliases()
+            return
+        
+        @app.get(f"{endpoint_base}/open-folder")
+        async def open_folder(request: Request):
+            ''' Explorer でフォルダを開く (Windows Only) '''
+            qs = dict(request.query_params)
+            path = qs.get("path", "")
+            DEBUG_PRINT(f"API Routes.open_folder path: {path}")
+            open_folder_win(path)
             return
 
 # Register to Gradio
