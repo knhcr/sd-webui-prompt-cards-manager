@@ -1,68 +1,4 @@
 /**
- * 初期化処理 (UI ロード後に実行)
- */
-const pcmPieInitialize = async()=>{
-    PCM_DEBUG_PRINT('pcm_pie initialized');
-
-    // キーボードショートカット
-    window.addEventListener('keydown', pcmPieOnKeyDownEsc); // エスケープキー押下時にモーダルを閉じる
-    window.addEventListener('keydown', pcmPieOnKeyDownCtrlS); // Ctrl-S で保存
-   
-    // ボタンのツールチップ
-    //  - 右列データセットボタン
-    gradioApp().querySelector('#pcm_pie_data_set_prpt_btn').setAttribute(
-        'title', 'If the image contains png_info and prompt exists within it,\nfill the Prompt field with that value.');
-    gradioApp().querySelector('#pcm_pie_data_set_neg_btn').setAttribute(
-        'title', 'If the image contains png_info and negative prompt exists within it,\nfill the Negative Prompt field with that value.');
-    gradioApp().querySelector('#pcm_pie_data_set_res_btn').setAttribute(
-        'title', 'Set the resolution values based on the image,\nscaling them to about 1M pixels while keeping the aspect ratio.');
-    //  - チェックボックス
-    gradioApp().querySelector('#pcm_pie_is_replace_checkbox').setAttribute(
-        'title', 'When checked, the prompt and negative prompt will be enclosed with "##>" and "##<",\n'
-                 + 'and replaced by other prompt cards in replace mode.\n'
-                 + 'When unchecked, the prompt and negative prompt will simply be added to the end of text.');
-    gradioApp().querySelector('#pcm_pie_enable_cnet_checkbox').setAttribute(
-        'title', 'When checked, CNet Send button appears on card.');
-    gradioApp().querySelector('#pcm_pie_apply_resolution_checkbox').setAttribute(
-        'title', 'If checked, the resolution values will be applied to the generation parameters.\n'
-                 + 'If unchecked, the resolution values will be ignored and current resolution values will be used.');
-    //  - 解像度スライダ
-    gradioApp().querySelector('#pcm_pie_fix_aspect_ratio_btn_wrapper').setAttribute(
-        'title', 'Keep the current aspect ratio of the slider.');
-    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_d2').setAttribute(
-        'title', 'Divide the resolution by 2.');
-    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_8').setAttribute(
-        'title', 'Adjust the resolution to be a multiple of 8.');
-    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_64').setAttribute(
-        'title', 'Adjust the resolution to be a multiple of 64.');
-    // - フッターボタン
-    gradioApp().querySelector('#pcm_pie_close_btn').setAttribute(
-        'title', 'Cancel and close. [Esc]');
-    gradioApp().querySelector('#pcm_pie_save_btn').setAttribute(
-        'title', 'Save and close. [Ctrl-S');
-
-
-    // 解像度スライダのコールバック
-    gradioApp().querySelector('#pcm_pie_resolution_slider_width').addEventListener('input', pcmePieResolutionSliderOnchange);
-    gradioApp().querySelector('#pcm_pie_resolution_slider_height').addEventListener('input', pcmePieResolutionSliderOnchange);
-
-    // 解像度微調整ボタンのコールバック
-    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_d2').addEventListener('click', ()=>pcmPieMultipleResolution(0.5));
-    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_8').addEventListener('click', ()=>pcmPieAdjustResolutionToMultiple(8));
-    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_64').addEventListener('click', ()=>pcmPieAdjustResolutionToMultiple(64));
-
-    // 画像解像度セットボタンのコールバック
-    gradioApp().querySelector('#pcm_pie_data_set_res_btn').addEventListener('click', pcmPieSetResolutionFromImageText);
-
-    // 解像度適用チェックボックスのコールバック
-    gradioApp().querySelector('#pcm_pie_apply_resolution_checkbox').addEventListener('change', pcmPieApplyResolutionCheckboxOnchange);
-
-    // 解像度フッターのアスペクト比ボタンのコールバック
-    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_text_aspect_ratio_wrapper').addEventListener('click', toggleAspectRationBasis);
-};
-
-
-/**
 * ポーズ情報エディタモーダルを開く
 * @param {Event} event
 * @param {string} tabname - タブ名（不使用）
@@ -70,18 +6,15 @@ const pcmPieInitialize = async()=>{
 * @param {string} thumbsName - ファイル名
 */
 const pcmPieOpenModal = (event, tabname, extraNetworksTabname, thumbsName)=>{
-    // 念のため不要なイベントを止める
     if(event){
-        event.preventDefault();  // デフォルトのイベントをキャンセル
-        event.stopPropagation(); // バブル していた場合止める
+        event.preventDefault();
+        event.stopPropagation();
     }
 
-    // Gradio は同一 value の連続する input イベントを無視するのでノンスを入れる
-    // (ファイル名$タイムスタンプ)
+    // Gradio は同一 value の連続する input イベントを無視するのでノンスを入れる (ファイル名$タイムスタンプ)
     const nonce = Date.now();
     thumbsName = `${thumbsName}$${nonce}`; 
 
-    // イベント発火
     const filenameInput = gradioApp().querySelector('#pcm_filename_input textarea');
     filenameInput.value = thumbsName;
     filenameInput.dispatchEvent(new Event('input', {bubbles:true}));
@@ -232,9 +165,7 @@ const toggleAspectRationBasis = ()=>{
     _pcmPieUpdateAspectRatio();
 }
 
-/**
- * 解像度を指定の倍数に微調整する
- * @param {Event} event
+/** 解像度を指定の倍数に微調整する
  * @param {number} multiple - 倍数
 */
 const pcmPieAdjustResolutionToMultiple = (multiple)=>{
@@ -247,9 +178,7 @@ const pcmPieAdjustResolutionToMultiple = (multiple)=>{
     }
 }
 
-/**
- * 解像度を指定の倍率に変更する
- * @param {Event} event
+/** 解像度を指定の倍率に変更する
  * @param {number} multiple - 倍率
 */
 const pcmPieMultipleResolution = (multiple)=>{
@@ -262,16 +191,40 @@ const pcmPieMultipleResolution = (multiple)=>{
     }
 }
 
-/**
- * 画像の解像度テキストをスライダーにセットする
+/** 画像の解像度テキストをスライダーにセットする
+ * @param {number} sqrtPixel - 指定された場合、その値に近い64の倍数の解像度にスケールする
 */
-const pcmPieSetResolutionFromImageText = ()=>{
-    const width = parseFloat(gradioApp().querySelector('#pcm_pie_resolution_slider_width input[type="number"]').value);
-    const height = parseFloat(gradioApp().querySelector('#pcm_pie_resolution_slider_height input[type="number"]').value);
-    const width2 = parseInt(gradioApp().querySelector('#pcm_pie_image_resolution_text_w').textContent);
-    const height2 = parseInt(gradioApp().querySelector('#pcm_pie_image_resolution_text_h').textContent);
-    if(width2 !== width || height2 !== height){
-        _pcmPieSetResolution(width2, height2);
+const pcmPieSetResolutionFromImageText = (sqrtPixel = null)=>{
+    // [w, h]
+    const resSlider = [
+        parseInt(gradioApp().querySelector('#pcm_pie_resolution_slider_width input[type="number"]').value),
+        parseInt(gradioApp().querySelector('#pcm_pie_resolution_slider_height input[type="number"]').value)
+    ];
+    const resImage = [
+        parseInt(gradioApp().querySelector('#pcm_pie_image_resolution_text_w').textContent),
+        parseInt(gradioApp().querySelector('#pcm_pie_image_resolution_text_h').textContent)
+    ];
+    const [MIN, MAX] = [64, 8192];
+    let resTarget = [...resImage];
+
+    // 指定されたスケールに調整
+    if(sqrtPixel !== null){
+        const orgPixel = Math.sqrt(resImage[0] * resImage[1]);
+        for(let i=0; i<resTarget.length; i++){
+            resTarget[i] = Math.round(resImage[i] * sqrtPixel / orgPixel);
+            resTarget[i] = Math.round(resTarget[i] / 64) * 64; // 64 の倍数にする
+        }
+    }
+    PCM_DEBUG_PRINT(`pcmPieSetResolutionFromImageText called : ` + 
+        `sqrtPixel : ${sqrtPixel}, resSlider : ${resSlider}, resImage : ${resImage}, resTarget : ${resTarget}`);
+
+    for(let i=0; i<resTarget.length; i++){
+        if(resTarget[i] < MIN) resTarget[i] = MIN;
+        if(resTarget[i] > MAX) resTarget[i] = MAX;
+    }
+
+    if(resTarget[0] !== resSlider[0] || resTarget[1] !== resSlider[1]){
+        _pcmPieSetResolution(resTarget[0], resTarget[1]);
     }
 }
 
@@ -380,6 +333,64 @@ const pcmPieApplyResolutionCheckboxOnchange = ()=>{
         !gradioApp().querySelector('#pcm_pie_apply_resolution_checkbox input[type="checkbox"]').checked);
 }
 
-// 初期化処理を登録
-//onUiLoaded(pcmPieInitialize);
+const pcmPieInitialize = async()=>{
+    PCM_DEBUG_PRINT('pcm_pie initialized');
+
+    // キーボードショートカット
+    window.addEventListener('keydown', pcmPieOnKeyDownEsc); // エスケープキー押下時にモーダルを閉じる
+    window.addEventListener('keydown', pcmPieOnKeyDownCtrlS); // Ctrl-S で保存
+   
+    // ボタンのツールチップ
+    //  - 右列データセットボタン
+    gradioApp().querySelector('#pcm_pie_data_set_prpt_btn').setAttribute(
+        'title', 'If the image contains png_info and prompt exists within it,\nfill the Prompt field with that value.');
+    gradioApp().querySelector('#pcm_pie_data_set_neg_btn').setAttribute(
+        'title', 'If the image contains png_info and negative prompt exists within it,\nfill the Negative Prompt field with that value.');
+    gradioApp().querySelector('#pcm_pie_data_set_res_btn').setAttribute(
+        'title', 'Set the resolution values based on the image,\nscaling them to about 1M pixels while keeping the aspect ratio.');
+    //  - チェックボックス
+    gradioApp().querySelector('#pcm_pie_is_replace_checkbox').setAttribute(
+        'title', 'When checked, the prompt and negative prompt will be enclosed with "##>" and "##<",\n'
+                 + 'and replaced by other prompt cards in replace mode.\n'
+                 + 'When unchecked, the prompt and negative prompt will simply be added to the end of text.');
+    gradioApp().querySelector('#pcm_pie_enable_cnet_checkbox').setAttribute(
+        'title', 'When checked, CNet Send button appears on card.');
+    gradioApp().querySelector('#pcm_pie_apply_resolution_checkbox').setAttribute(
+        'title', 'If checked, the resolution values will be applied to the generation parameters.\n'
+                 + 'If unchecked, the resolution values will be ignored and current resolution values will be used.');
+    //  - 解像度スライダ
+    gradioApp().querySelector('#pcm_pie_fix_aspect_ratio_btn_wrapper').setAttribute(
+        'title', 'Keep the current aspect ratio of the slider.');
+    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_d2').setAttribute(
+        'title', 'Divide the resolution by 2.');
+    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_8').setAttribute(
+        'title', 'Adjust the resolution to be a multiple of 8.');
+    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_64').setAttribute(
+        'title', 'Adjust the resolution to be a multiple of 64.');
+    // - フッターボタン
+    gradioApp().querySelector('#pcm_pie_close_btn').setAttribute(
+        'title', 'Cancel and close. [Esc]');
+    gradioApp().querySelector('#pcm_pie_save_btn').setAttribute(
+        'title', 'Save and close. [Ctrl-S');
+
+
+    // 解像度スライダのコールバック
+    gradioApp().querySelector('#pcm_pie_resolution_slider_width').addEventListener('input', pcmePieResolutionSliderOnchange);
+    gradioApp().querySelector('#pcm_pie_resolution_slider_height').addEventListener('input', pcmePieResolutionSliderOnchange);
+
+    // 解像度微調整ボタンのコールバック
+    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_d2').addEventListener('click', ()=>pcmPieMultipleResolution(0.5));
+    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_8').addEventListener('click', ()=>pcmPieAdjustResolutionToMultiple(8));
+    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_btn_64').addEventListener('click', ()=>pcmPieAdjustResolutionToMultiple(64));
+
+    // 画像解像度セットボタンのコールバック
+    gradioApp().querySelector('#pcm_pie_data_set_res_btn').addEventListener('click', pcmPieSetResolutionFromImageText.bind(null,1024));
+
+    // 解像度適用チェックボックスのコールバック
+    gradioApp().querySelector('#pcm_pie_apply_resolution_checkbox').addEventListener('change', pcmPieApplyResolutionCheckboxOnchange);
+
+    // 解像度フッターのアスペクト比ボタンのコールバック
+    gradioApp().querySelector('#pcm_pie_resolution_slider_footer_text_aspect_ratio_wrapper').addEventListener('click', toggleAspectRationBasis);
+};
+
 pcmWaitForContent('#pcm_pie_data_set_prpt_btn', pcmPieInitialize);
