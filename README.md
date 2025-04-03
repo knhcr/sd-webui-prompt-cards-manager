@@ -26,6 +26,9 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/04/02
+  - Changed Card Edit Window Resolution button behavior.
+
+* 2025/04/02
   - Added functionality for opening current card folder via Windows Explorer. (Windows Only)
   - Changed card display option checkboxes to icon buttons.
   - Added category alias functionality. ([category alias](#assigning-category-name-for-each-folders))
@@ -234,7 +237,7 @@ Note that this extension does not have features to automatically generate prompt
 * Set Data from Image Metadata buttons in the right column
   - Prompt: If the card image was AI-generated (precisely, if it contains Stable Diffusion metadata), copies the Prompt from the metadata to the Prompt area on the left
   - Negative Prompt: Same as Prompt
-  - Resolution: Copies the resolution values of the card image to the resolution sliders on the left
+  - Resolution: Copies the resolution values of the card image to the resolution sliders on the left column with scaling its value to 1024 resolution size.
 
 * You can also use the `Esc` key instead of the Cancel button to cancel this screen
 
