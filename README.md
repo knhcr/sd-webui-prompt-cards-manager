@@ -241,6 +241,14 @@ Note that this extension does not have features to automatically generate prompt
 ## Settings
 * In the WebUI's Settings under `Uncategorized` > `Prompt Cards Manager`, you can configure various default values when loading new images and settings for when setting images to ControlNet
 
+# Known Issues
+*  To enable handling a large number of images in the browser, this extension generates lightweight thumbnail images and caches
+  them when loading new images.
+   If you add or modify a large number of images all at once (e.g., several hundreds) and then press the update button,
+  the processing time can be significant. This may trigger a timeout on the framework's side, potentially causing the PromptCards tab
+  to remain stuck on a black screen. (This issue should stem from an outdated Gradio callback chain problem.)
+   However, there is no issue with the server-side internal processing - it completes successfully regardless of the timeout.
+  If this happens, simply reload the browser page, and the next time you push refresh button, everything shoud load correctly.
 
 # Credits
 This extension uses the folloing third-party resouces.
