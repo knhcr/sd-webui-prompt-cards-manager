@@ -355,6 +355,12 @@ function pcmCardPageSwitchCategory(number, tabname){
         }
     }
     target.querySelector(`:scope > .tree-list-content`).click();
+    // 対象カテゴリ以外のカテゴリのノードを折り畳む
+    for (const elem of categorieElems){
+        if(elem !== targetCategoryElem){
+            pcmCollapseDirItem(tabname, elem);
+        }
+    }
 }
 
 /** Ctrl + 0, Alt + 0 で Undo/Redo の click を発火
