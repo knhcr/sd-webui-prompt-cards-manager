@@ -173,9 +173,13 @@ class PcmCardSearch {
             }
 
             await pDomUpadated; // DOM の更新を待機
+            if(isTimeout){
+                PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} timeout`);
+                return;
+            }
 
             // クエリの再適用
-            if(!isTimeout) PcmCardSearch.updateMatch(tabname, true);
+            PcmCardSearch.updateMatch(tabname, true);
 
             // 検索パスを引き継いだ場合ツリーを展開
             if(keptPath !== null){
@@ -613,57 +617,62 @@ pcmWaitForContent('#txt2img_promptcards_extra_refresh', ()=>{
     }
 });
 
-/** Extra Networks の PromptCards タブボタン Callback */
-pcmWaitForContent('#txt2img_extra_tabs', async ()=>{
-    await pcmSleepAsync(200);
-    for (const tabname of ['txt2img', 'img2img']){
-        const elem = pcmGetElementBySelectorAndText(`#${tabname}_extra_tabs button`, 'PromptCards');
-        if(elem){
-            elem.addEventListener('click', async (event)=>{
-                if (!elem.classList.contains('selected')){ // PromptCards タブの外から PromptCards タブに入ってくる場合
-                    PCM_DEBUG_PRINT(`pcmPromptCardsOnClick: ${tabname} clicked.`);
-                    if (!PcmCardSearch.isInitialized[tabname]){
-                        PCM_DEBUG_PRINT(`pcmPromptCardsOnClick: ${tabname} : first time.`);
-                        // 初回はカードリスト更新し、ルートノードを expand -> 一旦無し
-                        //await PcmCardSearch.updateCards(tabname);
+/** Extra Networks の PromptCards タブボタンに Callback を貼り直し続ける Observer */
+pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', async ()=>{
+    /* [a1111 標準のタブ切り替え動作]
+    * - UIロード後の初回クリック
+    *   + 前回の最後のカードがキャッシュから読まれる
+    *   + PCM で付与している title や leaf マークは無い
+    *   + root ノード collapse 状態
+    * - 2回目以降のクリック
+    *   + カードの hidden 属性が全て削除される
+    *   + dir tree の選択状態, collapse 状態は維持される
+    *   + タブボタン自体はクリックするたびに全て再生成されるため、その都度 イベントリスナーを張り付ける必要あり
+    */
+    let isTabOpenedOnce = {txt2img: false, img2img: false};
+    let o = new MutationObserver((ms)=>{
+        // tabname の特定
+        let tabname = null;
+        for (const tmp of ['txt2img', 'img2img']){
+            const container = document.querySelector(`#${tmp}_extra_tabs > .tab-nav`);
+            if (container && container.contains(ms[0].target)){
+                tabname = tmp;
+                break;
+            }
+        }
+        if (!tabname) return;
 
-                        // 一応DOMに現れるまで待つ
-                        const rootElem = await pcmQuerySelectorAsync(`#${tabname}_promptcards_tree > ul > li > div`)
-                        if(!rootElem) return;
-                        pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
-                        pcmTreeViewSetLeafDirMark(tabname); // ツリービューの葉ノードにマークをセット
-                        rootElem.click();
-                        pcmApplyShowOptions(tabname); // 表示オプションの適用
-                        
-                        // 2回目以降のクリックでは、カードの hidden 属性が全て削除されるので DOM Update を行う処理を追加する
-                        //   - 別タブに移動すると、カレントのタブ要素 (button) は削除されて再生成される模様 (eventListner も属性も毎回消える)
-                        //   - 親要素のアイテム追加を mutationObserver で監視してその都度 イベントリスナーを張り付ける
-                        let o = new MutationObserver((ms)=>{
-                            const elem = pcmGetElementBySelectorAndText(`#${tabname}_extra_tabs button`, 'PromptCards');
-                            if(elem){
-                                // 初期化済みマークを付けて現在のDOM要素には既に event ハンドラが張られているか否かの目印とする
-                                if (!elem.hasAttribute('pcm-onclick-set')){
-                                    elem.toggleAttribute('pcm-onclick-set', true);
-                                    elem.addEventListener('click', async ()=>{
-                                        // どのタブか判定してDOM更新
-                                        for (const tabname of ['txt2img', 'img2img']){
-                                            const container = document.querySelector(`#${tabname}_extra_tabs > .tab-nav`);
-                                            if (container && container.contains(ms[0].target)){
-                                                PCM_DEBUG_PRINT(`pcmPromptCards Tab OnClick: ${tabname}`);
-                                                await pcmSleepAsync(50);
-                                                PcmCardSearch.updateDom(tabname);
-                                                return;
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                        o.observe(document.querySelector(`#${tabname}_extra_tabs > .tab-nav`), {childList: true, subtree: false});
-                    }
+        // PromptCards タブボタンの取得
+        const elem = pcmGetElementBySelectorAndText(`#${tabname}_extra_tabs button`, 'PromptCards');
+        if(!elem) return;
+
+        // hidden 属性を貼り直すための event handler をセット
+        if (!elem.hasAttribute('pcm-onclick-set')){ // 初期化済みマークを付けて既に貼られているか判定
+            elem.toggleAttribute('pcm-onclick-set', true);
+            elem.addEventListener('click', async ()=>{
+                PCM_DEBUG_PRINT(`pcmPromptCards Tab OnClick: ${tabname}`);
+                if(!isTabOpenedOnce[tabname]){
+                    // 初回クリック時
+                    isTabOpenedOnce[tabname] = true;
+                    await pcmSleepAsync(100);
+                    //await PcmCardSearch.updateCards(tabname); // カードリスト更新
+                    const rootElem = await pcmQuerySelectorAsync(`#${tabname}_promptcards_tree > ul > li > div`)
+                    if(!rootElem) return;
+                    pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
+                    pcmTreeViewSetLeafDirMark(tabname); // ツリービューの葉ノードにマークをセット
+                    rootElem.click();
+                    pcmApplyShowOptions(tabname); // 表示オプションの適用
                 }
+                else{
+                    await pcmSleepAsync(20);
+                    PcmCardSearch.updateDom(tabname);
+                }
+                return;
             });
         }
+    });
+    for (const tabname of ['txt2img', 'img2img']){
+        o.observe(document.querySelector(`#${tabname}_extra_tabs > .tab-nav`), {childList: true, subtree: false});
     }
 });
 
