@@ -1,6 +1,4 @@
-/** search textbox : prompt 
- * PcmCardSearch クラスを利用するため、custom_tree_button.js で event listner を追加
-*/
+/** search textbox : prompt */
 const pcmAddSearchTextboxPrompt = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
@@ -16,10 +14,11 @@ const pcmAddSearchTextboxPrompt = ()=>{
         elem2.placeholder = 'Search from Prompt';
         elem2.title = 'Search from card prompt.\n' +
                     'White spaces and commas are both treated as word separators.';
+        elem2.addEventListener('input', ()=>{
+            pcmPromptSearchCallback(tabname);
+        });
         elem.appendChild(elem2);
-        //controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
         controlsDiv.prepend(elem);
-    
     }
 
     // register to tag autocomplete
@@ -34,10 +33,17 @@ const pcmAddSearchTextboxPrompt = ()=>{
     }    
 
 }
+/** Prompt Search Callback */
+function pcmPromptSearchCallback(tabname){
+    const elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_search_prompt`);
+    if(!elem) return;
+    let query = elem.value;
+    if (query === null || query === undefined) query = "";
+    PcmCardSearch.updateQuery(tabname, "prompt", query, true);
+}
 
-/** search textbox : Description
- * PcmCardSearch クラスを利用するため、custom_tree_button.js で event listner を追加
-*/
+/* --------------------------------------------------------------------------------------*/
+/** search textbox : Description */
 const pcmAddSearchTextboxDesc = ()=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
@@ -54,11 +60,20 @@ const pcmAddSearchTextboxDesc = ()=>{
         elem2.title = 'Search from path and prompt and description.\n' +
                     'If one of them matches, the card will be shown.\n' + 
                     'Only white spaces are treated as word separators.';
-
+        elem2.addEventListener('input', ()=>{
+            pcmDescSearchCallback(tabname);
+        });
         elem.appendChild(elem2);
-        //controlsDiv.insertBefore(elem, controlsDiv.firstChild.nextSibling); // ラベルの後に追加
         controlsDiv.prepend(elem);
     }
+}
+/** Desc Search Callback */
+function pcmDescSearchCallback(tabname){
+    const elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_search_desc`);
+    if(!elem) return;
+    let query = elem.value;
+    if (query === null || query === undefined) query = "";
+    PcmCardSearch.updateQuery(tabname, "desc", query, true);
 }
 
 /* --------------------------------------------------------------------------------------*/
@@ -109,7 +124,6 @@ function pcmSubdirToggle(tabname, asis=false) {
         PcmCardSearch.updateQuery(tabname, "path", search_text);
     }
 }
-
 
 /* --------------------------------------------------------------------------------------*/
 /** dirname toggle button */
@@ -258,9 +272,20 @@ function pcmOpenFolder(tabname){
     });
 }
 
+/* --------------------------------------------------------------------------------------*/
+/** Card List Refresh Button Callback */
+function pcmRefreshCardListButtonSetCallback(){
+    for (const tabname of ['txt2img', 'img2img']){
+        let elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_refresh`);
+        if(elem){
+            elem.addEventListener('click', ()=>{
+                PcmCardSearch.updateCards(tabname);
+            });
+        }
+    }
+}
 
 /* --------------------------------------------------------------------------------------*/
-
 // checkbox 追加 (onUiLoaded では早すぎるため要素を監視)
 pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', ()=>{
     pcmAddOpenFolderButton();
@@ -270,4 +295,5 @@ pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', 
     pcmAddDirnameToggleBtn();
     pcmAddShowDescToggleBtn();
     pcmAddImageFitBtn();
+    pcmRefreshCardListButtonSetCallback();
 });
