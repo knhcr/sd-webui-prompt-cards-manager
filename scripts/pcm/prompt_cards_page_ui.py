@@ -236,6 +236,9 @@ class PromptCardsPage(ExtraNetworksPage):
 
         subdirs = {}
         for parentdir in [os.path.abspath(x) for x in self.allowed_directories_for_previews()]:
+            if not os.path.exists(parentdir):
+                break
+
             for root, dirs, _ in sorted(filter_walk(parentdir, ignore_dot_starts=shared.opts.prompt_cards_manager_ignore_dot_starts), key=lambda x: shared.natural_sort_key(x[0])):
                 for dirname in sorted(dirs, key=shared.natural_sort_key):
                     x = os.path.join(root, dirname)
@@ -268,12 +271,13 @@ class PromptCardsPage(ExtraNetworksPage):
         if subdirs:
             subdirs = {"": 1, **subdirs}
 
+        dir_names = [x.replace('\\', '/') for x in subdirs.keys()]
 
         subdirs_html = "".join([f"""
         <button class='lg secondary gradio-button custom-button{" search-all" if subdir == "" else ""}' onclick='extraNetworksSearchButton("{tabname}", "{self.extra_networks_tabname}", event)'>
         {html.escape(subdir if subdir != "" else "all")}
         </button>
-        """ for subdir in subdirs])
+        """ for subdir in dir_names])
 
         return subdirs_html
 

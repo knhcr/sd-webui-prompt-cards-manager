@@ -425,9 +425,15 @@ div:has(> .pcm_mini_gallery_subseed_input){
 /* hide default UI */
 div > #txt2img_promptcards_extra_search, div:has(> #txt2img_promptcards_extra_search),
 div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_search),
-.extra-networks-controls-div #txt2img_promptcards_extra_sort,
-.extra-networks-controls-div #txt2img_promptcards_extra_sort_dir{
-    display:none;
+.extra-networks-controls-div #txt2img_promptcards_extra_sort, .extra-networks-controls-div #img2img_promptcards_extra_sort,
+.extra-networks-controls-div #txt2img_promptcards_extra_sort_dir, .extra-networks-controls-div #img2img_promptcards_extra_sort_dir,
+#txt2img_promptcards_controls > small, #img2img_promptcards_controls > small,
+#txt2img_promptcards_extra_sort_path, #img2img_promptcards_extra_sort_path,
+#txt2img_promptcards_extra_sort_name, #img2img_promptcards_extra_sort_name,
+#txt2img_promptcards_extra_sort_date_created, #img2img_promptcards_extra_sort_date_created,
+#txt2img_promptcards_extra_sort_date_modified, #img2img_promptcards_extra_sort_date_modified 
+{
+  display: none;
 }
 
 /* belt layout */
