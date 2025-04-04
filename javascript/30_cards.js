@@ -526,7 +526,13 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     selectorTmp = `#tab_${tabname} .tabs.gradio-tabs.extra-networks > .tab-nav.scroll-hide > button`
     if(!(elemTmp = pcmGetElementBySelectorAndText(selectorTmp, 'PromptCards'))) return;
     elemTmp.click();
-    await pcmSleepAsync(50);
+    
+    // GenerationタブのクリックからPromptCardsタブへの戻りが自動処理だと早すぎるため、
+    // a1111 が hidden を消す処理の前に タブの onclick による貼り直しが終わってしまう
+    // 少し待機を入れてから再度 hidden 貼り直しを実施
+    await pcmSleepAsync(200);
+    PcmCardSearch.updateDom(tabname);
+
 
     PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet end.`);
 }
