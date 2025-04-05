@@ -1,8 +1,9 @@
 import os
 from modules import shared, ui_extra_networks, script_callbacks
-from modules.ui_extra_networks import ExtraNetworksPage
+from modules.ui_extra_networks import ExtraNetworksPage, get_tree, ExtraNetworksItem
 import html
 import traceback
+from typing import Optional
 from scripts.pcm.constants import image_folder, templates_folder, endpoint_base, extension_root_path
 from scripts.pcm.cache_info import CacheInfo
 from scripts.pcm.prompt_card_info import PromptCardInfoManager, PromptCardInfo
@@ -229,7 +230,71 @@ class PromptCardsPage(ExtraNetworksPage):
         else:
             # 渡されたテンプレートは無視してカスタムテンプレートを使用
             return self.custom_card_tpl.format(**item_with_extras)
-        
+
+
+    def create_tree_view_html(self, tabname: str) -> str:
+        """Generates HTML for displaying folders in a tree view.
+        File アイテムは作成しない
+
+        Args:
+            tabname: The name of the active tab.
+
+        Returns:
+            HTML string generated for this tree view.
+        """
+        res = ""
+
+        # Setup the tree dictionary.
+        roots = self.allowed_directories_for_previews()
+        tree_items = {v["filename"]: ExtraNetworksItem(v) for v in self.items.values()}
+        tree = get_tree([os.path.abspath(x) for x in roots], items=tree_items)
+
+        if not tree:
+            return res
+
+        def _build_tree(data: Optional[dict[str, ExtraNetworksItem]] = None) -> Optional[str]:
+            """Recursively builds HTML for a tree.
+
+            Args:
+                data: Dictionary representing a directory tree. Can be NoneType.
+                    Data keys should be absolute paths from the root and values
+                    should be subdirectory trees or an ExtraNetworksItem.
+
+            Returns:
+                If data is not None: HTML string
+                Else: None
+            """
+            if not data:
+                return None
+
+            # Lists for storing <li> items html for directories and files separately.
+            _dir_li = []
+            _file_li = []
+
+            dummy_file_added = False
+            for k, v in sorted(data.items(), key=lambda x: shared.natural_sort_key(x[0])):
+                if isinstance(v, (ExtraNetworksItem,)):
+                    if not dummy_file_added:
+                        _file_li.append("<li class='tree-list-item tree-list-item--subitem' data-tree-entry-type='file'></li>")
+                        dummy_file_added = True
+                    else:
+                        pass
+                else:
+                    _dir_li.append(self.create_tree_dir_item_html(tabname, k, _build_tree(v)))
+
+            # Directories should always be displayed before files so we order them here.
+            return "".join(_dir_li) + "".join(_file_li)
+            
+
+        # Add each root directory to the tree.
+        for k, v in sorted(tree.items(), key=lambda x: shared.natural_sort_key(x[0])):
+            item_html = self.create_tree_dir_item_html(tabname, k, _build_tree(v))
+            # Only add non-empty entries to the tree.
+            if item_html is not None:
+                res += item_html
+
+        return f"<ul class='tree-list tree-list--tree'>{res}</ul>"
+
 
     def create_dirs_view_html(self, tabname: str) -> str:
         """ Settings でツリービューではなくフォルダビューを選択している場合のボタン群を生成 """
