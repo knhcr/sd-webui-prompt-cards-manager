@@ -1,6 +1,5 @@
-/*#region Card Editor Modal ------------------------------------*/
-/* 背景オーバーレイ */
-.pcm-pie-overlay {
+/* モーダル背景オーバーレイ */
+.pcm-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -11,12 +10,17 @@
     min-height: 100vh;
     max-height: none;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
     pointer-events: auto;
 }
 
-/* モーダルウィンドウ */
-.pcm-pie-container.block.padded {
+/*#region Card Editor Modal ------------------------------------*/
+/* Modal Window : background overlay */
+#pcm_pie_overlay {
+    z-index: 9999;
+}
+
+/* Modal Window : foreground container */
+#pcm_pie_container {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -580,3 +584,58 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
     object-fit: contain !important;
 }
 /*#endregion Card Design ------------------------------------*/
+
+/*#region Mask Editor ------------------------------------*/
+/* Modal Window : background overlay */
+#pcm_mask_editor_overlay {
+    z-index: 9997;
+}
+
+/* Modal Window : foreground container */
+#pcm_mask_editor_container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9998;
+    background-color: var(--body-background-fill);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 90%;
+    width: 1536px;
+    padding: 20px !important; /* gradio の.block.padded による !important を上書き */
+    max-height: 98vh;
+    overflow-y: auto;
+}
+
+/* hide Deafault Buttons */
+#pcm_mask_editor_canvas .image-container button,
+#pcm_mask_editor_canvas .image-container input{
+    display: none;
+}
+
+#pcm_mask_editor_control_belt_buttons{
+    height: 10px;
+    margin-top:-7px
+}
+#pcm_mask_editor_control_belt_buttons > *{
+    margin:25px;
+    cursor: pointer;
+}
+
+/* hover時 / active時 アイコンはデフォルト非表示 */
+.pcm-mask-editor-button.hover,
+.pcm-mask-editor-button.on{
+    display: none;
+}
+
+/* hover / active になれば表示して平常時のアイコンは非表示 */
+.pcm-mask-editor-button-container:hover .pcm-mask-editor-button.hover,
+#pcm_mask_editor_invert_mask.active .pcm-mask-editor-button.on{
+    display: inline;
+}
+.pcm-mask-editor-button-container:hover .pcm-mask-editor-button.default,
+#pcm_mask_editor_invert_mask.active .pcm-mask-editor-button.off {
+    display: none;
+}
+/*#endregion Mask Editor ------------------------------------*/

@@ -54,7 +54,7 @@ class PromptCardInfoEditorUi:
             filename_input = gr.Textbox(value="", visible=False, elem_id="pcm_filename_input")
 
             # 背景オーバーレイ
-            overlay_html = '<div id="{elem_id}" class="pcm-pie-overlay""></div>'
+            overlay_html = '<div id="{elem_id}" class="pcm-overlay""></div>'
             overlay = gr.HTML(overlay_html.format(elem_id="pcm_pie_overlay"), visible=False)
 
             # モーダルウィンドウのコンテナ
@@ -361,9 +361,8 @@ class PromptCardInfoEditorUi:
 
     @classmethod
     def on_after_component(cls, component, **kwargs):
-        """ UIをGradioに追加 """
         if kwargs.get('elem_id') == 'footer':
-            return cls.create_ui() # フッタの前にUIを追加
+            return cls.create_ui()
 
-# コンポーネントを登録
+# コンポーネントを作成
 script_callbacks.on_after_component(PromptCardInfoEditorUi.on_after_component)
