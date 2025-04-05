@@ -150,7 +150,7 @@ const pcmAddDirnameToggleBtn = ()=>{
 /** dirname toggle callback, also called when refresh btn clicked with asis=true. */
 function pcmHideDirNameToggle(tabname, asis=false) {
     const btn = gradioApp().querySelector(`#${tabname}_pcm_dirname_toggle`);
-    const cardNames = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .card .name`));
+    const cardNames = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card .name`));
     if (btn){
         if(!asis) btn.classList.toggle('enabled', !btn.classList.contains('enabled'));
         for (let cardName of cardNames){
@@ -188,7 +188,7 @@ const pcmAddShowDescToggleBtn = ()=>{
 /** show description toggle callback, also called when refresh btn clicked with asis=true. */
 function pcmShowDescToggle(tabname, asis=false) {
     const btn = gradioApp().querySelector(`#${tabname}_pcm_desc_toggle`);
-    const cardDescs = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .card .description`));
+    const cardDescs = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card .description`));
     if (btn){
         if(!asis) btn.classList.toggle('enabled', !btn.classList.contains('enabled'));
         for (let cardDesc of cardDescs){
@@ -222,7 +222,7 @@ const pcmAddImageFitBtn = ()=>{
 /** image fit toggle callback, also called when refresh btn clicked with asis=true. */
 function pcmImageFitToggle(tabname, asis=false){
     const btn = gradioApp().querySelector(`#${tabname}_pcm_image_fit_toggle`);
-    const cardImgs = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .card > img`));
+    const cardImgs = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card > img`));
     if (btn){
         if(!asis) btn.classList.toggle('enabled', !btn.classList.contains('enabled'));
         for (let cardImg of cardImgs){

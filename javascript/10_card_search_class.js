@@ -346,7 +346,7 @@ class PcmCardSearch {
 
         try {
             // 基本いまあるカードは全部表示して、マッチしない物を非表示にする方針で処理
-            const dom_cards = gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .card`);
+            const dom_cards = gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card`);
             for (const dom_card of dom_cards){
                 let visible = true;
                 const nameElem = dom_card.querySelector(".name");

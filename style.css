@@ -273,7 +273,7 @@
 }
 
 /* ツリービューの幅 */
-#txt2img_promptcards_tree{
+#txt2img_promptcards_tree, #img2img_promptcards_tree{
     /*min-width: 260px;
     max-width: 310px;
     flex: 0.48;*/
@@ -510,6 +510,112 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 
 /*#endregion Control Belt ------------------------------------*/
 
+/*#region Card Design: copy default card style to pcm-card ----------*/
+.extra-network-pane .pcm-card .button-row{
+    display: inline-flex;
+    visibility: hidden;
+    color: white;
+    position: absolute;
+    right: 0;
+    z-index: 1;
+}
+
+.extra-network-pane .pcm-card:hover .button-row{
+    visibility: visible;
+}
+
+.extra-network-pane .pcm-card .card-button {
+    font-size: 2rem;
+}
+
+
+.standalone-card-preview.pcm-card .preview{
+    position: absolute;
+    object-fit: cover;
+    width: 100%;
+    height:100%;
+}
+
+.extra-network-pane .pcm-card, .standalone-card-preview.pcm-card{
+    display: inline-block;
+    margin: 0.5rem;
+    width: 16rem;
+    height: 24rem;
+    box-shadow: 0 0 5px rgba(128, 128, 128, 0.5);
+    border-radius: 0.2rem;
+    position: relative;
+
+    background-size: auto 100%;
+    background-position: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.extra-network-pane .pcm-card:hover{
+    box-shadow: 0 0 2px 0.3em rgba(0, 128, 255, 0.35);
+}
+
+.extra-network-pane .pcm-card .actions .additional{
+    display: none;
+}
+
+.extra-network-pane .pcm-card .actions{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.5em;
+    background: rgba(0,0,0,0.5);
+    box-shadow: 0 0 0.25em 0.25em rgba(0,0,0,0.5);
+    text-shadow: 0 0 0.2em black;
+}
+
+.extra-network-pane .pcm-card .actions *{
+    color: white;
+}
+
+.extra-network-pane .pcm-card .actions .name{
+    font-size: 1.7em;
+    font-weight: bold;
+    line-break: anywhere;
+}
+
+.extra-network-pane .pcm-card .actions .description {
+    display: block;
+    max-height: 3em;
+    white-space: pre-wrap;
+    line-height: 1.1;
+}
+
+.extra-network-pane .pcm-card .actions .description:hover {
+    max-height: none;
+}
+
+.extra-network-pane .pcm-card .actions:hover .additional{
+    display: block;
+}
+
+.extra-network-pane .pcm-card ul{
+    margin: 0.25em 0 0.75em 0.25em;
+    cursor: unset;
+}
+
+.extra-network-pane .pcm-card ul a{
+    cursor: pointer;
+}
+
+.extra-network-pane .pcm-card ul a:hover{
+    color: red;
+}
+
+.extra-network-pane .pcm-card .preview{
+    position: absolute;
+    object-fit: cover;
+    width: 100%;
+    height:100%;
+}
+/*#endregion Card Design: copy default card style to pcm-card ----------*/
+
 /*#region Card Design ------------------------------------*/
 /*#region Card Design : custom button ------------------------------------*/
 /* カスタムボタンに影を追加 */
@@ -555,7 +661,7 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 /*#endregion Card Design : custom button ------------------------------------*/
 
 /* カード情報がないカード */
-.card.no-card-info {
+.pcm-card.no-card-info {
     border-width: 3px;
     border-color: #ffff00;
 }
@@ -573,14 +679,14 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 }
 
 /* 画像の表示 */
-#txt2img_promptcards_cards > .card > img,
-#img2img_promptcards_cards > .card > img{
+#txt2img_promptcards_cards > .pcm-card > img,
+#img2img_promptcards_cards > .pcm-card > img{
     background-color:#ffffff;
 }
 
 /* 画像の fit */
-#txt2img_promptcards_cards .card > img.fit-contain,
-#img2img_promptcards_cards .card > img.fit-contain{
+#txt2img_promptcards_cards .pcm-card > img.fit-contain,
+#img2img_promptcards_cards .pcm-card > img.fit-contain{
     object-fit: contain !important;
 }
 /*#endregion Card Design ------------------------------------*/

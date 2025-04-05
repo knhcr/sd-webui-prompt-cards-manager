@@ -1,4 +1,4 @@
-<div class='card{noCardInfo}' onclick="{card_clicked}" style="{style}">
+<div class='pcm-card{noCardInfo}' onclick="{card_clicked}" style="{style}">
     {background_image}
     <div class="actions">
         <div class="name" orgname="{orgName}" basename="{baseName}">{name}</div>
