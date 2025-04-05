@@ -421,6 +421,37 @@ div:has(> .pcm_mini_gallery_subseed_input){
     margin-bottom: -7px;
     margin-top: 2px;
 }
+
+
+/* マスクエディタ */
+#pcm_mini_gallery_cnet_use_mask>*{
+    margin-top:-8px;
+}
+
+#pcm_mini_gallery_cnet_use_mask label{
+    width:85px;
+}
+
+#pcm_mini_gallery_cnet_mask_editor_btn{
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    margin-left:-104px;
+    margin-top:2px;
+}
+
+/* 平常時は hover用 は非表示*/
+#pcm_mini_gallery_cnet_mask_editor_btn > img.hover{
+    display: none;
+}
+/* hover 時は逆転 */
+#pcm_mini_gallery_cnet_mask_editor_btn:hover > img.hover{
+    display: inline;
+}
+#pcm_mini_gallery_cnet_mask_editor_btn:hover > img.default{
+    display: none;
+}
+
 /*#endregion Mini Gallery : cnet ------------------------------------*/
 
 /*#endregion Mini Gallery ------------------------------------*/

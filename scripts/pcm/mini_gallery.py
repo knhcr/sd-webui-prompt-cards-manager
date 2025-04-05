@@ -4,7 +4,7 @@ from urllib.parse import unquote
 from modules import script_callbacks
 from scripts.pcm.constants import DEBUG_PRINT
 from string import Template
-
+from scripts.pcm.constants import endpoint_base
 
 class MiniGallery:
     _js_pipelines = {
@@ -148,9 +148,18 @@ class MiniGallery:
                                                   interactive=True,
                                                   value=1.0,
                                                   minimum=0.0, maximum=1.0, step=0.01)
+                with gr.Row(variant="compact", equal_height=True, elem_classes="flex-row"):
+                    self.cnet_use_mask = gr.Checkbox(label="Use Mask", elem_id="pcm_mini_gallery_cnet_use_mask",
+                                                    value=False, interactive=True)
+                    gr.HTML(f'''<div id="pcm_mini_gallery_cnet_mask_editor_btn" title="Open CNet mask editor window" alt="mask editor">
+                                    <img class="pcm_mini_gallery_button default" src="{endpoint_base}/resources/painting-roller-svgrepo-com.svg">
+                                    <img class="pcm_mini_gallery_button hover" src="{endpoint_base}/resources/painting-roller-blue-svgrepo-com.svg">
+                                </div>'''
+                    )
 
             # JS 側からの発火用
             self.hidden_txt_image = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt_image") # 画像表示用
+            self.hidden_mask_editor_open = gr.Textbox(value="", visible=False, elem_id="pcm_mini_gallery_mask_editor_open") # マスクエディタオープン用
 
         # Gallery の画像更新
         self.hidden_txt_image.input(
