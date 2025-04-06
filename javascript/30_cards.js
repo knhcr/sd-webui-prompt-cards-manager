@@ -324,7 +324,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
 
     // -- 関数定義 --
     /** Data URI から DataTransfer オブジェクトを作成する */
-    const createDataTransferAsync = async (dataUri) => {
+    const _createDataTransferAsync = async (dataUri) => {
         const mimeType = dataUri.split(';')[0].split(':')[1];
         const base64Data = dataUri.split(',')[1];
         const binaryData = atob(base64Data);
@@ -395,7 +395,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     //   -> CNet モデル一覧の更新処理や、CNet モデルの変更を行った場合も再度表示が必要っぽい
     //      念のため初回だけでなく毎回表示させる
     // 画像ドロップの前までにUI表示後の待機時間が必要 (それまでに画像処理は非同期でやっておく)
-    let pDataTransferImg = createDataTransferAsync(dataUri);
+    let pDataTransferImg = _createDataTransferAsync(dataUri);
 
     // Generationタブのクリック
     selectorTmp = `#tab_${tabname} .tabs.gradio-tabs.extra-networks > .tab-nav.scroll-hide > button`

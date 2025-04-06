@@ -1,6 +1,9 @@
 class PcmMaskEditor{
     static SELECTORS = {
         MASK_EDITOR_OPEN_HIDDEN_TXT : "#pcm_mask_editor_open_hidden_txt textarea",
+        CNET_UNIT_IMAGE_CONTAINER : "#txt2img_controlnet_ControlNet-0_input_image img.absolute-img",
+        MASK_EDITOR_IMAGE_INPUT : "#pcm_mask_editor_input_image",
+
         BRUSH_SLIDER : "#pcm_mask_editor_blush_slider",
         MASK_CANVAS : "#pcm_mask_editor_canvas",
         IMAGE_INFO : "#pcm_mask_editor_canvas_current_image_info",
@@ -156,8 +159,45 @@ class PcmMaskEditor{
         slider.dispatchEvent(new Event("change"), {bubbles: true});
     }
     
-    /** マスクエディタを開くために隠しテキストに値をセットしてディスパッチ */
-    static openMaskEditor(){
+    /** マスクエディタを開く
+     * CNET の画像を mask editor にセットし、隠しテキストに値を入れてディスパッチ */
+    static async openMaskEditor(){
+        /** Data URI から DataTransfer オブジェクトを作成する */
+        const _createDataTransferAsync = async (dataUri) => {
+            const mimeType = dataUri.split(';')[0].split(':')[1];
+            const base64Data = dataUri.split(',')[1];
+            const binaryData = atob(base64Data);
+            const arrayBuffer = new Uint8Array(binaryData.length);
+            for (let i = 0; i < binaryData.length; i++) {
+                arrayBuffer[i] = binaryData.charCodeAt(i);
+            }
+            // blob から File を作成して DataTransfer にセット
+            const blob = new Blob([arrayBuffer], { type: mimeType });
+            const file = new File([blob], "image.png", { type: mimeType });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            dataTransfer.effectAllowed = "all";
+            return dataTransfer;
+        }
+
+        // CNET の画像は img.absolute-img の src 属性に dataURI として入っている
+        const cnetUnitImageContainer = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_IMAGE_CONTAINER);
+        if (!cnetUnitImageContainer) return;
+        const imageDataUri = cnetUnitImageContainer.src; // dataURI (data:image/png;base64,...)
+        if (!imageDataUri) return;
+        const dataTransfer = await _createDataTransferAsync(imageDataUri);
+
+        // 画像ドロップイベントをエミュレート
+        const dropArea = gradioApp().querySelector(`${PcmMaskEditor.SELECTORS.MASK_EDITOR_IMAGE_INPUT} .image-container > div`);
+        if(!dropArea) return;
+        const dragEvent = new DragEvent("drop", {
+            bubbles: true,
+            cancelable: true,
+            dataTransfer: dataTransfer
+        });
+        dropArea.dispatchEvent(dragEvent);
+
+        // 隠しテキストに値を入れてモーダルオープン
         const hiddenTxt = gradioApp().querySelector(PcmMaskEditor.SELECTORS.MASK_EDITOR_OPEN_HIDDEN_TXT);
         if (!hiddenTxt) return;
         const value = "1" + "$" + Date.now();

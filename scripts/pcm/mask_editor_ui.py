@@ -103,9 +103,8 @@ class CnetMaskEditor:
             self.isInverted = gr.State(True)
             self.open_mask_editor_txt_hidden = gr.Textbox(elem_id="pcm_mask_editor_open_hidden_txt", value = "", visible=False,)
 
-        # テスト用 Input
-        with gr.Group():
-            self.input_image = gr.Image(label="Input Image", elem_id="input_image", height=64, width=128)
+            # 画像 Input 用隠しコンポーネント
+            self.input_image = gr.Image(label="Input Image", elem_id="pcm_mask_editor_input_image", height=64, width=128, visible=False)
 
         # マスクエディタをオープン
         self.open_mask_editor_txt_hidden.input(
