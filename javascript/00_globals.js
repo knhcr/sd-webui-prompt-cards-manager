@@ -16,15 +16,18 @@ const pcmGetGradioComponentByElemId = (elem_id) => {
     return window.gradio_config.components.find(c => c.props && c.props.elem_id === elem_id);
 }
 
-/** opts.<キー名> の値を取得 (OnUiLoaded のタイミングが早いため、設定値の初期化を待つ場合に用いる)
+/** opts.<キー名> の値を A1111 の共有オブジェクトから取得
+ * opts は初期化されるまでのタイミングが遅い(OnUiLoadedから数秒後) ため、
+ * 初期化直後にwaitして確実に取得する用途に使う
+ * (なお、pcm に関する設定はこれではなく、python起動時に初期化される専用のAPIから pcmGetSettingsAsync を用いて取得可能)
  *  @param {string} key キー名
  *  @return {any} 値
- *  @param {number} timeout 最大待機時間 (デフォルト2000ms, 0: 無限待機)
+ *  @param {number} timeout 最大待機時間 (デフォルト5000ms, 0: 無限待機)
  */
-const pcmGetOptValueAsync = async (key, timeout=2000) => {
+const pcmGetOptValueAsyncA1111 = async (key, timeout=5000) => {
     let time = 0;
     let ret = undefined;
-    while(time < timeout){
+    while(timeout===0 || time < timeout){
         ret = opts[key];
         if (ret !== undefined) break;
         await pcmSleepAsync(100);
@@ -39,6 +42,29 @@ const pcmGetOptValueAsync = async (key, timeout=2000) => {
     return ret;
 }
 
+/** Settings の全ての値を専用の API から取得
+ *  @param {number} timeout 最大待機時間 (デフォルト5000ms, 0: 無限待機)
+ */
+const pcmGetSettingsAsync = async (timeout=5000) => {
+    let data = undefined;
+    let time = 0;
+    while((timeout===0 || time<timeout) && !data){
+        try{
+            const res = await fetch(`${PCM_API_ENDPOINT_BASE}/settings`);
+            if (!res.ok) throw new Error();
+            data = await res.json();
+        }catch (e){
+            console.error(`pcmGetOptValueAsync error: ${e}`);
+            await pcmSleepAsync(100);
+            time += 100;
+        }
+    }
+    if (time >= timeout){
+        console.error(`Prompt Card Manager error. Failed to get settings from server.`);
+        data = null;
+    }
+    return data;
+}
 
 /** elem_id から Gradio のコンポーネントオブジェクトを取得
  *  全てのオブジェクトを配列で返す
@@ -78,10 +104,10 @@ const pcmWaitForContent = (selector,cb)=>{
 
 /** 指定されたセレクタに一致する要素が存在するまで待機し、対象エレメントを返す。無ければnull
  *  @param {string} selector セレクタ
- *  @param {number} timeout 最大待機時間 (デフォルト2000ms, 0: 無限待機)
+ *  @param {number} timeout 最大待機時間 (デフォルト5000ms, 0: 無限待機)
  *  @return {Element} 対象エレメント
 */
-const pcmQuerySelectorAsync = async (selector, timeout=2000)=>{
+const pcmQuerySelectorAsync = async (selector, timeout=5000)=>{
     let content = gradioApp().querySelector(selector);
     let wait_ms = 0;
     while (!content && (timeout === 0 || wait_ms < timeout)){

@@ -3,6 +3,7 @@ import yaml
 import re
 import sys
 from modules import shared
+from scripts.pcm.extension_settings import PCM_SETTINGS_KEYS
 from scripts.pcm.constants import image_folder, category_alias_file
 from scripts.pcm.constants import DEBUG_PRINT
 
@@ -44,7 +45,7 @@ class CategoryAlias:
 
         files = os.listdir(os.path.join(self._extension_root_path, image_folder))
         raw_categories = [x for x in files if os.path.isdir(os.path.join(self._extension_root_path, image_folder, x))]
-        if shared.opts.prompt_cards_manager_ignore_dot_starts:
+        if getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["ignore_dot_starts"]):
             raw_categories = [x for x in raw_categories if not x.startswith('.')]
         
         self.category_aliases = self._create_aliases(raw_categories, alias_definitions)

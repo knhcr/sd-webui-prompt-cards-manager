@@ -1,29 +1,9 @@
 /** Mini Gallery の初期化 */
 async function pcmSetupMiniGallery(){
-    // Settings の取得
-    const [isShowImage, isShowResolution, isShowSeed, isShowCnet] = await Promise.all([
-        pcmGetOptValueAsync('prompt_cards_manager_gallery_show_image'),
-        pcmGetOptValueAsync('prompt_cards_manager_gallery_show_resolution'),
-        pcmGetOptValueAsync('prompt_cards_manager_gallery_show_seed'),
-        pcmGetOptValueAsync('prompt_cards_manager_gallery_show_cnet_values')
-    ]);
+    // 表示/非表示の更新
+    await pcmUpdateMiniGalleryVisibility();
 
-    const top_container = gradioApp().querySelector('#pcm_mini_gallery_column'); // ミニギャラリー全体
-    const container_image = gradioApp().querySelector('#pcm_mini_gallery'); // 画像
-    const container_resolution = gradioApp().querySelector('#pcm_mini_gallery_resolution_group'); // 解像度
-    const container_seed = gradioApp().querySelector('#pcm_mini_gallery_seed_group'); // シード
-    const container_cnet = gradioApp().querySelector('#pcm_mini_gallery_cnet_group'); // ControlNet
-
-    if([!isShowImage, !isShowResolution, !isShowSeed, !isShowCnet].every(Boolean)){
-        if (top_container) top_container.style.display = 'none';
-    }else{
-        if (!isShowImage && container_image) container_image.style.display = 'none';
-        if (!isShowResolution && container_resolution) container_resolution.style.display = 'none';
-        if (!isShowSeed && container_seed) container_seed.style.display = 'none';
-        if (!isShowCnet && container_cnet) container_cnet.style.display = 'none';
-    }
     // 解像度スイッチボタンの title 更新
-
     gradioApp().querySelector("#pcm_mini_gallery_switch_btn").setAttribute("title", "Switch width/height");
 
     // 初期値の同期
@@ -170,7 +150,52 @@ async function pcmSetupMiniGallery(){
             pcmUpdateMiniGalleryControlValues({update_seed_extra: true});
         });
     }
+
+    PCM_DEBUG_PRINT(`pcmSetupMiniGallery initialized`);
 }
+
+/** ミニギャラリーの表示/非表示を更新 (設定値はPCMのAPIから取得) */
+async function pcmUpdateMiniGalleryVisibility(){
+    PCM_DEBUG_PRINT(`pcmUpdateMiniGalleryVisibility called`);
+
+    // Settings の取得
+    const settings = await pcmGetSettingsAsync();
+
+    let [isShowImage, isShowResolution, isShowSeed, isShowCnet] = [true, true, true, true];
+    if (settings) {
+        [isShowImage, isShowResolution, isShowSeed, isShowCnet] = [
+            ("prompt_cards_manager_gallery_show_image" in settings) ? settings.prompt_cards_manager_gallery_show_image : isShowImage,
+            ("prompt_cards_manager_gallery_show_resolution" in settings) ? settings.prompt_cards_manager_gallery_show_resolution : isShowResolution,
+            ("prompt_cards_manager_gallery_show_seed" in settings) ? settings.prompt_cards_manager_gallery_show_seed : isShowSeed,
+            ("prompt_cards_manager_gallery_show_cnet" in settings) ? settings.prompt_cards_manager_gallery_show_cnet : isShowCnet
+        ];
+    }
+
+    const top_container = await pcmQuerySelectorAsync('#pcm_mini_gallery_column'); // ミニギャラリー全体
+    if (!top_container){return;}
+    const container_image = gradioApp().querySelector('#pcm_mini_gallery'); // 画像
+    const container_resolution = gradioApp().querySelector('#pcm_mini_gallery_resolution_group'); // 解像度
+    const container_seed = gradioApp().querySelector('#pcm_mini_gallery_seed_group'); // シード
+    const container_cnet = gradioApp().querySelector('#pcm_mini_gallery_cnet_group'); // ControlNet
+
+    if([!isShowImage, !isShowResolution, !isShowSeed, !isShowCnet].every(Boolean)){
+        top_container.style.display = 'none';
+    }else{
+        top_container.style.display = '';
+        if (!isShowImage && container_image) container_image.style.display = 'none';
+        else container_image.style.display = '';
+
+        if (!isShowResolution && container_resolution) container_resolution.style.display = 'none';
+        else container_resolution.style.display = '';
+
+        if (!isShowSeed && container_seed) container_seed.style.display = 'none';
+        else container_seed.style.display = '';
+
+        if (!isShowCnet && container_cnet) container_cnet.style.display = 'none';
+        else container_cnet.style.display = '';
+    }
+}
+
 
 /** 画像生成を監視して Mini Gallery に画像を転送 */
 function pcmSetupMiniGalleryImageObserver() {
@@ -722,3 +747,4 @@ function pcmMinigallerySeedExtraReuse(){
 }
 
 onUiLoaded(pcmSetupMiniGallery); // ミニギャラリーの初期化
+onOptionsChanged(pcmUpdateMiniGalleryVisibility); // 設定値の変更時にミニギャラリーの表示/非表示を更新

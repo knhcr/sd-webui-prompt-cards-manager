@@ -13,6 +13,7 @@ from PIL import Image
 from modules.images import read_info_from_image
 from modules.infotext_utils import parse_generation_parameters
 from modules import shared
+from scripts.pcm.extension_settings import PCM_SETTINGS_KEYS
 
 
 class PromptCardInfoEditorUi:
@@ -74,14 +75,16 @@ class PromptCardInfoEditorUi:
                             description = gr.Textbox(label="Description", elem_id="pcm_pie_description",
                                                      lines=7, interactive=True)
                             isReplace = gr.Checkbox(label="Replace Mode", elem_id="pcm_pie_is_replace_checkbox",
-                                                    value=shared.opts.prompt_cards_manager_default_is_replace, interactive=True)
+                                                    value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_is_replace"]),
+                                                    interactive=True)
                             enableCnet = gr.Checkbox(label="CNet Enabled", elem_id="pcm_pie_enable_cnet_checkbox",
-                                                     value=shared.opts.prompt_cards_manager_default_cnet_enabled, interactive=True)
+                                                     value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_cnet_enabled"]),
+                                                     interactive=True)
                             # 解像度グループ                            
                             with gr.Box(elem_classes="pcm-pie-resolution-box"):
                                 apply_resolution = gr.Checkbox(label="Apply Resolution to Generation Parameters",
                                                                elem_id="pcm_pie_apply_resolution_checkbox",
-                                                               value=shared.opts.prompt_cards_manager_default_apply_resolution,
+                                                               value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_apply_resolution"]),
                                                                interactive=True, show_label=True)
                                 
                                 # 解像度スライダとアス比固定ボタン
@@ -89,12 +92,14 @@ class PromptCardInfoEditorUi:
                                     with gr.Column(scale=1):
                                         resolution_width = gr.Slider(
                                             label="Width", elem_id="pcm_pie_resolution_slider_width",
-                                            minimum=64, maximum=3072, step=8, value=shared.opts.prompt_cards_manager_default_resolution_width,
+                                            minimum=64, maximum=3072, step=8,
+                                            value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_resolution_width"]),
                                             interactive=True, show_label=True)
 
                                         resolution_height = gr.Slider(
                                             label="Height", elem_id="pcm_pie_resolution_slider_height",
-                                            minimum=64, maximum=3072, step=8, value=shared.opts.prompt_cards_manager_default_resolution_height,
+                                            minimum=64, maximum=3072, step=8,
+                                            value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_resolution_height"]),
                                             interactive=True, show_label=True)
                                         
                                     with gr.Column(scale=0):
@@ -250,9 +255,9 @@ class PromptCardInfoEditorUi:
         description = card_info_container.card_info.get('description', '')
         prompt = card_info_container.card_info.get('prompt', '')
         negative_prompt = card_info_container.card_info.get('negative_prompt', '')
-        isReplace = card_info_container.card_info.get('isReplace', shared.opts.prompt_cards_manager_default_is_replace)
-        enableCnet = card_info_container.card_info.get('enableCnet', shared.opts.prompt_cards_manager_default_cnet_enabled)
-        apply_resolution = card_info_container.card_info.get('apply_resolution', shared.opts.prompt_cards_manager_default_apply_resolution)
+        isReplace = card_info_container.card_info.get('isReplace', getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_is_replace"]))
+        enableCnet = card_info_container.card_info.get('enableCnet', getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_cnet_enabled"]))
+        apply_resolution = card_info_container.card_info.get('apply_resolution', getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_apply_resolution"]))
         resolution_slider = card_info_container.card_info.get('resolution', {})
         
         DEBUG_PRINT(f"PromptCardInfoEditor.show_modal prompt_card_info: {card_info_container.card_info}")
@@ -268,8 +273,8 @@ class PromptCardInfoEditorUi:
             gr.update(value=isReplace), # 置換モードフラグ
             gr.update(value=enableCnet), # CNet 有効フラグ
             gr.update(value=apply_resolution), # 解像度適用フラグ
-            gr.update(value=resolution_slider.get('width', shared.opts.prompt_cards_manager_default_resolution_width)), # 解像度スライダ (width)
-            gr.update(value=resolution_slider.get('height', shared.opts.prompt_cards_manager_default_resolution_height)), # 解像度スライダ (height)
+            gr.update(value=resolution_slider.get('width', getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_resolution_width"]))), # 解像度スライダ (width)
+            gr.update(value=resolution_slider.get('height', getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_resolution_height"]))), # 解像度スライダ (height)
             gr.update(value=image_resolution_text), # 元画像の解像度テキスト
         )
 
@@ -284,11 +289,11 @@ class PromptCardInfoEditorUi:
             gr.update(value=""), # 説明
             gr.update(value=""), # プロンプト
             gr.update(value=""), # ネガティブプロンプト
-            gr.update(value=shared.opts.prompt_cards_manager_default_is_replace), # 置換モードフラグ
-            gr.update(value=shared.opts.prompt_cards_manager_default_cnet_enabled), # CNet 有効フラグ
-            gr.update(value=shared.opts.prompt_cards_manager_default_apply_resolution), # 解像度適用フラグ
-            gr.update(value=shared.opts.prompt_cards_manager_default_resolution_width), # 解像度スライダ (width)
-            gr.update(value=shared.opts.prompt_cards_manager_default_resolution_height), # 解像度スライダ (height)
+            gr.update(value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_is_replace"])), # 置換モードフラグ
+            gr.update(value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_cnet_enabled"])), # CNet 有効フラグ
+            gr.update(value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_apply_resolution"])), # 解像度適用フラグ
+            gr.update(value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_resolution_width"])), # 解像度スライダ (width)
+            gr.update(value=getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_resolution_height"])), # 解像度スライダ (height)
             gr.update(value=""), # 元画像の解像度のテキスト表示
         )
     

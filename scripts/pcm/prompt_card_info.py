@@ -12,6 +12,7 @@ from scripts.pcm.category import CategoryAlias
 from scripts.pcm.constants import DEBUG_PRINT
 from base64 import b64encode
 from modules import shared
+from scripts.pcm.extension_settings import PCM_SETTINGS_KEYS
 import html
 
 class PromptCardInfoManager:
@@ -29,11 +30,12 @@ class PromptCardInfoManager:
         if thumbs_name not in cls.__card_info_dict:
             #DEBUG_PRINT(f"PromptCardInfoManager card initialize: {thumbs_name}")
             cls.__card_info_dict[thumbs_name] = PromptCardInfo(thumbs_name)
-        # カード情報が既にメモリにある場合、必要なら更新
+
+        # カード情報が既にメモリにある場合でも refresh が True なら既存を破棄して新規作成
         elif is_refresh:
             #DEBUG_PRINT(f"PromptCardInfoManager card refresh: {thumbs_name}")
             cls.refresh_card_info_dict()
-            cls.__card_info_dict[thumbs_name].load_card_info_from_file()
+            cls.__card_info_dict[thumbs_name] = PromptCardInfo(thumbs_name)
         
         return cls.__card_info_dict[thumbs_name]
 
@@ -94,12 +96,12 @@ class PromptCardInfo:
         __default_card_info =  {
             'prompt': '',
             'negative_prompt': '',
-            'isReplace': shared.opts.prompt_cards_manager_default_is_replace,
-            'enableCnet': shared.opts.prompt_cards_manager_default_cnet_enabled,
-            'apply_resolution': shared.opts.prompt_cards_manager_default_apply_resolution,
+            'isReplace': getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_is_replace"]),
+            'enableCnet': getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_cnet_enabled"]),
+            'apply_resolution': getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_apply_resolution"]),
             'resolution': {
-                'width': shared.opts.prompt_cards_manager_default_resolution_width,
-                'height': shared.opts.prompt_cards_manager_default_resolution_height
+                'width': getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_resolution_width"]),
+                'height': getattr(shared.opts, PCM_SETTINGS_KEYS["cards"]["default_resolution_height"])
             },
         }
         return __default_card_info

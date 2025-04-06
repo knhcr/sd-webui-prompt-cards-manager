@@ -3,10 +3,12 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from modules import script_callbacks
+from modules import shared
 from scripts.pcm.constants import thumbs_folder, endpoint_base, extension_root_path
 from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.prompt_card_info import PromptCardInfoManager
 from scripts.pcm.category import CategoryAlias
+from scripts.pcm.extension_settings import PCM_SETTINGS_KEYS
 from scripts.pcm.prompt_cards_page_ui import open_folder_win
 
 
@@ -87,6 +89,16 @@ class APIRoutes:
             DEBUG_PRINT(f"API Routes.open_folder path: {path}")
             open_folder_win(path)
             return
+        
+        @app.get(f"{endpoint_base}/settings")
+        async def get_settings(request: Request):
+            ''' Settings の設定値を取得 '''
+            DEBUG_PRINT(f"API Routes.get_settings")
+            ret = {}
+            for d in [PCM_SETTINGS_KEYS[k] for k in PCM_SETTINGS_KEYS]:
+                for k in d:
+                    ret[d[k]] = getattr(shared.opts, d[k])
+            return JSONResponse(ret)
 
 # Register to Gradio
 script_callbacks.on_app_started(lambda demo, app : APIRoutes.register_routes(app))
