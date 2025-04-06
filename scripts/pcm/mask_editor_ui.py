@@ -101,10 +101,18 @@ class CnetMaskEditor:
             self.gen_mask_btn = gr.Button(elem_id="pcm_mask_editor_gen_mask", value="Generate Mask", visible=False,)
             self.invert_mask_btn = gr.Button(elem_id="pcm_mask_editor_invert_mask_hidden_button", value="Invert Mask", visible=False,)
             self.isInverted = gr.State(True)
+            self.open_mask_editor_txt_hidden = gr.Textbox(elem_id="pcm_mask_editor_open_hidden_txt", value = "", visible=False,)
 
         # テスト用 Input
         with gr.Group():
             self.input_image = gr.Image(label="Input Image", elem_id="input_image", height=64, width=128)
+
+        # マスクエディタをオープン
+        self.open_mask_editor_txt_hidden.input(
+            fn=self.open_mask_editor,
+            inputs = [self.open_mask_editor_txt_hidden],
+            outputs = []
+        )
 
         # 出力用マスク画像を生成
         gen_mask__inputs = [self.mask_canvas, self.isInverted]
@@ -130,6 +138,10 @@ class CnetMaskEditor:
             fn=self.invert_mask,
             inputs=invert_mask__inputs,
             outputs=invert_mask__outputs)
+        
+    def open_mask_editor(self, value):
+        value = value.split("$")[0]
+        DEBUG_PRINT(f"CnetMaskEditor.open_mask_editor value: {value}")
 
     def gen_mask(self, images, isInverted):
         # value : {

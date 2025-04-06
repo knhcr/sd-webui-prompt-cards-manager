@@ -1,5 +1,6 @@
 class PcmMaskEditor{
     static SELECTORS = {
+        MASK_EDITOR_OPEN_HIDDEN_TXT : "#pcm_mask_editor_open_hidden_txt textarea",
         BRUSH_SLIDER : "#pcm_mask_editor_blush_slider",
         MASK_CANVAS : "#pcm_mask_editor_canvas",
         IMAGE_INFO : "#pcm_mask_editor_canvas_current_image_info",
@@ -155,6 +156,15 @@ class PcmMaskEditor{
         slider.dispatchEvent(new Event("change"), {bubbles: true});
     }
     
+    /** マスクエディタを開くために隠しテキストに値をセットしてディスパッチ */
+    static openMaskEditor(){
+        const hiddenTxt = gradioApp().querySelector(PcmMaskEditor.SELECTORS.MASK_EDITOR_OPEN_HIDDEN_TXT);
+        if (!hiddenTxt) return;
+        const value = "1" + "$" + Date.now();
+        hiddenTxt.value = value;
+        hiddenTxt.dispatchEvent(new Event("input"), {bubbles: true});
+        PCM_DEBUG_PRINT(`PcmMaskEditor.openMaskEditor value: ${value}`);
+    }
 }
 
 (new PcmMaskEditor()).initialize();

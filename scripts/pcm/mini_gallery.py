@@ -160,7 +160,8 @@ class MiniGallery:
                 with gr.Row(variant="compact", equal_height=True, elem_classes="flex-row"):
                     self.cnet_use_mask = gr.Checkbox(label="Use Mask", elem_id="pcm_mini_gallery_cnet_use_mask",
                                                     value=False, interactive=True)
-                    gr.HTML(f'''<div id="pcm_mini_gallery_cnet_mask_editor_btn" title="Open CNet mask editor window" alt="mask editor">
+                    # mask editor の open をコール
+                    gr.HTML(f'''<div id="pcm_mini_gallery_cnet_mask_editor_btn" title="Open CNet mask editor window" alt="mask editor" onclick="PcmMaskEditor.openMaskEditor()">
                                     <img class="pcm_mini_gallery_button default" src="{endpoint_base}/resources/painting-roller-svgrepo-com.svg">
                                     <img class="pcm_mini_gallery_button hover" src="{endpoint_base}/resources/painting-roller-blue-svgrepo-com.svg">
                                 </div>'''
@@ -168,7 +169,6 @@ class MiniGallery:
 
             # JS 側からの発火用
             self.hidden_txt_image = gr.Textbox("", visible=False, elem_id="pcm_mini_gallery_hidden_txt_image") # 画像表示用
-            self.hidden_mask_editor_open = gr.Textbox(value="", visible=False, elem_id="pcm_mini_gallery_mask_editor_open") # マスクエディタオープン用
 
         # Gallery の画像更新
         self.hidden_txt_image.input(
