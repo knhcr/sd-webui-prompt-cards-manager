@@ -135,8 +135,14 @@ const pcmGetElement = (selector, base_elem = gradioApp(), suppressError = false)
 const pcmSleepAsync = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 
+/** デバッグフラグ */
+if(typeof PCM_DEBUG_MODE === "undefined"){
+    window.PCM_DEBUG_MODE = false;
+}
+
 /** デバッグプリント */
-let PCM_DEBUG_MODE = false;
-const PCM_DEBUG_PRINT = (...args) => {
-    if(PCM_DEBUG_MODE){ console.log(...args); }
-};
+if(PCM_DEBUG_MODE){
+    window.PCM_DEBUG_PRINT = console.log;
+}else{
+    window.PCM_DEBUG_PRINT = () => {};
+}
