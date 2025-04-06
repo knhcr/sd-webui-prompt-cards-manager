@@ -18,11 +18,11 @@ async function pcmSetupMiniGallery(){
     // 画像生成時に画像をセット
     pcmSetupMiniGalleryImageObserver(); 
 
-    // Generation Tab のコントロール群本体 -> Mini Gallery
+    // Generation Tab の各値コンテナ本体の変更イベント -> Mini Gallery へのシンクロ
     pcmRegisterGenerationConditionsCallbacks();
 
-    // その他のスクリプト群からの変更に対応
-    // Generation Tab の解像度スイッチボタン -> Mini Gallery
+    // Generation Tab の各種コントロールボタン
+    //  - 解像度スイッチボタン -> Mini Gallery
     const resSwitchBtn = gradioApp().querySelector('#txt2img_res_switch_btn');
     if (resSwitchBtn){
         resSwitchBtn.addEventListener('click', async (e)=>{
@@ -31,7 +31,44 @@ async function pcmSetupMiniGallery(){
         });
     }
 
-    // Mini Gallery : 解像度スイッチボタン -> Generation Tab
+    //  - Seed Random ボタン -> Mini Gallery
+    const seedRandomBtn = gradioApp().querySelector('#txt2img_seed_row button#txt2img_random_seed');
+    if (seedRandomBtn){
+        seedRandomBtn.addEventListener('click', async (e)=>{
+            await pcmSleepAsync(50);
+            pcmUpdateMiniGalleryControlValues({update_seed: true});
+        });
+    }
+
+    //  - Seed Reuse ボタン -> Mini Gallery
+    const seedReuseBtn = gradioApp().querySelector('#txt2img_seed_row button#txt2img_reuse_seed');
+    if (seedReuseBtn){
+        seedReuseBtn.addEventListener('click', async (e)=>{
+            await pcmSleepAsync(200); // reuse はかなり遅めに反映されるため少し待つ必要あり
+            pcmUpdateMiniGalleryControlValues({update_seed: true});
+        });
+    }
+
+    //  - Seed Extra Random ボタン -> Mini Gallery
+    const seedExtraRandomBtn = gradioApp().querySelector('#txt2img_seed_extras button#txt2img_random_subseed');
+    if (seedExtraRandomBtn){
+        seedExtraRandomBtn.addEventListener('click', async (e)=>{
+            await pcmSleepAsync(50);
+            pcmUpdateMiniGalleryControlValues({update_seed_extra: true});
+        });
+    }
+
+    //  - Seed Extra Reuse ボタン -> Mini Gallery
+    const seedExtraReuseBtn = gradioApp().querySelector('#txt2img_seed_extras button#txt2img_reuse_subseed');
+    if (seedExtraReuseBtn){
+        seedExtraReuseBtn.addEventListener('click', async (e)=>{
+            await pcmSleepAsync(200); // reuse はかなり遅めに反映されるため少し待つ必要あり
+            pcmUpdateMiniGalleryControlValues({update_seed_extra: true});
+        });
+    }    
+
+    // Mini Gallery ボタン類の Generation Tab へのシンクロ処理
+    //  - Mini Gallery : 解像度スイッチボタン -> Generation Tab
     const miniGalleryResSwitchBtn = gradioApp().querySelector('#pcm_mini_gallery_switch_btn');
     if (miniGalleryResSwitchBtn){
         miniGalleryResSwitchBtn.addEventListener('click', async (e)=>{
@@ -39,7 +76,7 @@ async function pcmSetupMiniGallery(){
         });
     }
 
-    // Mini Gallery : Seed Random ボタン -> Generation Tab
+    //  - Mini Gallery : Seed Random ボタン -> Generation Tab
     const miniGallerySeedRandomBtn = gradioApp().querySelector('button#pcm_mini_gallery_seed_rnd');
     if (miniGallerySeedRandomBtn){
         miniGallerySeedRandomBtn.addEventListener('click', async (e)=>{
@@ -47,7 +84,7 @@ async function pcmSetupMiniGallery(){
         });
     }
 
-    // Mini Gallery : Seed Reuse ボタン -> Generation Tab
+    //  - Mini Gallery : Seed Reuse ボタン -> Generation Tab
     const miniGallerySeedReuseBtn = gradioApp().querySelector('button#pcm_mini_gallery_seed_reuse');
     if (miniGallerySeedReuseBtn){
         miniGallerySeedReuseBtn.addEventListener('click', async (e)=>{
@@ -55,7 +92,7 @@ async function pcmSetupMiniGallery(){
         });
     }
 
-    // Mini Gallery : Seed Extra Random ボタン -> Generation Tab
+    //  - Mini Gallery : Seed Extra Random ボタン -> Generation Tab
     const miniGallerySeedExtraRandomBtn = gradioApp().querySelector('button#pcm_mini_gallery_subseed_rnd');
     if (miniGallerySeedExtraRandomBtn){
         miniGallerySeedExtraRandomBtn.addEventListener('click', async (e)=>{
@@ -63,7 +100,7 @@ async function pcmSetupMiniGallery(){
         });
     }
 
-    // Mini Gallery : Seed Extra Reuse ボタン -> Generation Tab
+    //  - Mini Gallery : Seed Extra Reuse ボタン -> Generation Tab
     const miniGallerySeedExtraReuseBtn = gradioApp().querySelector('button#pcm_mini_gallery_subseed_reuse');
     if (miniGallerySeedExtraReuseBtn){
         miniGallerySeedExtraReuseBtn.addEventListener('click', async (e)=>{
@@ -71,7 +108,8 @@ async function pcmSetupMiniGallery(){
         });
     }
 
-    // png_inf paste ボタン -> Mini Gallery
+    // その他のコントロールにも Mini Gallery シンクロ用コールバックを貼り付け
+    //  - png_inf paste ボタン -> Mini Gallery
     const pngInfPasteBtn = gradioApp().querySelector('#txt2img_tools button#paste');
     if (pngInfPasteBtn){
         pngInfPasteBtn.addEventListener('click', async (e)=>{
@@ -84,7 +122,7 @@ async function pcmSetupMiniGallery(){
         });
     }
 
-    // Config Presets Extension ドロップダウン -> Mini Gallery
+    //  - Config Presets Extension ドロップダウン -> Mini Gallery
     const configPresetsExtDropdown = gradioApp().querySelector('#config_preset_txt2img_dropdown input');
     if (configPresetsExtDropdown){
         configPresetsExtDropdown.addEventListener('change', async (e)=>{
@@ -93,7 +131,7 @@ async function pcmSetupMiniGallery(){
         });
     }
 
-    // Config Presets Extension Reapply ボタン -> Mini Gallery
+    //  - Config Presets Extension Reapply ボタン -> Mini Gallery
     const scriptConfigPresetReapplyBtn = gradioApp().querySelector('#txt2img_extra_tabs #script_config_preset_reapply_button');
     if (scriptConfigPresetReapplyBtn){
         scriptConfigPresetReapplyBtn.addEventListener('click', async (e)=>{
@@ -102,7 +140,7 @@ async function pcmSetupMiniGallery(){
         });
     }
 
-    // PNG Info タブ Send to txt2img ボタン -> Mini Gallery
+    //  - PNG Info タブ Send to txt2img ボタン -> Mini Gallery
     const pngInfoSendToTxt2imgBtn = gradioApp().querySelector('#tab_pnginfo button#txt2img_tab');
     if (pngInfoSendToTxt2imgBtn){
         pngInfoSendToTxt2imgBtn.addEventListener('click', async (e)=>{
@@ -112,42 +150,6 @@ async function pcmSetupMiniGallery(){
                 update_seed: true, update_seed_extra_cbx: true, update_seed_extra: true, update_seed_extra_strength: true,
                 update_cnet_enabled: true, update_cnet_weight: true, update_cnet_end_step: true
             });
-        });
-    }
-
-    // Seed Random ボタン -> Mini Gallery
-    const seedRandomBtn = gradioApp().querySelector('#txt2img_seed_row button#txt2img_random_seed');
-    if (seedRandomBtn){
-        seedRandomBtn.addEventListener('click', async (e)=>{
-            await pcmSleepAsync(50);
-            pcmUpdateMiniGalleryControlValues({update_seed: true});
-        });
-    }
-
-    // Seed Reuse ボタン -> Mini Gallery
-    const seedReuseBtn = gradioApp().querySelector('#txt2img_seed_row button#txt2img_reuse_seed');
-    if (seedReuseBtn){
-        seedReuseBtn.addEventListener('click', async (e)=>{
-            await pcmSleepAsync(50);
-            pcmUpdateMiniGalleryControlValues({update_seed: true});
-        });
-    }
-
-    // Seed Extra Random ボタン -> Mini Gallery
-    const seedExtraRandomBtn = gradioApp().querySelector('#txt2img_seed_extras button#txt2img_random_subseed');
-    if (seedExtraRandomBtn){
-        seedExtraRandomBtn.addEventListener('click', async (e)=>{
-            await pcmSleepAsync(50);
-            pcmUpdateMiniGalleryControlValues({update_seed_extra: true});
-        });
-    }
-
-    // Seed Extra Reuse ボタン -> Mini Gallery
-    const seedExtraReuseBtn = gradioApp().querySelector('#txt2img_seed_extras button#txt2img_reuse_subseed');
-    if (seedExtraReuseBtn){
-        seedExtraReuseBtn.addEventListener('click', async (e)=>{
-            await pcmSleepAsync(50);
-            pcmUpdateMiniGalleryControlValues({update_seed_extra: true});
         });
     }
 
@@ -365,7 +367,7 @@ function pcmUpdateDefaultGallerySeedExtraStrength(_seed_extra_strength){
 
 /** [Gradioからコール] CNet Enabled : Mini Gallery -> Generation Tab (txt2img のみ) */
 async function pcmUpdateDefaultGalleryCNetEnabled(_cnet_enabled){
-    // CNetが有効になっていなければ Enable ボタンをクリック
+    // Generation Tab の値を合わせる
     selectorTmp = `#txt2img_controlnet_ControlNet-0_controlnet_enable_checkbox input[type='checkbox']`
     if(!(elemTmp = pcmGetElement(selectorTmp))){
         console.error(`Prompt Cards Manager Error. txt2img ControlNet Unit 0 Enable Checkbox not found`);
@@ -407,9 +409,26 @@ async function pcmUpdateDefaultGalleryCNetEndStep(_cnet_end_step){
     }
 }
 
+/** [Gradioからコール] CNet Use Mask : Mini Gallery -> Generation Tab (txt2img のみ) */
+async function pcmUpdateDefaultGalleryCNetUseMask(_cnet_use_mask){
+    // Generation Tab の値を合わせる
+    selectorTmp = `#txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox input[type='checkbox']`
+    if(!(elemTmp = pcmGetElement(selectorTmp))){
+        console.error(`Prompt Cards Manager Error. txt2img ControlNet Unit 0 Use Mask Checkbox not found`);
+        return;
+    }
+    statusTmp = pcmGetGradioComponentByElemId(`txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox`)
+    if(statusTmp){
+        PCM_DEBUG_PRINT(`pcmUpdateDefaultGalleryCNetUseMask clicked: input=${_cnet_use_mask}, tmp=${statusTmp.props.value}`);
+        if(statusTmp.props.value !== _cnet_use_mask){
+            elemTmp.click(); 
+            await pcmSleepAsync(10);
+        }
+    }
+}
+
 /** [直接のCallBackを登録] Width, Height, Seed, CNet enabled : Generation Tab -> Mini Gallery (txt2img のみ)
- * 直接当該コントールを弄る場合の更新処理を登録
- * 別途 script で更新する場合は別途個別に pcmUpdateMiniGalleryControlValues を登録する
+ * 個別の値コンテナを直接変更する場合の更新処理
 */
 function pcmRegisterGenerationConditionsCallbacks(){
     const width_dg_num = gradioApp().querySelector('#txt2img_column_size #txt2img_width input[type="number"]');
@@ -418,13 +437,9 @@ function pcmRegisterGenerationConditionsCallbacks(){
     const height_dg_range = gradioApp().querySelector('#txt2img_column_size #txt2img_height input[type="range"]');
 
     const seed_dg_num = gradioApp().querySelector('#txt2img_seed input[type="number"]');
-    const seed_dg_rnd_btn = gradioApp().querySelector('#txt2img_seed_row button#txt2img_random_seed');
-    const seed_dg_reuse_btn = gradioApp().querySelector('#txt2img_seed_row button#txt2img_reuse_seed');
     const seed_dg_extra_cbx = gradioApp().querySelector('#txt2img_subseed_show input[type="checkbox"]');
     
     const seed_dg_extra_num = gradioApp().querySelector('#txt2img_subseed input[type="number"]');
-    const seed_dg_extra_rnd_btn = gradioApp().querySelector('#txt2img_seed_extras button#txt2img_random_subseed');
-    const seed_dg_extra_reuse_btn = gradioApp().querySelector('#txt2img_seed_extras button#txt2img_reuse_subseed');
     const seed_dg_extra_strength_num = gradioApp().querySelector('#txt2img_subseed_strength input[type="number"]');
     const seed_dg_extra_strength_range = gradioApp().querySelector('#txt2img_subseed_strength input[type="range"]');
     
@@ -433,6 +448,7 @@ function pcmRegisterGenerationConditionsCallbacks(){
     const cnet_weight_dg_range = gradioApp().querySelector('#txt2img_controlnet_ControlNet-0_controlnet_control_weight_slider input[type="range"]');
     const cnet_end_step_dg_num = gradioApp().querySelector('#txt2img_controlnet_ControlNet-0_controlnet_ending_control_step_slider input[type="number"]');
     const cnet_end_step_dg_range = gradioApp().querySelector('#txt2img_controlnet_ControlNet-0_controlnet_ending_control_step_slider input[type="range"]');
+    const cnet_use_mask_dg = gradioApp().querySelector('#txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox input[type="checkbox"]');
 
     // Resolution
     //  - Width (Number box)
@@ -517,18 +533,16 @@ function pcmRegisterGenerationConditionsCallbacks(){
         });
     }
 
-    // Seed/Subseed random/reuse button
-    for (const btn of [seed_dg_rnd_btn, seed_dg_reuse_btn, seed_dg_extra_rnd_btn, seed_dg_extra_reuse_btn]){
-        if (btn){
-            btn.addEventListener('click', async (e)=>{
-                await pcmSleepAsync(175); // reuse はかなり遅めに反映されるため少し待つ必要あり
-                pcmUpdateMiniGalleryControlValues({update_seed: true});
-            });
-        }
+    //  - CNet Use Mask
+    if (cnet_use_mask_dg){
+        cnet_use_mask_dg.addEventListener('change', (e)=>{
+            pcmUpdateMiniGalleryControlValues({update_cnet_use_mask: true});
+        });
     }
 }
 
-/** Update all Mini Gallery values. Call this function when you change Generation Resolution via script.
+/** Update all Mini Gallery values to synchronize Generation tab values.
+ * Call this function when you change any Generation Parameters via script.
  * @param {boolean} update_width Default: false, if true, update width
  * @param {boolean} update_height Default: false, if true, update height
  * @param {boolean} update_seed Default: false, if true, update seed
@@ -544,6 +558,7 @@ function pcmUpdateMiniGalleryControlValues({
     update_width= false, update_height= false,
     update_seed= false, update_seed_extra_cbx= false, update_seed_extra= false, update_seed_extra_strength= false,
     update_cnet_enabled= false, update_cnet_weight= false, update_cnet_end_step= false,
+    update_cnet_use_mask= false,
     force= false }){
 
     // 解像度 width
@@ -675,6 +690,20 @@ function pcmUpdateMiniGalleryControlValues({
                 if (cnet_end_step.props.value !== cnet_end_step_mg.value || force){
                     cnet_end_step_mg.value = cnet_end_step.props.value;
                     updateInput(cnet_end_step_mg);
+                }
+            }
+        }
+    }
+
+    //  - CNet Use Mask
+    if (update_cnet_use_mask){
+        const cnet_use_mask = pcmGetGradioComponentByElemId("txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox");
+        if(cnet_use_mask){
+            const cnet_use_mask_mg = gradioApp().querySelector('#pcm_mini_gallery_cnet_use_mask input[type="checkbox"]');
+            if(cnet_use_mask_mg){
+                if (cnet_use_mask.props.value !== cnet_use_mask_mg.checked || force){
+                    cnet_use_mask_mg.checked = cnet_use_mask.props.value;
+                    updateInput(cnet_use_mask_mg);
                 }
             }
         }

@@ -88,6 +88,15 @@ class MiniGallery:
                 return inputs;
             }
         """),
+
+        # CNet Use Mask : Mini Gallery -> CNet Unit 0
+        "cnet_use_mask": Template("""
+            async function(...args){
+                const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+                await pcmUpdateDefaultGalleryCNetUseMask(inputs[0]);
+                return inputs;
+            }
+        """),
     }
 
     def __init__(self):
@@ -265,7 +274,16 @@ class MiniGallery:
             inputs = cnet_end_step_inputs,
             outputs = [],
             _js = MiniGallery._js_pipelines['cnet_end_step'].substitute(num_inputs=len(cnet_end_step_inputs)),
-        )        
+        )  
+
+        # Generation タブの CNet Unit 0 の use mask 更新
+        cnet_use_mask_inputs = [self.cnet_use_mask]
+        self.cnet_use_mask.change(
+            fn=lambda x: x,
+            inputs = cnet_use_mask_inputs,
+            outputs = [],
+            _js = MiniGallery._js_pipelines['cnet_use_mask'].substitute(num_inputs=len(cnet_use_mask_inputs)),
+        )              
 
     def on_after_component(self, component, **kwargs):
         if kwargs.get("elem_id") == "txt2img_prompt_container":
