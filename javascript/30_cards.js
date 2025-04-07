@@ -395,9 +395,19 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     //   -> CNet モデル一覧の更新処理や、CNet モデルの変更を行った場合も再度表示が必要っぽい
     //      念のため初回だけでなく毎回表示させる
     // 画像ドロップの前までにUI表示後の待機時間が必要 (それまでに画像処理は非同期でやっておく)
+    // Mask についても同様のため、ここで一旦 Use Mask を On にした状態で開く
     let pDataTransferImg = _createDataTransferAsync(dataUri);
 
     // Generationタブのクリック
+    //  - Mask の canvas も初期化させるため Use Mask を On にする
+    const CNET_UNIT_USE_MASK_CHECKBOX = `#${tabname}_controlnet_ControlNet-${index}_controlnet_mask_upload_checkbox input[type='checkbox']`;
+    PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet use mask cbx : ${CNET_UNIT_USE_MASK_CHECKBOX}`);
+    const useMaskCheckbox = gradioApp().querySelector(CNET_UNIT_USE_MASK_CHECKBOX);
+    const useMaskCheckbox_orgValue = useMaskCheckbox.checked;
+    if(useMaskCheckbox && !useMaskCheckbox_orgValue){
+        useMaskCheckbox.click();
+    }
+
     selectorTmp = `#tab_${tabname} .tabs.gradio-tabs.extra-networks > .tab-nav.scroll-hide > button`
     if(!(elemTmp = pcmGetElementBySelectorAndText(selectorTmp, 'Generation'))) return;
     elemTmp.click();
@@ -450,6 +460,11 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
             elemTmp = pcmGetElement(`#${tabname}_controlnet_ControlNet-${index}_controlnet_preprocessor_dropdown`)
             if (elemTmp) updateInput(elemTmp);
         }
+    }
+
+    // Use Mask Checkbox を元に戻す
+    if(useMaskCheckbox && !useMaskCheckbox_orgValue){
+        useMaskCheckbox.click();
     }
 
     // 画像ドロップイベントをエミュレート
