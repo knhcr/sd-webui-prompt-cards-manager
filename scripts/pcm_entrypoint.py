@@ -1,8 +1,3 @@
-import sys
-IS_FORGE = False
-if 'modules_forge.forge_version' in sys.modules:
-    IS_FORGE = True
-
 import scripts.pcm.constants
 import scripts.pcm.extension_settings
 import scripts.pcm.cache_info

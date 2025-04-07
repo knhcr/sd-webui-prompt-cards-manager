@@ -1,5 +1,14 @@
 import os
 import sys
+
+IS_FORGE = False
+IS_REFORGE = False
+if 'modules_forge.forge_version' in sys.modules:
+    IS_FORGE = True
+    from modules_forge.forge_version import version as FORGE_VERSION
+    if FORGE_VERSION.startswith('1.'):
+        IS_REFORGE = True
+
 extension_root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 image_folder = "prompt_cards" # Prompt Images Folder
