@@ -29,6 +29,13 @@ class CnetMaskEditor:
             await PcmMaskEditor.setImage();
             return inputs;
         }'''),
+
+        # マスクを適用してからエディタを閉じる
+        "pcmCnetMaskApply" : Template('''async function(...args){
+            const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+            await PcmMaskEditor.applyMask();
+            return inputs;
+        }'''),
     }
 
 
@@ -40,9 +47,9 @@ class CnetMaskEditor:
         ''' wrap editor as modal '''
         with gr.Group(elem_id="pcm_mask_editor"):
             overlay_html = '<div id="{elem_id}" class="pcm-overlay""></div>'
-            overlay = gr.HTML(overlay_html.format(elem_id="pcm_mask_editor_overlay"), visible=False)
+            self.overlay = gr.HTML(overlay_html.format(elem_id="pcm_mask_editor_overlay"), visible=False)
 
-            with gr.Box(visible=False, elem_id="pcm_mask_editor_container", elem_classes="pcm-mask-editor-container") as editor_container:
+            with gr.Box(visible=False, elem_id="pcm_mask_editor_container", elem_classes="pcm-mask-editor-container") as self.editor_container:
                 self.create_editor()
 
 
@@ -102,6 +109,7 @@ class CnetMaskEditor:
             self.invert_mask_btn = gr.Button(elem_id="pcm_mask_editor_invert_mask_hidden_button", value="Invert Mask", visible=False,)
             self.isInverted = gr.State(True)
             self.open_mask_editor_txt_hidden = gr.Textbox(elem_id="pcm_mask_editor_open_hidden_txt", value = "", visible=False,)
+            self.clear_mask_result_btn_hidden = gr.Button(elem_id="pcm_mask_editor_clear_mask_result_hidden_button", value="Clear Mask Result", visible=False,)
 
             # 画像 Input 用隠しコンポーネント
             self.input_image = gr.Image(label="Input Image", elem_id="pcm_mask_editor_input_image", height=64, width=128, visible=False)
@@ -110,8 +118,49 @@ class CnetMaskEditor:
         self.open_mask_editor_txt_hidden.input(
             fn=self.open_mask_editor,
             inputs = [self.open_mask_editor_txt_hidden],
-            outputs = []
+            outputs = [self.editor_container, self.overlay]
         )
+
+        # Cancel ボタン
+        cancel__inputs = []
+        cancel__outputs = [
+            self.editor_container, # マスクエディタ
+            self.overlay, # オーバーレイ
+            self.input_image, # 画像 Input
+            self.mask_canvas, # マスクキャンバス
+            self.mask_result, # 出力マスク画像
+        ]
+        self.cancel.click(
+            fn= self.close_mask_editor,
+            inputs=cancel__inputs,
+            outputs=cancel__outputs
+        )
+
+        # Apply ボタン : マスク投入は JS に任せて閉じるだけ (マスクキャンバスのクリアを行わない点が cancel との違い)
+        apply__inputs = [self.mask_result]
+        apply__outputs = [
+            self.editor_container, # マスクエディタ
+            self.overlay, # オーバーレイ
+            self.input_image, # 画像 Input
+            self.mask_canvas, # マスクキャンバス
+            self.mask_result, # 出力マスク画像
+        ]
+        self.apply.click(
+            fn= self.apply_mask_editor,
+            inputs=apply__inputs,
+            outputs=apply__outputs,
+            _js = CnetMaskEditor._js_pipelines["pcmCnetMaskApply"].substitute(num_inputs=len(apply__inputs)),
+        )
+
+        # Clear Mask Result ボタン
+        clear_mask_result_btn_hidden__inputs = []
+        clear_mask_result_btn_hidden__outputs = [
+            self.mask_result, # 出力マスク画像
+        ]
+        self.clear_mask_result_btn_hidden.click(
+            fn=self.clear_mask_result,
+            inputs=clear_mask_result_btn_hidden__inputs,
+            outputs=clear_mask_result_btn_hidden__outputs)
 
         # 出力用マスク画像を生成
         gen_mask__inputs = [self.mask_canvas, self.isInverted]
@@ -138,9 +187,36 @@ class CnetMaskEditor:
             inputs=invert_mask__inputs,
             outputs=invert_mask__outputs)
         
+    
     def open_mask_editor(self, value):
+        ''' マスクエディタをオープン, 画像は js の drop イベントで別途セット済み '''
         value = value.split("$")[0]
-        DEBUG_PRINT(f"CnetMaskEditor.open_mask_editor value: {value}")
+        return gr.update(visible=True), gr.update(visible=True)
+    
+    def close_mask_editor(self):
+        ''' マスクエディタをクローズ '''
+        return (
+            gr.update(visible=False), # マスクエディタ
+            gr.update(visible=False), # オーバーレイ
+            None, # 画像 Input
+            None, # マスクキャンバス
+            None, # 出力マスク画像
+        )
+    
+    def apply_mask_editor(self, mask_result:np.ndarray):
+        ''' マスクを適用してエディタクローズ '''
+        return (
+            gr.update(visible=False), # マスクエディタ
+            gr.update(visible=False), # オーバーレイ
+            None, # 画像 Input
+            None, # マスクキャンバス
+            gr.update(), # 出力マスク画像は残しておく
+        )
+    
+    def clear_mask_result(self):
+        ''' 出力マスク画像をクリア '''
+        return gr.update(value=None)
+
 
     def gen_mask(self, images, isInverted):
         # value : {
@@ -164,6 +240,8 @@ class CnetMaskEditor:
         ''' 画像の変更 '''
         # canvas : サイズ固定で画像が高さにフィットする
         # 画像が横にはみ出さないよう、canvas の縦幅を変更する
+        if value is None:
+            return gr.update(), gr.update(), gr.update()
         DEBUG_PRINT(f"CnetMaskEditor.set_image value.shape: {value.shape}")
         [h_img, w_img] = value.shape[:2]
         height = int(h_img * CnetMaskEditor._canvas_width / w_img)

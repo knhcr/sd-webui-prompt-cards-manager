@@ -2,8 +2,11 @@ class PcmMaskEditor{
     static SELECTORS = {
         MASK_EDITOR_OPEN_HIDDEN_TXT : "#pcm_mask_editor_open_hidden_txt textarea",
         CNET_UNIT_IMAGE_CONTAINER : "#txt2img_controlnet_ControlNet-0_input_image img.absolute-img",
+        CNET_UNIT_MASK_CONTAINER : "#txt2img_controlnet_ControlNet-0_mask_image img.absolute-img",
         MASK_EDITOR_IMAGE_INPUT : "#pcm_mask_editor_input_image",
-
+        MASK_EDITOR_RESULT_CONTAINER : "#pcm_mask_editor_result > img",
+        MASK_EDITOR_CLEAR_MASK_RESULT_BUTTON : "#pcm_mask_editor_clear_mask_result_hidden_button",
+        
         BRUSH_SLIDER : "#pcm_mask_editor_blush_slider",
         MASK_CANVAS : "#pcm_mask_editor_canvas",
         IMAGE_INFO : "#pcm_mask_editor_canvas_current_image_info",
@@ -126,11 +129,11 @@ class PcmMaskEditor{
                 if (time >= TIMEOUT) break;
             }
             if (!slider_opened){
-                console.error("pcmImageSetInitialize: brush size slider not opened");
+                PCM_DEBUG_PRINT("pcmImageSetInitialize: brush size slider not opened");
                 return;
             }
         }else{
-            console.error("pcmImageSetInitialize: brush size slider not found");
+            PCM_DEBUG_PRINT("pcmImageSetInitialize: brush size slider not found");
             return;
         }
     
@@ -162,30 +165,12 @@ class PcmMaskEditor{
     /** マスクエディタを開く
      * CNET の画像を mask editor にセットし、隠しテキストに値を入れてディスパッチ */
     static async openMaskEditor(){
-        /** Data URI から DataTransfer オブジェクトを作成する */
-        const _createDataTransferAsync = async (dataUri) => {
-            const mimeType = dataUri.split(';')[0].split(':')[1];
-            const base64Data = dataUri.split(',')[1];
-            const binaryData = atob(base64Data);
-            const arrayBuffer = new Uint8Array(binaryData.length);
-            for (let i = 0; i < binaryData.length; i++) {
-                arrayBuffer[i] = binaryData.charCodeAt(i);
-            }
-            // blob から File を作成して DataTransfer にセット
-            const blob = new Blob([arrayBuffer], { type: mimeType });
-            const file = new File([blob], "image.png", { type: mimeType });
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            dataTransfer.effectAllowed = "all";
-            return dataTransfer;
-        }
-
         // CNET の画像は img.absolute-img の src 属性に dataURI として入っている
         const cnetUnitImageContainer = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_IMAGE_CONTAINER);
         if (!cnetUnitImageContainer) return;
         const imageDataUri = cnetUnitImageContainer.src; // dataURI (data:image/png;base64,...)
         if (!imageDataUri) return;
-        const dataTransfer = await _createDataTransferAsync(imageDataUri);
+        const dataTransfer = await PcmMaskEditor.#createDataTransferAsync(imageDataUri);
 
         // 画像ドロップイベントをエミュレート
         const dropArea = gradioApp().querySelector(`${PcmMaskEditor.SELECTORS.MASK_EDITOR_IMAGE_INPUT} .image-container > div`);
@@ -204,6 +189,69 @@ class PcmMaskEditor{
         hiddenTxt.value = value;
         hiddenTxt.dispatchEvent(new Event("input"), {bubbles: true});
         PCM_DEBUG_PRINT(`PcmMaskEditor.openMaskEditor value: ${value}`);
+    }
+
+    /** マスクを投入してからエディタのmask resultをクリア */
+    static async applyMask(){
+        PCM_DEBUG_PRINT("PcmMaskEditor.applyMask");
+        const maskResult = gradioApp().querySelector(PcmMaskEditor.SELECTORS.MASK_EDITOR_RESULT_CONTAINER);
+        if (!maskResult) return; // マスクが生成されていない場合は存在しない
+        const maskDataUri = maskResult.src;
+        if (!maskDataUri) return;
+
+        // DataTransfer を作成 (wait は後で)
+        const pDataTransfer = PcmMaskEditor.#createDataTransferAsync(maskDataUri);
+
+        // Use Mask にチェックが入っていなければチェック
+        selectorTmp = `#txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox input[type='checkbox']`
+        if(!(elemTmp = pcmGetElement(selectorTmp))){
+            console.error(`Prompt Cards Manager Error. txt2img ControlNet Unit 0 Use Mask Checkbox not found`);
+            return;
+        }
+        statusTmp = pcmGetGradioComponentByElemId(`txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox`)
+        if(statusTmp){
+            PCM_DEBUG_PRINT(`PcmMaskEditor.applyMask Use Mask Checkbox : ${statusTmp.props.value}`);
+            if(!statusTmp.props.value){
+                elemTmp.click();
+            }
+        }
+
+        // CNet Module の Mask container が現れるまで待機
+        const [dt, elem] = await Promise.all([pDataTransfer, pcmQuerySelectorAsync(PcmMaskEditor.SELECTORS.CNET_UNIT_MASK_CONTAINER)]);
+        if(!elem){
+            PCM_DEBUG_PRINT("PcmMaskEditor.applyMask CNet Module Mask container not found");
+            return;
+        }
+
+        // 画像ドロップイベントをエミュレート
+        const dragEvent = new DragEvent("drop", {
+            bubbles: true,
+            cancelable: true,
+            dataTransfer: dt
+        });
+        elem.dispatchEvent(dragEvent);
+
+        // マスクエディタの mask result をクリア
+        const clearMaskResultBtn = gradioApp().querySelector(PcmMaskEditor.SELECTORS.MASK_EDITOR_CLEAR_MASK_RESULT_BUTTON);
+        if (clearMaskResultBtn) clearMaskResultBtn.click();
+    }
+
+    /** Data URI から DataTransfer オブジェクトを作成する */
+    static async #createDataTransferAsync(dataUri){
+        const mimeType = dataUri.split(';')[0].split(':')[1];
+        const base64Data = dataUri.split(',')[1];
+        const binaryData = atob(base64Data);
+        const arrayBuffer = new Uint8Array(binaryData.length);
+        for (let i = 0; i < binaryData.length; i++) {
+            arrayBuffer[i] = binaryData.charCodeAt(i);
+        }
+        // blob から File を作成して DataTransfer にセット
+        const blob = new Blob([arrayBuffer], { type: mimeType });
+        const file = new File([blob], "image.png", { type: mimeType });
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        dataTransfer.effectAllowed = "all";
+        return dataTransfer;
     }
 }
 

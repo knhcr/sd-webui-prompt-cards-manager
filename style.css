@@ -752,11 +752,10 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 }
 
 #pcm_mask_editor_control_belt_buttons{
-    height: 10px;
-    margin-top:-7px
+    margin-top:-28px
 }
 #pcm_mask_editor_control_belt_buttons > *{
-    margin:25px;
+    margin:24px;
     cursor: pointer;
 }
 
