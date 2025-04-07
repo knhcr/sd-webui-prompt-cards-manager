@@ -303,7 +303,7 @@ async function pcmDropImageToCnet(dataUri, index = 0, tabname = "txt2img", is_ma
     }
 
     PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet CNET function not found`);
-    return;    
+    return;
 }
 
 
@@ -454,17 +454,17 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
 
     // 画像ドロップイベントをエミュレート
     let [dataTransferImg, _] = await Promise.all([pDataTransferImg, pcmSleepAsync(350)]);
-    selectorTmp = `#${tabname}_controlnet_ControlNet-${index}_input_image .image-container > div`
+    selectorTmp = `#${tabname}_controlnet_ControlNet-${index}_input_image .image-container > .center`
     if(!(elemTmp = pcmGetElement(selectorTmp, baseElem))){
         console.error(`Prompt Cards Manager Error. ${tabname} ControlNet Unit ${index} Input Image Area not found`);
         return;
     }
-    const dragEvent = new DragEvent("drop", {
+    const dropEvent = new DragEvent("drop", {
         bubbles: true,
         cancelable: true,
         dataTransfer: dataTransferImg
     });
-    elemTmp.dispatchEvent(dragEvent);
+    elemTmp.dispatchEvent(dropEvent);
 
     // 各種パラメータのセット : gradio_config 経由でセットする
     //  - Control Weight
@@ -522,18 +522,14 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
         }
     }
   
+    // 少し待機
+    await pcmSleepAsync(200);
+
     // 再度Prompt Cards Manager タブに戻る
     selectorTmp = `#tab_${tabname} .tabs.gradio-tabs.extra-networks > .tab-nav.scroll-hide > button`
     if(!(elemTmp = pcmGetElementBySelectorAndText(selectorTmp, 'PromptCards'))) return;
     elemTmp.click();
     
-    // GenerationタブのクリックからPromptCardsタブへの戻りが自動処理だと早すぎるため、
-    // a1111 が hidden を消す処理の前に タブの onclick による貼り直しが終わってしまう
-    // 少し待機を入れてから再度 hidden 貼り直しを実施
-    await pcmSleepAsync(200);
-    PcmCardSearch.updateDom(tabname);
-
-
     PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet end.`);
 }
 
