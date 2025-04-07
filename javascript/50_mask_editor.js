@@ -2,7 +2,7 @@ class PcmMaskEditor{
     static SELECTORS = {
         CNET_UNIT_IMAGE_CONTAINER :   "#txt2img_controlnet_ControlNet-0_input_image img.absolute-img",
         CNET_UNIT_USE_MASK_CHECKBOX : "#txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox input[type='checkbox']",
-        CNET_UNIT_MASK_CONTAINER :    "#txt2img_controlnet_ControlNet-0_mask_image img.absolute-img",
+        CNET_UNIT_MASK_DROP_TARGET :    "#txt2img_controlnet_ControlNet-0_mask_image .center",
         CNET_UNIT_MASK_UNDO_BUTTON :  "#txt2img_controlnet_ControlNet-0_mask_image button[aria-label='Undo']",
        
         MASK_EDITOR_OPEN_TXT_HIDDEN :                 "#pcm_mask_editor_open_hidden_txt textarea", // Modal Open トリガー
@@ -215,7 +215,7 @@ class PcmMaskEditor{
         }
 
         // CNet Module の Mask container が現れるまで待機
-        const [dt, elem] = await Promise.all([pDataTransfer, pcmQuerySelectorAsync(PcmMaskEditor.SELECTORS.CNET_UNIT_MASK_CONTAINER)]);
+        const [dt, elem] = await Promise.all([pDataTransfer, pcmQuerySelectorAsync(PcmMaskEditor.SELECTORS.CNET_UNIT_MASK_DROP_TARGET)]);
         if(!elem){
             PCM_DEBUG_PRINT("PcmMaskEditor.applyMask CNet Module Mask container not found");
             return;
