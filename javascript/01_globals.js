@@ -115,6 +115,7 @@ const pcmQuerySelectorAsync = async (selector, timeout=5000)=>{
         wait_ms += 100;
         content = gradioApp().querySelector(selector);
     }
+    if (!content) PCM_DEBUG_PRINT(`pcmQuerySelectorAsync timeout: ${selector}`);
     return content;
 }
 

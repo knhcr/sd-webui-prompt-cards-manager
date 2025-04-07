@@ -16,8 +16,8 @@ class CnetMaskEditor:
     _icons={
         "undo"       : f"{endpoint_base}/resources/reset-svgrepo-com.svg",
         "undo_hover" : f"{endpoint_base}/resources/reset-blue-svgrepo-com.svg",
-        "clean"      : f"{endpoint_base}/resources/eraser-bold-svgrepo-com.svg",
-        "clean_hover": f"{endpoint_base}/resources/eraser-bold-blue-svgrepo-com.svg",
+        "clear"      : f"{endpoint_base}/resources/eraser-bold-svgrepo-com.svg",
+        "clear_hover": f"{endpoint_base}/resources/eraser-bold-blue-svgrepo-com.svg",
         "flip"       : f"{endpoint_base}/resources/flip-color-svgrepo-com.svg",
         "flip_hover" : f"{endpoint_base}/resources/flip-color-blue-svgrepo-com.svg",
     }
@@ -65,14 +65,14 @@ class CnetMaskEditor:
                 with gr.Column(scale=1):
                     with gr.Row(elem_id="pcm_mask_editor_control_belt_buttons"):
                         gr.HTML(f'''<div id="pcm_mask_editor_undo" class="pcm-mask-editor-button-container"
-                                title="Undo" onclick="PcmMaskEditor.undoBrush()">
+                                title="Undo" onclick="PcmMaskEditor.undoMask()">
                                 <img class="pcm-mask-editor-button default" src="{CnetMaskEditor._icons["undo"]}" alt="undo">
                                 <img class="pcm-mask-editor-button hover" src="{CnetMaskEditor._icons["undo_hover"]}" alt="undo_hover">
                                 </div>''')
-                        gr.HTML(f'''<div id="pcm_mask_editor_erase" class="pcm-mask-editor-button-container"
-                                title="Clear" onclick="PcmMaskEditor.cleanBrush()">
-                                <img class="pcm-mask-editor-button default" src="{CnetMaskEditor._icons["clean"]}" alt="clean">
-                                <img class="pcm-mask-editor-button hover" src="{CnetMaskEditor._icons["clean_hover"]}" alt="clean_hover">
+                        gr.HTML(f'''<div id="pcm_mask_editor_clear" class="pcm-mask-editor-button-container"
+                                title="Clear" onclick="PcmMaskEditor.clearMask()">
+                                <img class="pcm-mask-editor-button default" src="{CnetMaskEditor._icons["clear"]}" alt="clear">
+                                <img class="pcm-mask-editor-button hover" src="{CnetMaskEditor._icons["clear_hover"]}" alt="clear_hover">
                                 </div>''')
                         gr.HTML(f'''<div id="pcm_mask_editor_invert_mask" class="pcm-mask-editor-button-container"
                                 title="Invert White/Black\n(CNet uses the white area)" onclick="PcmMaskEditor.invertMask()">

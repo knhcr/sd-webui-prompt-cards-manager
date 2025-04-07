@@ -30,6 +30,13 @@ PCM_SETTINGS_KEYS = {
         "default_resize_mode": "prompt_cards_manager_default_controlnet_resize_mode",
     },
 
+    "mask_editor":{
+        "min_brush_size": "prompt_cards_manager_mask_editor_min_brush_size",
+        "max_brush_size": "prompt_cards_manager_mask_editor_max_brush_size",
+        "default_brush_size": "prompt_cards_manager_default_mask_editor_brush_size",
+        "default_invert_mask": "prompt_cards_manager_default_mask_editor_invert_mask",
+    },
+
     "misc":{
         "decoration_line_length": "prompt_cards_manager_decoration_line_length",
         "fix_template_paste_behavior": "prompt_cards_manager_fix_template_paste_behavior",
@@ -196,6 +203,34 @@ def on_ui_settings():
         section=section
     ))
 
+    # mask editor min brush size
+    shared.opts.add_option(PCM_SETTINGS_KEYS["mask_editor"]["min_brush_size"], shared.OptionInfo(
+        0.5, "Mask Editor : Min Brush Size (% of shorter side of image)",
+        gr.Slider, {"minimum": 0.1, "maximum": 100.0, "step": 0.1}, 
+        section=section
+    ))
+
+    # mask editor max brush size
+    shared.opts.add_option(PCM_SETTINGS_KEYS["mask_editor"]["max_brush_size"], shared.OptionInfo(
+        60.0, "Mask Editor : Max Brush Size (% of shorter side of image)",
+        gr.Slider, {"minimum": 0.1, "maximum": 100.0, "step": 0.1}, 
+        section=section
+    ))
+
+    # mask editor default brush size
+    shared.opts.add_option(PCM_SETTINGS_KEYS["mask_editor"]["default_brush_size"], shared.OptionInfo(
+        27.0, "Mask Editor : Default Brush Size (% of max brush size)",
+        gr.Slider, {"minimum": 0.1, "maximum": 100.0, "step": 0.1}, 
+        section=section
+    ))
+    
+    # mask editor invert mask
+    shared.opts.add_option(PCM_SETTINGS_KEYS["mask_editor"]["default_invert_mask"], shared.OptionInfo(
+        False, "Mask Editor : Default Invert Mask",
+        gr.Checkbox, 
+        section=section
+    ))
+    
     # fix 'Template:' paste behavior of sd-dynamic-prompts.
     shared.opts.add_option(PCM_SETTINGS_KEYS["misc"]["fix_template_paste_behavior"], shared.OptionInfo(
         False,
