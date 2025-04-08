@@ -272,14 +272,16 @@
     margin-right:9px;
 }
 
-/* ツリービューの幅 */
+/* ツリービューの幅 : reforge では不要 */
+/*
 #txt2img_promptcards_tree, #img2img_promptcards_tree{
-    /*min-width: 260px;
+    min-width: 260px;
     max-width: 310px;
-    flex: 0.48;*/
+    flex: 0.48;
     width: 300px;
     flex: none;
 }
+*/
 /*#endregion ExtraNetworks : TreeView ------------------------------------*/
 
 /*#region Mini Gallery ------------------------------------*/
