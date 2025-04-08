@@ -399,15 +399,6 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     let pDataTransferImg = _createDataTransferAsync(dataUri);
 
     // Generationタブのクリック
-    //  - Mask の canvas も初期化させるため Use Mask を On にする
-    const CNET_UNIT_USE_MASK_CHECKBOX = `#${tabname}_controlnet_ControlNet-${index}_controlnet_mask_upload_checkbox input[type='checkbox']`;
-    PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet use mask cbx : ${CNET_UNIT_USE_MASK_CHECKBOX}`);
-    const useMaskCheckbox = gradioApp().querySelector(CNET_UNIT_USE_MASK_CHECKBOX);
-    const useMaskCheckbox_orgValue = useMaskCheckbox.checked;
-    if(useMaskCheckbox && !useMaskCheckbox_orgValue){
-        useMaskCheckbox.click();
-    }
-
     selectorTmp = `#tab_${tabname} .tabs.gradio-tabs.extra-networks > .tab-nav.scroll-hide > button`
     if(!(elemTmp = pcmGetElementBySelectorAndText(selectorTmp, 'Generation'))) return;
     elemTmp.click();
@@ -460,11 +451,6 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
             elemTmp = pcmGetElement(`#${tabname}_controlnet_ControlNet-${index}_controlnet_preprocessor_dropdown`)
             if (elemTmp) updateInput(elemTmp);
         }
-    }
-
-    // Use Mask Checkbox を元に戻す
-    if(useMaskCheckbox && !useMaskCheckbox_orgValue){
-        useMaskCheckbox.click();
     }
 
     // 画像ドロップイベントをエミュレート
