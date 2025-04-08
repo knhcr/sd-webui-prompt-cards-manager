@@ -46,4 +46,25 @@ const pcmSetPromptCardsTabOnClickAsync = async ()=>{
     }
 };
 
+/** reforge 対応 : reforge 独自の filter, sort のハンドリングをバイパスする
+ * - reforge ではカードDOM 初期化時にもまず applyExtraNetworkFilter() が適用される
+ * - その処理の中で applySort() を通る
+ * - reforge の applySort() は '#' + tabname_full + "_cards" の innerHTML を空にしてから
+ *   div.card で引っ掛けた要素をソートして DOM として埋め込む処理に変更されている
+ * - 従って card 以外のカスタムクラスだと applySort() を通った時点で DOM が空になってしまう
+ * - そもそもフィルタリングは独自実装のため reforge のフィルタリングは一切不要なので
+ *   monkey patch を当てて、pcmcardsの場合のみ当該処理を完全にスキップする
+ */
+const pcmReforgeBypassFilterSort = () => {
+    const originalApplyExtraNetworkFilter = window.applyExtraNetworkFilter; // original
+
+    window.applyExtraNetworkFilter = function(tabname_full) {
+      if (!tabname_full.toLowerCase().includes('promptcards')) {
+        originalApplyExtraNetworkFilter(tabname_full); // PromptCards 以外のときだけ通常の処理
+      }
+      return;
+    };
+};
+
 pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmSetPromptCardsTabOnClickAsync);
+pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmReforgeBypassFilterSort);
