@@ -43,16 +43,21 @@ class PcmCardSearch {
     }
    
     /** カードデータとカテゴリー Alias を更新
-     * リフレッシュボタン経由の場合は tabname も受け取る
      *   - a1111標準のコールバックは、クリック元のタブのカードしか更新しないため t2i と i2i は別々に管理する
-     * リフレッシュ時は、カードに変化があるかどうかで DOM の挙動が変わる
-     *   - カードに変化が無い : div.card だけが全削除されてから再生成される
+     * 
+     * リフレッシュ時は、カードに変化があるかどうかで挙動が変わる
+     *   - カードに変化が無い : div.card だけが全削除されてから再生成される(カスタムカードの場合は変化なし)
+     *      -> おそらく実際には DOM の再生成ではなく、 forge の applySort() による作用
      *   - カードに変化がある : さらにその上の tree-view も内包する DOM 要素全体が削除されて再生成される
-     * -> ここで監視せず以下で監視する
+     *
      * #txt2img_promptcards_cards_html.block > div.wrap が読み込み中の半透明の画面暗転エフェクトの実体
      *   - リフレッシュ中は class に translucent が付与され、読み込み終了後に削除される
-     *   - ただし、起動時、初回に別タブから Prompt Cards タブを開いた場合に走る updateCards は translucent は付与されないため補足できない
-     *     -> updateCards の処理がタイムアウト待ちで止まってしまうため初回タブクリックによる更新は無しに変更
+     *   - 基本的にこれで DOM 更新の終了を捕捉可能
+     * 
+     * 起動時の初回にタブを開いた時だけ refresh ボタンが自動で押される
+     *   - この場合は暗転処理が行われないため捕捉不可
+     *   - 基本的には前回終了時の DOM がキャッシュされているため変化は少ない筈
+     *     -> 初回の updateCards は DOM 更新の厳密な終了タイミングを捕捉せず、適当に待機して即次の処理に移る
      * @param {string} tabname "txt2img" or "img2img"
     */
     static async updateCards(tabname=null){
@@ -67,43 +72,58 @@ class PcmCardSearch {
         // a1111 による DOM の更新が走るのを監視
         let isTimeout = false;
         const pDomUpadated = new Promise((resolve, reject) => {
-            const wrapDiv = gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block > div.wrap`);
-            if(!wrapDiv) reject(new Error(`pcmCardSearch.updateCards: ${tabname} div.wrap not found`));
+            if(PcmCardSearch.isInitialized[tabname]){
+                // 初回以降は translucent で判定可能
+                const wrapDiv = gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block > div.wrap`);
+                if(!wrapDiv) reject(new Error(`pcmCardSearch.updateCards: ${tabname} div.wrap not found`));
 
-            let isStarted = false; // div.wrap に translucent が付与されたら true
-            const obsWrapDiv = new MutationObserver(async (ms, o) => {
-                for(const m of ms){
-                    //PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} ${m.type} ${m.attributeName}`);
-                    if(!isStarted && wrapDiv.classList.contains("translucent")){
-                        isStarted = true;
-                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} DOM Update started`);
-                        return;
+                let isStarted = false; // div.wrap に translucent が付与されたら true
+                const obsWrapDiv = new MutationObserver(async (ms, o) => {
+                    for(const m of ms){
+                        //PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} ${m.type} ${m.attributeName}`);
+                        if(!isStarted && wrapDiv.classList.contains("translucent")){
+                            isStarted = true;
+                            PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} DOM Update started`);
+                            return;
+                        }
+                        else if(isStarted && !wrapDiv.classList.contains("translucent")){
+                            PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} DOM Update finished`);
+                            o.disconnect();
+                            await pcmSleepAsync(150); // 念のため少し待つ                            
+                            resolve();
+                            return;
+                        }
                     }
-                    else if(isStarted && !wrapDiv.classList.contains("translucent")){
-                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: Update Observer ${tabname} DOM Update finished`);
-                        o.disconnect();
-                        await pcmSleepAsync(150); // 念のため少し待つ                            
-                        resolve();
-                        return;
-                    }
-                }
-                return; // 関係なかった場合
-            });
-            // 念のためタイムアウトを設定しておく
-            setTimeout(() => {
-                obsWrapDiv.disconnect();
-                isTimeout = true;
-                resolve();
-            }, 30000);
-            obsWrapDiv.observe(
-                gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block`),
-                {childList: true, subtree: true});
-
+                    return; // 関係なかった場合
+                });
+                // 念のためタイムアウトを設定しておく
+                setTimeout(() => {
+                    obsWrapDiv.disconnect();
+                    isTimeout = true;
+                    resolve();
+                }, 40000);
+                obsWrapDiv.observe(
+                    gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block`),
+                    {childList: true, subtree: true}
+                );
+            }else{
+                // 初回の場合は何もせず少し待ってresolve
+                setTimeout(() => resolve(), 150);
+                return;
+            }
         });
 
         PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} called, isInitialized: ${PcmCardSearch.isInitialized[tabname]}`);
-        if(!PcmCardSearch.isInitialized[tabname]) PcmCardSearch.isInitialized[tabname] = true;
+
         try {
+            await pDomUpadated; // DOM の更新を待機
+
+            if(isTimeout){
+                PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} timeout`);
+                if(!PcmCardSearch.isInitialized[tabname]) PcmCardSearch.isInitialized[tabname] = true;
+                return;
+            }
+            
             // カード情報を取得
             const res = await fetch(PcmCardSearch.cardsInfoUrl);
             if (!res.ok) {
@@ -125,66 +145,62 @@ class PcmCardSearch {
                 card.desc = json[orgname].desc.toLowerCase();
                 cards[orgname] = card;
             }
-
             PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${Object.keys(cards).length} cards updated for ${tabname}`);
             PcmCardSearch.cards[tabname] = cards;
 
-            const tmpQuery = PcmCardSearch.queries[tabname];
-            PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: tmpQuery: path = ${tmpQuery.path}, prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
 
-            PCM_DEBUG_PRINT(`pcmCardSearch.clearQuery called`);
-            PcmCardSearch.clearQuery(tabname);
+            if(!PcmCardSearch.isInitialized[tabname]){
+                const tmpQuery = PcmCardSearch.queries[tabname];
+                PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: tmpQuery: path = ${tmpQuery.path}, prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
 
-            // 更新前にクエリがセットされていた場合は、再度クエリをセットしなおしてマッチ状態に適用
-            const tmpPath = tmpQuery.path;
-            let keptPath = null;
-            if (tmpPath !== null && tmpPath !== undefined && tmpPath.length > 0){
-                // 更新後もセットされていたPathが有効な場合
-                //  - 更新後のフォルダ名一覧に存在するか
-                //    + ディレクトリツリーはパスの途中のフォルダもノードとして存在する
-                //    + 従ってフォルダ名としてマッチするか否かで有効性を確認する
-                // カード情報の全パスから $ を外して/に付け替えた集合
-                let all_paths = new Set(Object.values(PcmCardSearch.cards[tabname]).map(o=>o.path.slice(0, -1)+'/')); // [`prompt_curds/subdir/subdir`, ...]
+                PCM_DEBUG_PRINT(`pcmCardSearch.clearQuery called`);
+                PcmCardSearch.clearQuery(tabname);
 
-                let checkPath = tmpPath;
-                if (checkPath.endsWith('$')) checkPath = checkPath.slice(0, -1);
-                checkPath += '/';
-                let isValidPath = false;
-                for (const path of all_paths){
-                    if (path.startsWith(checkPath)){
-                        isValidPath = true;
-                        break;
+                // 更新前にクエリがセットされていた場合は、再度クエリをセットしなおしてマッチ状態に適用
+                const tmpPath = tmpQuery.path;
+                let keptPath = null;
+                if (tmpPath !== null && tmpPath !== undefined && tmpPath.length > 0){
+                    // 更新後もセットされていたPathが有効な場合
+                    //  - 更新後のフォルダ名一覧に存在するか
+                    //    + ディレクトリツリーはパスの途中のフォルダもノードとして存在する
+                    //    + 従ってフォルダ名としてマッチするか否かで有効性を確認する
+                    // カード情報の全パスから $ を外して/に付け替えた集合
+                    let all_paths = new Set(Object.values(PcmCardSearch.cards[tabname]).map(o=>o.path.slice(0, -1)+'/')); // [`prompt_curds/subdir/subdir`, ...]
+
+                    let checkPath = tmpPath;
+                    if (checkPath.endsWith('$')) checkPath = checkPath.slice(0, -1);
+                    checkPath += '/';
+                    let isValidPath = false;
+                    for (const path of all_paths){
+                        if (path.startsWith(checkPath)){
+                            isValidPath = true;
+                            break;
+                        }
+                    }
+                    if (isValidPath){
+                        keptPath = tmpPath;
+                        PcmCardSearch.updateQuery(tabname, "path", tmpPath, false);
+                        PcmCardSearch.updateQuery(tabname, "prompt", tmpQuery.prompt.join(" "), false);
+                        PcmCardSearch.updateQuery(tabname, "desc", tmpQuery.desc.join(" "), false);
+                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: previous query : path = ${tmpPath}, prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
+                    }
+                }else{
+                    // 検索クエリのみがセットされていた場合
+                    if (tmpQuery.prompt.length > 0 || tmpQuery.desc.length > 0){
+                        PcmCardSearch.updateQuery(tabname, "prompt", tmpQuery.prompt.join(" "), false);
+                        PcmCardSearch.updateQuery(tabname, "desc", tmpQuery.desc.join(" "), false);
+                        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: previous query : prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
                     }
                 }
-                if (isValidPath){
-                    keptPath = tmpPath;
-                    PcmCardSearch.updateQuery(tabname, "path", tmpPath, false);
-                    PcmCardSearch.updateQuery(tabname, "prompt", tmpQuery.prompt.join(" "), false);
-                    PcmCardSearch.updateQuery(tabname, "desc", tmpQuery.desc.join(" "), false);
-                    PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: previous query : path = ${tmpPath}, prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
+
+                // クエリの再適用
+                PcmCardSearch.updateMatch(tabname, true);
+
+                // 検索パスを引き継いだ場合ツリーを展開
+                if(keptPath !== null){
+                    const dirElem = pcmSearchPathToDirTreeElement(keptPath, tabname);
+                    if(dirElem) pcmExpandDirItem(tabname, dirElem, true);
                 }
-            }else{
-                // 検索クエリのみがセットされていた場合
-                if (tmpQuery.prompt.length > 0 || tmpQuery.desc.length > 0){
-                    PcmCardSearch.updateQuery(tabname, "prompt", tmpQuery.prompt.join(" "), false);
-                    PcmCardSearch.updateQuery(tabname, "desc", tmpQuery.desc.join(" "), false);
-                    PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: previous query : prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
-                }
-            }
-
-            await pDomUpadated; // DOM の更新を待機
-            if(isTimeout){
-                PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${tabname} timeout`);
-                return;
-            }
-
-            // クエリの再適用
-            PcmCardSearch.updateMatch(tabname, true);
-
-            // 検索パスを引き継いだ場合ツリーを展開
-            if(keptPath !== null){
-                const dirElem = pcmSearchPathToDirTreeElement(keptPath, tabname);
-                if(dirElem) pcmExpandDirItem(tabname, dirElem, true);
             }
 
             pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
@@ -193,7 +209,10 @@ class PcmCardSearch {
             // 表示オプションの適用
             pcmApplyShowOptions(tabname);
 
+            if(!PcmCardSearch.isInitialized[tabname]) PcmCardSearch.isInitialized[tabname] = true;
+
         } catch (error) {
+            if(!PcmCardSearch.isInitialized[tabname]) PcmCardSearch.isInitialized[tabname] = true;
             console.error(`pcmCardSearch.updateCards failed: ${error}`);
             console.error(error.stack);
         }
