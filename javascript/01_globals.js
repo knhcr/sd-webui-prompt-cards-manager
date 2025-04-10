@@ -174,6 +174,8 @@ if(typeof PCM_DEBUG_MODE === "undefined"){
 /** デバッグプリント */
 if(PCM_DEBUG_MODE){
     window.PCM_DEBUG_PRINT = console.log;
+    window.PCM_DEBUG_TRACE = console.trace;
 }else{
     window.PCM_DEBUG_PRINT = () => {};
+    window.PCM_DEBUG_TRACE = () => {};
 }

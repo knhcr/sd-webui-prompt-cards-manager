@@ -95,13 +95,17 @@ class PcmMaskEditor{
     /** CNET 画像を Canvas にセットしてエディタを初期化 */
     static async setImage(){
         PCM_DEBUG_PRINT("PcmMaskEditor.setImage called.");
-
+        
         // キャンバスサイズ変更直後は画像が表示されない場合があるため、Undo ボタンをクリックして再表示を促す
         const undoBtn = await pcmQuerySelectorAsync(`${PcmMaskEditor.SELECTORS.MASK_EDITOR_CANVAS_UNDO_BUTTON}`);
         if (undoBtn){
             await pcmSleepAsync(300); // 待機必須
             undoBtn.click();
             PCM_DEBUG_PRINT("Undo button clicked");
+        }else{
+            // cancel, apply などのキャンバスクリア時にも gradio の change ハンドラが発火する -> 明示的にフラグで管理した方が良さそう
+            PCM_DEBUG_PRINT("PcmMaskEditor.setImage: canvas not found");
+            return;
         }
 
         // キャンバスの Brush Slider を取得

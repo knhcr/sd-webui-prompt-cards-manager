@@ -24,7 +24,7 @@ class CnetMaskEditor:
     
     _js_pipelines ={
         # 画像変更時にコントロールの表示を変更
-        "pcmCnetMaskEditor" : Template('''async function(...args){
+        "pcmCnetMaskSetImage" : Template('''async function(...args){
             const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
             await PcmMaskEditor.setImage();
             return inputs;
@@ -176,7 +176,7 @@ class CnetMaskEditor:
             outputs=input_image__outputs,
         ).then( 
             fn=None, # 画像セット終了後にJS実行
-            _js = CnetMaskEditor._js_pipelines["pcmCnetMaskEditor"].substitute(num_inputs=len([])),
+            _js = CnetMaskEditor._js_pipelines["pcmCnetMaskSetImage"].substitute(num_inputs=len([])),
         )
 
         # マスクを白黒反転
@@ -240,7 +240,7 @@ class CnetMaskEditor:
         ''' 画像の変更 '''
         # canvas : サイズ固定で画像が高さにフィットする
         # 画像が横にはみ出さないよう、canvas の縦幅を変更する
-        if value is None:
+        if value is None: # 画像がない場合はそのままリターン
             return gr.update(), gr.update(), gr.update()
         DEBUG_PRINT(f"CnetMaskEditor.set_image value.shape: {value.shape}")
         [h_img, w_img] = value.shape[:2]
