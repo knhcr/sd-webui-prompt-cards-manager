@@ -25,6 +25,11 @@ etc.
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## 更新履歴
+* 2025/04/11
+  - CNet 用のマスク画像を編集・適用する機能を追加。ミニギャラリー下部のローラーのアイコンから呼び出せる。
+  - ショートカットキーでカテゴリーを切り替えた際、非アクティブなカテゴリを折り畳むよう動作を変更
+  - bug fix. タブ切り替え動作の安定
+
 * 2025/04/02
   - カード情報編集画面の Resolution ボタンを解像度 1024 にスケールしてセットするよう変更
 
@@ -192,6 +197,7 @@ etc.
   - プロンプトの右横に、`Generation` タブの中にある標準の生成結果表示コンポーネントと同じ内容の小さな画面を常に表示できます
   - 各種設定値は Generation タブと連動しています
   - ミニギャラリーが不要な場合は `Settings` > `Show Mini Gallery` のチェックを外してください
+  - 下部のローラーのアイコンのボタンを押すことで、Control Net のマスクを編集・適用する事が可能
 
 ![MiniGellery](./docs/images/mini%20gallery.png)
 
@@ -247,9 +253,8 @@ etc.
   タイムアウトしてもサーバ側の内部処理に問題が発生したわけではないので、その場合はブラウザをリロードして再度ページを読み込めば、
   次以降は正常に読み込まれる。
 
-
 # Credits
-This extension uses the folloing third-party resouces.
+This extension utilizes the folloing third-party resouces.
 
 ## Icons
 * https://www.svgrepo.com/svg/485431/info-1, LICENSE: CC Attribution License, AUTHOR: Anastasia Savenko
@@ -262,3 +267,8 @@ This extension uses the folloing third-party resouces.
 * https://www.svgrepo.com/svg/435987/window, LICENSE: MIT License, AUTHOR: Flux Icons
 * https://www.svgrepo.com/svg/532815/folder-exclamation, LICENSE: CC Attribution License, AUTHOR: Dazzle UI
 * https://www.svgrepo.com/svg/525443/minimize-square-minimalistic, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/343263/reset, LICENSE: PD License, AUTHOR: CoreyGinnivan
+* https://www.svgrepo.com/svg/362678/eraser-bold, LICENSE: MIT License, AUTHOR: phosphor
+* https://www.svgrepo.com/svg/445768/flip, LICENSE: MIT License, AUTHOR: Denali Design
+* https://www.svgrepo.com/svg/522859/flip-horizontal, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/129307/painting-roller, LICENSE: CC0 License, UPLOADER: SVG Repo

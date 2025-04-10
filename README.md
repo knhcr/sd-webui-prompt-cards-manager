@@ -25,6 +25,11 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/04/11
+  - Added. CNet mask editor function. You can open it by roller icon button in Mini Gallery.
+  - Changed category shorcut key behavior. Now collapse another category than currently selected.
+  - bug fix. Stabilized behavior on changing Extra Networks tabs.
+
 * 2025/04/02
   - Changed Card Edit Window Resolution button behavior.
 
@@ -195,6 +200,7 @@ Note that this extension does not have features to automatically generate prompt
   - At the right side of prompt textarea, you can always see a small gallery which shows the image generation result.
   - All of the values are syncronized with those of Generation tab.
   - If you don't need this gallery, uncheck `Settings` > `Show Mini Gallery` option.
+  - By pushing roller icon, you can open mask map editor for ControlNet, and apply map to CNet.
 
 ![MiniGellery](./docs/images/mini%20gallery.png)
 
@@ -254,7 +260,7 @@ Note that this extension does not have features to automatically generate prompt
   If this happens, simply reload the browser page, and the next time you push refresh button, everything shoud load correctly.
 
 # Credits
-This extension uses the folloing third-party resouces.
+This extension utilizes the folloing third-party resouces.
 
 ## Icons
 * https://www.svgrepo.com/svg/485431/info-1, LICENSE: CC Attribution License, AUTHOR: Anastasia Savenko
@@ -267,3 +273,8 @@ This extension uses the folloing third-party resouces.
 * https://www.svgrepo.com/svg/435987/window, LICENSE: MIT License, AUTHOR: Flux Icons
 * https://www.svgrepo.com/svg/532815/folder-exclamation, LICENSE: CC Attribution License, AUTHOR: Dazzle UI
 * https://www.svgrepo.com/svg/525443/minimize-square-minimalistic, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/343263/reset, LICENSE: PD License, AUTHOR: CoreyGinnivan
+* https://www.svgrepo.com/svg/362678/eraser-bold, LICENSE: MIT License, AUTHOR: phosphor
+* https://www.svgrepo.com/svg/445768/flip, LICENSE: MIT License, AUTHOR: Denali Design
+* https://www.svgrepo.com/svg/522859/flip-horizontal, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/129307/painting-roller, LICENSE: CC0 License, UPLOADER: SVG Repo
