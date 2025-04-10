@@ -81,10 +81,21 @@ const pcmGetGradioComponentsAllByElemId = (elem_id) => {
 }
 
 
-/** Selector に一致する要素の内、テキストに txt を含む(一致ではない)最初の要素を返す。無ければ null */
-const pcmGetElementBySelectorAndText = (selector, txt, base_elem = gradioApp()) => {
+/** Selector に一致する要素の内、テキストに txt を含む(一致ではない)最初の要素を返す。無ければ null
+ *  @param {string} selector セレクタ
+ *  @param {string} txt テキスト
+ *  @param {Element} base_elem 基準エレメント (デフォルトは gradioApp())
+ *  @param {boolean} toLower テキストを小文字に変換して比較するかどうか (デフォルトは false)
+ *  @return {Element} 対象エレメント。無ければ null
+*/
+const pcmGetElementBySelectorAndText = (selector, txt, base_elem = gradioApp(), toLower = false) => {
     const elems = base_elem.querySelectorAll(selector);
-    const ret = Array.from(elems).find(elem => elem.textContent.includes(txt));
+    let ret = null;
+    if (toLower){
+        ret = Array.from(elems).find(elem => elem.textContent.toLowerCase().includes(txt.toLowerCase()));
+    }else{
+        ret = Array.from(elems).find(elem => elem.textContent.includes(txt));
+    }
     if (!ret){
         console.error(`pcmDropImageToCnet getElementBySelectorAndText not found : ${selector} ${txt}`);
         return null;
@@ -134,6 +145,25 @@ const pcmGetElement = (selector, base_elem = gradioApp(), suppressError = false)
 
 /** 指定されたミリ秒数だけ待機する */
 const pcmSleepAsync = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+
+/** Data URI から DataTransfer オブジェクトを作成する */
+const pcmCreateDataTransferAsync = async (dataUri) => {
+    const mimeType = dataUri.split(';')[0].split(':')[1];
+    const base64Data = dataUri.split(',')[1];
+    const binaryData = atob(base64Data);
+    const arrayBuffer = new Uint8Array(binaryData.length);
+    for (let i = 0; i < binaryData.length; i++) {
+        arrayBuffer[i] = binaryData.charCodeAt(i);
+    }
+    // blob から File を作成して DataTransfer にセット
+    const blob = new Blob([arrayBuffer], { type: mimeType });
+    const file = new File([blob], "image.png", { type: mimeType });
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    dataTransfer.effectAllowed = "all";
+    return dataTransfer;
+}
 
 
 /** デバッグフラグ */

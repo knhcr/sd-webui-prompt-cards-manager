@@ -1,9 +1,11 @@
 class PcmMaskEditor{
     static SELECTORS = {
-        CNET_UNIT_IMAGE_CONTAINER :   "#txt2img_controlnet_ControlNet-0_input_image img.absolute-img",
-        CNET_UNIT_USE_MASK_CHECKBOX : "#txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox input[type='checkbox']",
-        CNET_UNIT_MASK_DROP_TARGET :    "#txt2img_controlnet_ControlNet-0_mask_image .center",
-        CNET_UNIT_MASK_UNDO_BUTTON :  "#txt2img_controlnet_ControlNet-0_mask_image button[aria-label='Undo']",
+        CNET_UNIT_IMAGE_CONTAINER :                   "#txt2img_controlnet_ControlNet-0_input_image img.absolute-img",
+        CNET_UNIT_USE_MASK_CHECKBOX :                 "#txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox input[type='checkbox']",
+        CNET_UNIT_MASK_DROP_TARGET :                  "#txt2img_controlnet_ControlNet-0_mask_image .center",
+        CNET_UNIT_MASK_UNDO_BUTTON :                  "#txt2img_controlnet_ControlNet-0_mask_image button[aria-label='Undo']",
+
+        TAB_BUTTONS :                                 "#tab_txt2img .tab-nav button", // 選択中のタブ : selected class が付く
        
         MASK_EDITOR_OPEN_TXT_HIDDEN :                 "#pcm_mask_editor_open_hidden_txt textarea", // Modal Open トリガー
         MASK_EDITOR_IMAGE_INPUT_HIDDEN :              "#pcm_mask_editor_input_image .image-container > div", // Open 時 背景画像 Drop 用隠しターゲット
@@ -176,17 +178,17 @@ class PcmMaskEditor{
         if (!cnetUnitImageContainer) return;
         const imageDataUri = cnetUnitImageContainer.src; // dataURI (data:image/png;base64,...)
         if (!imageDataUri) return;
-        const dataTransfer = await PcmMaskEditor.#createDataTransferAsync(imageDataUri);
+        const dataTransfer = await pcmCreateDataTransferAsync(imageDataUri);
 
         // 画像ドロップイベントをエミュレート
         const dropArea = gradioApp().querySelector(`${PcmMaskEditor.SELECTORS.MASK_EDITOR_IMAGE_INPUT_HIDDEN}`);
         if(!dropArea) return;
-        const dragEvent = new DragEvent("drop", {
+        const dropEvent = new DragEvent("drop", {
             bubbles: true,
             cancelable: true,
             dataTransfer: dataTransfer
         });
-        dropArea.dispatchEvent(dragEvent);
+        dropArea.dispatchEvent(dropEvent);
 
         // 隠しテキストに値を入れてモーダルオープン
         const hiddenTxt = gradioApp().querySelector(PcmMaskEditor.SELECTORS.MASK_EDITOR_OPEN_TXT_HIDDEN);
@@ -197,6 +199,7 @@ class PcmMaskEditor{
         PCM_DEBUG_PRINT(`PcmMaskEditor.openMaskEditor value: ${value}`);
     }
 
+
     /** マスクを投入してからエディタのmask resultをクリア */
     static async applyMask(){
         PCM_DEBUG_PRINT("PcmMaskEditor.applyMask");
@@ -205,8 +208,23 @@ class PcmMaskEditor{
         const maskDataUri = maskResult.src;
         if (!maskDataUri) return;
 
+        // Generation タブを開いていない場合クリック
+        let isTabSwitched = false;
+        let tabCurrent = document.querySelector(PcmMaskEditor.SELECTORS.TAB_BUTTONS + ".selected");
+        const tabCurrentText = tabCurrent ? tabCurrent.textContent : null; // 後でタブ要素を再取得するために使う
+        const tabGeneration = pcmGetElementBySelectorAndText(PcmMaskEditor.SELECTORS.TAB_BUTTONS, "generation", gradioApp(), true);
+        if(!tabGeneration){
+            PCM_DEBUG_PRINT("PcmMaskEditor.applyMask error. Generation Tab not found");
+            return;
+        }
+        if(!tabCurrent || tabCurrent !== tabGeneration){
+            PCM_DEBUG_PRINT(`PcmMaskEditor.applyMask Generation tab clicked : from ${tabCurrentText}`);
+            isTabSwitched = true;
+            tabGeneration.click();
+        }
+
         // DataTransfer を作成 (wait は後で)
-        const pDataTransfer = PcmMaskEditor.#createDataTransferAsync(maskDataUri);
+        const pDataTransfer = pcmCreateDataTransferAsync(maskDataUri);
 
         // Use Mask にチェックが入っていなければチェック
         let useMaskCheckbox = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_USE_MASK_CHECKBOX);
@@ -215,19 +233,23 @@ class PcmMaskEditor{
         }
 
         // CNet Module の Mask container が現れるまで待機
-        const [dt, elem] = await Promise.all([pDataTransfer, pcmQuerySelectorAsync(PcmMaskEditor.SELECTORS.CNET_UNIT_MASK_DROP_TARGET)]);
+        const [dt, elem] = await Promise.all([
+            pDataTransfer,
+            pcmQuerySelectorAsync(PcmMaskEditor.SELECTORS.CNET_UNIT_MASK_DROP_TARGET),
+            pcmSleepAsync(1250) // 最低限の待機 (マスク drop 前に CNet の画像本体が描画されるのを待つ必要があるため、長めに待機)
+        ]);
         if(!elem){
             PCM_DEBUG_PRINT("PcmMaskEditor.applyMask CNet Module Mask container not found");
             return;
         }
 
         // 画像ドロップイベントをエミュレート
-        const dragEvent = new DragEvent("drop", {
+        const dropEvent = new DragEvent("drop", {
             bubbles: true,
             cancelable: true,
             dataTransfer: dt
         });
-        elem.dispatchEvent(dragEvent);
+        elem.dispatchEvent(dropEvent);
         PCM_DEBUG_PRINT("PcmMaskEditor.applyMask dragEvent dispatched");
 
         // マスクエディタの mask result をクリア
@@ -237,31 +259,16 @@ class PcmMaskEditor{
             PCM_DEBUG_PRINT("PcmMaskEditor.applyMask clearMaskResultBtn clicked");
         }
 
-        // CNet Module の Mask Container の再描画を促すため、Undo ボタンをクリック
-        await pcmSleepAsync(200);
-        const maskUndoBtn = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_MASK_UNDO_BUTTON);
-        if (maskUndoBtn){
-            maskUndoBtn.click();
-            PCM_DEBUG_PRINT("PcmMaskEditor.applyMask maskUndoBtn clicked");
+        // タブを切り替えていた場合は元のタブに戻る
+        if (isTabSwitched && tabCurrentText !== null){
+            await pcmSleepAsync(500); // ドロップ後少し待機
+            // 改めて タブ を取得する必要あり
+            tabCurrent = pcmGetElementBySelectorAndText(PcmMaskEditor.SELECTORS.TAB_BUTTONS, tabCurrentText, gradioApp(), true);
+            if(tabCurrent){
+                tabCurrent.click();
+                PCM_DEBUG_PRINT(`PcmMaskEditor.applyMask tab switched back : to ${tabCurrent.textContent}`);
+            }
         }
-    }
-
-    /** Data URI から DataTransfer オブジェクトを作成する */
-    static async #createDataTransferAsync(dataUri){
-        const mimeType = dataUri.split(';')[0].split(':')[1];
-        const base64Data = dataUri.split(',')[1];
-        const binaryData = atob(base64Data);
-        const arrayBuffer = new Uint8Array(binaryData.length);
-        for (let i = 0; i < binaryData.length; i++) {
-            arrayBuffer[i] = binaryData.charCodeAt(i);
-        }
-        // blob から File を作成して DataTransfer にセット
-        const blob = new Blob([arrayBuffer], { type: mimeType });
-        const file = new File([blob], "image.png", { type: mimeType });
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        dataTransfer.effectAllowed = "all";
-        return dataTransfer;
     }
 
     static initialize(){

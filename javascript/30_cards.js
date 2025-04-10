@@ -322,25 +322,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     const controlMode = opts.prompt_cards_manager_default_controlnet_control_mode;
     const resizeMode = opts.prompt_cards_manager_default_controlnet_resize_mode;
 
-    // -- 関数定義 --
-    /** Data URI から DataTransfer オブジェクトを作成する */
-    const _createDataTransferAsync = async (dataUri) => {
-        const mimeType = dataUri.split(';')[0].split(':')[1];
-        const base64Data = dataUri.split(',')[1];
-        const binaryData = atob(base64Data);
-        const arrayBuffer = new Uint8Array(binaryData.length);
-        for (let i = 0; i < binaryData.length; i++) {
-            arrayBuffer[i] = binaryData.charCodeAt(i);
-        }
-        // blob から File を作成して DataTransfer にセット
-        const blob = new Blob([arrayBuffer], { type: mimeType });
-        const file = new File([blob], "image.png", { type: mimeType });
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        dataTransfer.effectAllowed = "all";
-        return dataTransfer;
-    }
-    // ----------------
+
     
     let selectorTmp = ''; // テンポラリセレクタ
     let elemTmp = null // テンポラリ要素オブジェクト
@@ -396,7 +378,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
     //      念のため初回だけでなく毎回表示させる
     // 画像ドロップの前までにUI表示後の待機時間が必要 (それまでに画像処理は非同期でやっておく)
     // Mask についても同様のため、ここで一旦 Use Mask を On にした状態で開く
-    let pDataTransferImg = _createDataTransferAsync(dataUri);
+    let pDataTransferImg = pcmCreateDataTransferAsync(dataUri);
 
     // Generationタブのクリック
     selectorTmp = `#tab_${tabname} .tabs.gradio-tabs.extra-networks > .tab-nav.scroll-hide > button`
