@@ -56,15 +56,38 @@ const pcmSetPromptCardsTabOnClickAsync = async ()=>{
  *   monkey patch を当てて、pcmcardsの場合のみ当該処理を完全にスキップする
  */
 const pcmReforgeBypassFilterSort = () => {
-    const originalApplyExtraNetworkFilter = window.applyExtraNetworkFilter; // original
+    const applyExtraNetworkFilter_org = window.applyExtraNetworkFilter; // original
 
     window.applyExtraNetworkFilter = function(tabname_full) {
       if (!tabname_full.toLowerCase().includes('promptcards')) {
-        originalApplyExtraNetworkFilter(tabname_full); // PromptCards 以外のときだけ通常の処理
+        applyExtraNetworkFilter_org(tabname_full); // PromptCards 以外は通常の処理
       }
       return;
     };
 };
 
+
+/** 見た目の初期化 */ 
+const initializePage = async()=>{
+    // Forge の場合は tree dir view の幅を調整
+    const settings = await pcmGetSettingsAsync();
+    if (settings && settings.IS_FORGE && !settings.IS_REFORGE){
+        const _dedent = (str, indent=1)=>{
+            return str.replace(new RegExp(`^(?:    ){${indent}}`, 'gm'), '');
+        };
+        let style =`
+            #txt2img_promptcards_tree, #img2img_promptcards_tree{
+                width: 300px;
+                flex: none;
+            }`;
+        style = _dedent(style, 3);
+
+        const styleElem = document.createElement('style');
+        styleElem.textContent = style;
+        document.head.appendChild(styleElem);
+    }
+};
+
 pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmSetPromptCardsTabOnClickAsync);
 pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmReforgeBypassFilterSort);
+onUiLoaded(initializePage);

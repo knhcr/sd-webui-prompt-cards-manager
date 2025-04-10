@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from modules import script_callbacks
 from modules import shared
 from scripts.pcm.constants import thumbs_folder, endpoint_base, extension_root_path
+from scripts.pcm.constants import IS_FORGE, IS_REFORGE
 from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.prompt_card_info import PromptCardInfoManager
 from scripts.pcm.category import CategoryAlias
@@ -92,12 +93,14 @@ class APIRoutes:
         
         @app.get(f"{endpoint_base}/settings")
         async def get_settings(request: Request):
-            ''' Settings の設定値を取得 '''
+            ''' Settings の設定値を取得, IS_FORGE, IS_REFORGE のフラグも追加 '''
             DEBUG_PRINT(f"API Routes.get_settings")
             ret = {}
             for d in [PCM_SETTINGS_KEYS[k] for k in PCM_SETTINGS_KEYS]:
                 for k in d:
                     ret[d[k]] = getattr(shared.opts, d[k])
+            ret["IS_FORGE"] = IS_FORGE
+            ret["IS_REFORGE"] = IS_REFORGE
             return JSONResponse(ret)
 
 # Register to Gradio
