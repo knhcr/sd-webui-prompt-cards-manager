@@ -27,6 +27,7 @@ async function pcmCardClick(event, tabname, thumbsName) {
         if (!response.ok) throw new Error(response.statusText);
 
         data = await response.json();
+        // sample data
         //{
         //  rel_path: '',
         //  prompt: '',
@@ -107,21 +108,6 @@ async function pcmCardClick(event, tabname, thumbsName) {
         }
 
         // Mini Gallery の値も更新
-        //  - 前の処理の updateInput() は input イベントの発火
-        //    Mini Gallery 用にスライダーにセットした change イベントのコールバックは発火しないため
-        /*
-        const width_mg = gradioApp().querySelector('#pcm_mini_gallery_width input[type="number"]');
-        const height_mg = gradioApp().querySelector('#pcm_mini_gallery_height input[type="number"]');
-        if (width_mg && height_mg){
-            if(width_mg.value !== data.resolution.width){
-                width_mg.value = data.resolution.width;
-                updateInput(width_mg);
-            }
-            if(height_mg.value !== data.resolution.height){
-                height_mg.value = data.resolution.height;
-                updateInput(height_mg);
-            }
-        }*/
         pcmUpdateMiniGalleryControlValues({
             update_width: true, update_height: true,
             update_cnet_enabled: true, update_cnet_weight: true, update_cnet_end_step: true
@@ -396,7 +382,7 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
         selectorTmp = `#${tabname}_controlnet_ControlNet-${index}_controlnet_refresh_models`
         if((elemTmp = pcmGetElement(selectorTmp))){
             elemTmp.click();
-            updateInput(elemTmp); // 必須
+            //updateInput(elemTmp); // 必須
             PCM_DEBUG_PRINT(`tab: ${tabname} pcmDropImageToCnet ControlNet Model List Refresh Button clicked`);
             // 追加で待機
             for (let i = 0; i < 5; i++){
@@ -490,7 +476,6 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
         elemTmp = pcmGetElementBySelectorAndText("label", controlMode, pcmGetElement(`#${selectorTmp}`, baseElem));
         if (elemTmp){
             elemTmp.click();
-            updateInput(elemTmp);
         }
     }
 
@@ -501,10 +486,16 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
         elemTmp = pcmGetElementBySelectorAndText("label", resizeMode, pcmGetElement(`#${selectorTmp}`, baseElem));
         if (elemTmp){
             elemTmp.click();
-            updateInput(elemTmp);
         }
     }
-  
+
+    // 画像変更時は Mask は Off にする
+    selectorTmp = `#${tabname}_controlnet_ControlNet-${index}_controlnet_mask_upload_checkbox input[type='checkbox']`
+    elemTmp = pcmGetElement(selectorTmp);
+    if(elemTmp && elemTmp.checked){
+            elemTmp.click();
+    }
+    
     // 少し待機
     await pcmSleepAsync(200);
 
