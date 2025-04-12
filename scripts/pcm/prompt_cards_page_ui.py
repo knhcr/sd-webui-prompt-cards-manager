@@ -25,7 +25,7 @@ class PromptCardsPage(ExtraNetworksPage):
         self.btn_send_cnet_tpl = self._create_custom_button_template(
             os.path.join(self.html_templates_path, "send-cnet-button.html"),
             '/'.join([endpoint_base, "resources", "upload-square-svgrepo-com.svg"]),
-            '/'.join([endpoint_base, "resources", "upload-square-red-svgrepo-com.svg"])
+            '/'.join([endpoint_base, "resources", "upload-square-blue-svgrepo-com.svg"])
         )
         self.btn_send_cnet_mask_tpl = self._create_custom_button_template(
             os.path.join(self.html_templates_path, "send-cnet-mask-button.html"),
@@ -160,7 +160,7 @@ class PromptCardsPage(ExtraNetworksPage):
         # カスタムカード用のボタン群
         cnet_enabled = card_info.card_info.get("enableCnet", shared.opts.prompt_cards_manager_default_cnet_enabled)
         #  - CNET 送信ボタン
-        classes = "pcm-send-with-cnet-button card-button pcm-svg-icon"
+        classes = "pcm-card-button pcm-card-button-cnet"
         if not cnet_enabled:
             classes += " cnet-disabled"
         send_cnet_button = self.btn_send_cnet_tpl.format(
@@ -169,7 +169,7 @@ class PromptCardsPage(ExtraNetworksPage):
             thumbs_name=thumbs_name,
         )
         #  - CNET マスク送信ボタン
-        classes = "pcm-send-with-cnet-mask-button card-button pcm-svg-icon"
+        classes = "pcm-card-button pcm-card-button-cnet-mask"
         if not cnet_enabled:
             classes += " cnet-disabled"
         send_cnet_mask_button = self.btn_send_cnet_mask_tpl.format(
@@ -179,7 +179,9 @@ class PromptCardsPage(ExtraNetworksPage):
             mask_suffix="M[0]", # [TODO] とりあえず版
         )
         #  - カード情報編集ボタン
+        classes = "pcm-card-button pcm-info-edit-button"
         info_edit_button = self.btn_info_edit_tpl.format(
+            classes=classes,
             tabname=tabname,
             thumbs_name=thumbs_name
         )

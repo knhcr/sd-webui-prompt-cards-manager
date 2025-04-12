@@ -575,7 +575,7 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
     visibility: visible;
 }
 
-.extra-network-pane .pcm-card .card-button {
+.extra-network-pane .pcm-card .pcm-card-button {
     font-size: 2rem;
 }
 
@@ -669,44 +669,50 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 
 /*#region Card Design ------------------------------------*/
 /*#region Card Design : custom button ------------------------------------*/
-/* カスタムボタンに影を追加 */
-.pcm-svg-icon > svg {
-    filter: drop-shadow(4px 4px 6px rgba(0, 0, 0, 0.5));
+.pcm-card-button{
+    color: white;
+    font-size: 2rem;
+    text-shadow: 2px 2px 3px black;
+
+    width: 1.5em;
+    height: 2em;
+    filter: drop-shadow(4px 4px 6px rgba(0, 0, 0, 1));
+    padding: 0.25em 0.1em;
+}
+
+.pcm-card-button:hover{
+    color: red;
+}
+
+.pcm-card-button img {
+    width: 32px;
+    /*filter: drop-shadow(2px 2px 3px rgba(0, 0, 0, 1));*/
 }
 
 /* ホバー時のアイコン切り替え */
-.pcm-send-with-cnet-button .normal-icon,
-.pcm-send-with-cnet-mask-button .normal-icon,
-.pcm-info-edit-button .normal-icon {
+.pcm-card-button .normal-icon {
     display: inline-block;
 }
 
-.pcm-send-with-cnet-button .hover-icon,
-.pcm-send-with-cnet-mask-button .hover-icon,
-.pcm-info-edit-button .hover-icon {
+.pcm-card-button .hover-icon {
     display: none;
 }
 
-.pcm-send-with-cnet-button:hover .normal-icon,
-.pcm-send-with-cnet-mask-button:hover .normal-icon,
-.pcm-info-edit-button:hover .normal-icon {
+.pcm-card-button:hover .normal-icon {
     display: none;
 }
 
-.pcm-send-with-cnet-button:hover .hover-icon,
-.pcm-send-with-cnet-mask-button:hover .hover-icon,
-.pcm-info-edit-button:hover .hover-icon {
+.pcm-card-button:hover .hover-icon {
     display: inline-block;
 }
 
 /* CNet 無効のカードは CNet ボタンを非表示にする */
-.cnet-disabled.pcm-send-with-cnet-button,
-.cnet-disabled.pcm-send-with-cnet-mask-button {
+.pcm-card-button.cnet-disabled {
     display: none;
 }
 
 /* CNet Mask は現状未実装 [TODO] */
-.pcm-send-with-cnet-mask-button {
+.pcm-card-button.pcm-card-button-cnet-mask {
     display: none;
 }
 /*#endregion Card Design : custom button ------------------------------------*/
