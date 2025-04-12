@@ -436,17 +436,29 @@ div:has(> .pcm_mini_gallery_subseed_input){
 
 #pcm_mini_gallery_cnet_mask_editor_btn{
     cursor: pointer;
-    width: 18px;
+    width: 21px;
     margin-left:-104px;
-    margin-top:3px;
+    margin-top:2px;
+
+    background: #323c4b;
+    border-radius: 3px;
 }
 
 #pcm_mini_gallery_cnet_mirror_btn{
     cursor: pointer;
-    width: 19px;
-    margin-left:-27px;
+    width: 21px;
+    margin-left:-26px;
     margin-top:9px;
+
+    background: #323c4b;
+    border-radius: 3px;
 }
+
+#pcm_mini_gallery_cnet_mirror_btn > *,
+#pcm_mini_gallery_cnet_mask_editor_btn > *{
+    padding:1px;
+}
+
 
 /* 平常時は hover用 は非表示*/
 .pcm_mini_gallery_button > img.hover{
