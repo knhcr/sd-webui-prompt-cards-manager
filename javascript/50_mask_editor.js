@@ -358,6 +358,7 @@ class PcmMaskEditor{
         }
 
         if(maskDataTransfer !== null){
+            await pcmSleepAsync(500);
             const dropTargetMask = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_MASK_DROP_TARGET);
             if (dropTargetMask){
                 dropTargetMask.dispatchEvent(new DragEvent("drop", {
