@@ -25,8 +25,11 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/04/12a
+  - Added CNet image horizontal mirror button at Mini Gallery.
+
 * 2025/04/11
-  - Added. CNet mask editor function. You can open it by roller icon button in Mini Gallery.
+  - Added CNet mask editor function. You can open it by roller icon button in Mini Gallery.
   - Changed category shorcut key behavior. Now collapse another category than currently selected.
   - bug fix. Stabilized behavior on changing Extra Networks tabs.
 
@@ -275,6 +278,5 @@ This extension utilizes the folloing third-party resouces.
 * https://www.svgrepo.com/svg/525443/minimize-square-minimalistic, LICENSE: CC Attribution License, AUTHOR: Solar Icons
 * https://www.svgrepo.com/svg/343263/reset, LICENSE: PD License, AUTHOR: CoreyGinnivan
 * https://www.svgrepo.com/svg/362678/eraser-bold, LICENSE: MIT License, AUTHOR: phosphor
-* https://www.svgrepo.com/svg/445768/flip, LICENSE: MIT License, AUTHOR: Denali Design
-* https://www.svgrepo.com/svg/522859/flip-horizontal, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/258637/mirror-horizontally-graphic-design, LICENSE: CC0 License, UPLOADER: SVG Repo
 * https://www.svgrepo.com/svg/129307/painting-roller, LICENSE: CC0 License, UPLOADER: SVG Repo

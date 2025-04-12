@@ -25,6 +25,9 @@ etc.
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## 更新履歴
+* 2025/04/12
+  - CNet の画像を左右鏡像反転するボタンをミニギャラリー内に追加
+
 * 2025/04/11
   - CNet 用のマスク画像を編集・適用する機能を追加。ミニギャラリー下部のローラーのアイコンから呼び出せる。
   - ショートカットキーでカテゴリーを切り替えた際、非アクティブなカテゴリを折り畳むよう動作を変更
@@ -269,6 +272,5 @@ This extension utilizes the folloing third-party resouces.
 * https://www.svgrepo.com/svg/525443/minimize-square-minimalistic, LICENSE: CC Attribution License, AUTHOR: Solar Icons
 * https://www.svgrepo.com/svg/343263/reset, LICENSE: PD License, AUTHOR: CoreyGinnivan
 * https://www.svgrepo.com/svg/362678/eraser-bold, LICENSE: MIT License, AUTHOR: phosphor
-* https://www.svgrepo.com/svg/445768/flip, LICENSE: MIT License, AUTHOR: Denali Design
-* https://www.svgrepo.com/svg/522859/flip-horizontal, LICENSE: CC Attribution License, AUTHOR: Solar Icons
+* https://www.svgrepo.com/svg/258637/mirror-horizontally-graphic-design, LICENSE: CC0 License, UPLOADER: SVG Repo
 * https://www.svgrepo.com/svg/129307/painting-roller, LICENSE: CC0 License, UPLOADER: SVG Repo
