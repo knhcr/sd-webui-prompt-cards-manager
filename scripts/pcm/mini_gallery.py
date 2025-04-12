@@ -147,8 +147,17 @@ class MiniGallery:
                                                           minimum=0.0, maximum=1.0, step=0.01, value=0.0)
 
             with gr.Group(elem_id="pcm_mini_gallery_cnet_group"):
-                self.cnet_enabled = gr.Checkbox(label="t2i CNet Unit 0 Enabled", elem_id="pcm_mini_gallery_cnet_enabled",
-                                               value=False, interactive=True)
+                with gr.Row(variant="compact", equal_height=True, elem_classes="flex-row"):
+                    self.cnet_enabled = gr.Checkbox(label="t2i CNet Unit 0 Enabled", elem_id="pcm_mini_gallery_cnet_enabled",
+                                                    value=False, interactive=True)
+                    gr.HTML(f'''<div id="pcm_mini_gallery_cnet_mirror_btn"
+                                     class="pcm_mini_gallery_button"
+                                     title="mirror CNet Image and Map" alt="mirror" onclick="PcmMaskEditor.mirrorCNetImageAndMap()">
+                                    <img class="default" src="{endpoint_base}/resources/mirror-horizontally-graphic-design-svgrepo-com.svg">
+                                    <img class="hover" src="{endpoint_base}/resources/mirror-horizontally-graphic-design-blue-svgrepo-com.svg">
+                                </div>'''
+                    )
+                
                 with gr.Row(variant="compact", equal_height=True, elem_classes="flex-row"):
                     self.cnet_weight = gr.Slider(scale=1, label="Weight", elem_id="pcm_mini_gallery_cnet_weight",
                                                 interactive=True,
@@ -161,9 +170,11 @@ class MiniGallery:
                     self.cnet_use_mask = gr.Checkbox(label="Use Mask", elem_id="pcm_mini_gallery_cnet_use_mask",
                                                     value=False, interactive=True)
                     # mask editor の open をコール
-                    gr.HTML(f'''<div id="pcm_mini_gallery_cnet_mask_editor_btn" title="Open CNet mask editor window" alt="mask editor" onclick="PcmMaskEditor.openMaskEditor()">
-                                    <img class="pcm_mini_gallery_button default" src="{endpoint_base}/resources/painting-roller-svgrepo-com.svg">
-                                    <img class="pcm_mini_gallery_button hover" src="{endpoint_base}/resources/painting-roller-blue-svgrepo-com.svg">
+                    gr.HTML(f'''<div id="pcm_mini_gallery_cnet_mask_editor_btn"
+                                    class="pcm_mini_gallery_button"
+                                    title="Open CNet mask editor window" alt="mask editor" onclick="PcmMaskEditor.openMaskEditor()">
+                                    <img class="default" src="{endpoint_base}/resources/painting-roller-svgrepo-com.svg">
+                                    <img class="hover" src="{endpoint_base}/resources/painting-roller-blue-svgrepo-com.svg">
                                 </div>'''
                     )
 

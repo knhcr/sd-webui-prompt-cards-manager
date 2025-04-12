@@ -1,9 +1,11 @@
 class PcmMaskEditor{
     static SELECTORS = {
         CNET_UNIT_IMAGE_CONTAINER :                   "#txt2img_controlnet_ControlNet-0_input_image img.absolute-img",
+        CNET_UNIT_IMAGE_DROP_TARGET :                 "#txt2img_controlnet_ControlNet-0_input_image .center",
         CNET_UNIT_USE_MASK_CHECKBOX :                 "#txt2img_controlnet_ControlNet-0_controlnet_mask_upload_checkbox input[type='checkbox']",
         CNET_UNIT_MASK_DROP_TARGET :                  "#txt2img_controlnet_ControlNet-0_mask_image .center",
         CNET_UNIT_MASK_UNDO_BUTTON :                  "#txt2img_controlnet_ControlNet-0_mask_image button[aria-label='Undo']",
+        CNET_UNIT_MASK_CONTAINER :                    "#txt2img_controlnet_ControlNet-0_mask_image img.absolute-img",
 
         TAB_BUTTONS :                                 "#tab_txt2img .tab-nav button", // 選択中のタブ : selected class が付く
        
@@ -271,6 +273,109 @@ class PcmMaskEditor{
             if(tabCurrent){
                 tabCurrent.click();
                 PCM_DEBUG_PRINT(`PcmMaskEditor.applyMask tab switched back : to ${tabCurrent.textContent}`);
+            }
+        }
+    }
+
+    /** CNet の画像とマスクを鏡像反転 */
+    static async mirrorCNetImageAndMap(){
+        /** 画像データ URI を鏡像反転して返す */
+        const _mirrorDataUriAsync = (dataUri)=>{
+            return new Promise((resolve, reject)=>{
+                const img = new Image();
+                img.onload = ()=>{
+                    const canvas = document.createElement("canvas");
+                    const context = canvas.getContext("2d");
+                
+                    // set canvas size to image size
+                    canvas.width = img.width; 
+                    canvas.height = img.height;
+                    
+                    // mirror image
+                    context.translate(img.width, 0);
+                    context.scale(-1, 1);
+
+                    // draw image
+                    context.drawImage(img, 0, 0);
+
+                    // return dataURI
+                    resolve(canvas.toDataURL("image/png"));
+                };
+                img.src = dataUri;
+            });
+        };
+
+        PCM_DEBUG_PRINT("PcmMaskEditor.mirrorCNetImageAndMap called.");
+        const cnetUnitImageContainer = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_IMAGE_CONTAINER);
+        if (!cnetUnitImageContainer) return;
+
+        // 画像
+        const imageDataUri = cnetUnitImageContainer.src; // dataURI (data:image/png;base64,...)
+        if (!imageDataUri) return;
+        
+        // マスク
+        let maskDataUri = null;
+        const maskContainer = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_MASK_CONTAINER);
+        const useMaskCheckbox = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_USE_MASK_CHECKBOX);
+        if (maskContainer && useMaskCheckbox && useMaskCheckbox.checked){
+            maskDataUri = maskContainer.src;
+        }
+
+        // Generation タブを開いていない場合クリック
+        let isTabSwitched = false;
+        let tabCurrent = document.querySelector(PcmMaskEditor.SELECTORS.TAB_BUTTONS + ".selected");
+        const tabCurrentText = tabCurrent ? tabCurrent.textContent : null; // 後でタブ要素を再取得するために使う
+        const tabGeneration = pcmGetElementBySelectorAndText(PcmMaskEditor.SELECTORS.TAB_BUTTONS, "generation", gradioApp(), true);
+        if(!tabGeneration){
+            PCM_DEBUG_PRINT("PcmMaskEditor.mirrorCNetImageAndMap error. Generation Tab not found");
+            return;
+        }
+        if(!tabCurrent || tabCurrent !== tabGeneration){
+            PCM_DEBUG_PRINT(`PcmMaskEditor.mirrorCNetImageAndMap Generation tab clicked : from ${tabCurrentText}`);
+            isTabSwitched = true;
+            tabGeneration.click();
+        }
+
+        // dataUri を鏡像反転して dataTransfer を作成
+        const [imageDataUriMirror, maskDataUriMirror] = await Promise.all([
+            _mirrorDataUriAsync(imageDataUri),
+            maskDataUri ? _mirrorDataUriAsync(maskDataUri) : null
+        ]);
+
+        const [imageDataTransfer, maskDataTransfer] = await Promise.all([
+            pcmCreateDataTransferAsync(imageDataUriMirror),
+            maskDataUriMirror ? pcmCreateDataTransferAsync(maskDataUriMirror) : null
+        ]);
+
+        // 画像ドロップイベントをエミュレート
+        const dropTargetImg = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_IMAGE_DROP_TARGET);
+        if (dropTargetImg){
+            dropTargetImg.dispatchEvent(new DragEvent("drop", {
+                bubbles: true,
+                cancelable: true,
+                dataTransfer: imageDataTransfer
+            }));
+        }
+
+        if(maskDataTransfer !== null){
+            const dropTargetMask = gradioApp().querySelector(PcmMaskEditor.SELECTORS.CNET_UNIT_MASK_DROP_TARGET);
+            if (dropTargetMask){
+                dropTargetMask.dispatchEvent(new DragEvent("drop", {
+                    bubbles: true,
+                    cancelable: true,
+                    dataTransfer: maskDataTransfer
+                }));
+            }
+        }
+
+        // タブを切り替えていた場合は元のタブに戻る
+        if (isTabSwitched && tabCurrentText !== null){
+            await pcmSleepAsync(500); // ドロップ後少し待機
+            // 改めて タブ を取得する必要あり
+            tabCurrent = pcmGetElementBySelectorAndText(PcmMaskEditor.SELECTORS.TAB_BUTTONS, tabCurrentText, gradioApp(), true);
+            if(tabCurrent){
+                tabCurrent.click();
+                PCM_DEBUG_PRINT(`PcmMaskEditor.mirrorCNetImageAndMap tab switched back : to ${tabCurrent.textContent}`);
             }
         }
     }

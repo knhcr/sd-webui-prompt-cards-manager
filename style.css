@@ -437,20 +437,26 @@ div:has(> .pcm_mini_gallery_subseed_input){
 #pcm_mini_gallery_cnet_mask_editor_btn{
     cursor: pointer;
     width: 18px;
-    height: 18px;
     margin-left:-104px;
     margin-top:3px;
 }
 
+#pcm_mini_gallery_cnet_mirror_btn{
+    cursor: pointer;
+    width: 19px;
+    margin-left:-27px;
+    margin-top:9px;
+}
+
 /* 平常時は hover用 は非表示*/
-#pcm_mini_gallery_cnet_mask_editor_btn > img.hover{
+.pcm_mini_gallery_button > img.hover{
     display: none;
 }
 /* hover 時は逆転 */
-#pcm_mini_gallery_cnet_mask_editor_btn:hover > img.hover{
-    display: inline;
+.pcm_mini_gallery_button:hover > img.hover{
+    display: block;
 }
-#pcm_mini_gallery_cnet_mask_editor_btn:hover > img.default{
+.pcm_mini_gallery_button:hover > img.default{
     display: none;
 }
 
