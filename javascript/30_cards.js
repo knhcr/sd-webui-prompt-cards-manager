@@ -208,6 +208,12 @@ function pcmGeneratePrompt(currentText, text, category="", isReplace=true){
 
             currentText = currentText.slice(0, startIndex) + insertText + currentText.slice(endIndex);
             // PCM_DEBUG_PRINT(`pcmGeneratePrompt currentText : ${currentText}`);
+
+            // startIndex より上が全て改行のみの場合、不要な改行なので削除
+            if(currentText.slice(0, startIndex).match(/^\n+$/)){
+                currentText = currentText.slice(startIndex);
+            }
+
             return currentText;
         } else{
             // fall through
