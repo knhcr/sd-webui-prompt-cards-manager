@@ -87,7 +87,7 @@ class CnetMaskEditor:
                         show_label=False,height=1024, width=CnetMaskEditor._canvas_width,
                         show_download_button=False, show_share_button=False,)
         
-            with gr.Row():
+            with gr.Row(elem_id="pcm_mask_editor_footer_row"):
                 with gr.Column():
                     with gr.Row(elem_id="pcm_mask_editor_footer_buttons"):
                         self.cancel = gr.Button(
