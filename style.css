@@ -13,6 +13,11 @@
     pointer-events: auto;
 }
 
+/* PromptCards タブ */
+#txt2img_promptcards_pane{
+    height:60vh;
+}
+
 /*#region Card Editor Modal ------------------------------------*/
 /* Modal Window : background overlay */
 #pcm_pie_overlay {
