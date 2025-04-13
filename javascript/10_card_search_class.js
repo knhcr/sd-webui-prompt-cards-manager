@@ -149,7 +149,7 @@ class PcmCardSearch {
             PcmCardSearch.cards[tabname] = cards;
 
 
-            if(!PcmCardSearch.isInitialized[tabname]){
+            if(PcmCardSearch.isInitialized[tabname]){
                 const tmpQuery = PcmCardSearch.queries[tabname];
                 PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: tmpQuery: path = ${tmpQuery.path}, prompt = ${tmpQuery.prompt.join(" ")}, desc = ${tmpQuery.desc.join(" ")}`);
 
