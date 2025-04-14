@@ -14,8 +14,9 @@
 }
 
 /* PromptCards タブ */
-#txt2img_promptcards_pane{
-    height:60vh;
+#txt2img_promptcards_pane {
+    min-height:10px;
+    height: calc((100vh - 880px)*1);
 }
 
 /*#region Card Editor Modal ------------------------------------*/
