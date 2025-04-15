@@ -25,6 +25,10 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/04/16
+  - Changed to refresh the card view when you altered its info without pushing refresh button.
+  - Changed PromptCards tab height.
+
 * 2025/04/12
   - Added CNet image horizontal mirror button at Mini Gallery.
 
