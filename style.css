@@ -533,6 +533,7 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 }
 /*#endregion Control Belt : checkbox ------------------------------------*/
 
+
 /* 検索入力欄の幅を調整 */
 #txt2img_extra_tabs .extra-network-control--search-text,
 #img2img_extra_tabs .extra-network-control--search-text
@@ -540,13 +541,31 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
     width: 320px;
 }
 
-/* button */
+/* open folder button */
 #txt2img_pcm_open_folder_btn, #img2img_pcm_open_folder_btn{
     display: flex;
     align-items:center;
     width: 26px;
     cursor: pointer;
 }
+
+/* refresh dir button */
+#txt2img_pcm_refresh_dir_btn > img,
+#img2img_pcm_refresh_dir_btn > img{
+    margin-top: 1px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+}
+
+#txt2img_pcm_refresh_dir_btn > img:active,
+#img2img_pcm_refresh_dir_btn > img:active{
+    -ms-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+    transition: transform 0.2s;
+}
+
 
 #txt2img_promptcards_extra_tree_view{
     margin-right: -7px;

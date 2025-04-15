@@ -286,6 +286,9 @@ class PromptCardsPage(ExtraNetworksPage):
 
             dummy_file_added = False
             for k, v in sorted(data.items(), key=lambda x: shared.natural_sort_key(x[0])):
+                # k は dir_path
+                #   - data-path 属性にそのまま入る
+                #   - os.path.basename(k) が action_list_item_label (=ボタンのラベル) に入る
                 if isinstance(v, (ExtraNetworksItem,)):
                     if not dummy_file_added:
                         _file_li.append("<li class='tree-list-item tree-list-item--subitem' data-tree-entry-type='file'></li>")

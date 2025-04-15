@@ -75,9 +75,9 @@ function pcmExtraNetworksTreeProcessDirectoryClick(event, btn, tabname, extra_ne
     }
 
     function _update_search(_tabname, _extra_networks_tabname, _search_text) {
-        // _search_text は <div type="button" data-path="prompt_cards/subdir/subdir$"> の data-path の値
+        // _search_text は <div type="button" data-path="prompt_cards\subdir\subdir$"> の data-path の値
         //   - data-path は ui_extra_networks.py の create_tree_dir_item_html() で初期化される (dir_path の値がそのまま入る)
-        //     + Case Sensitive, $ は含まない
+        //     + Case Sensitive, $ は含まない, パスの区切り文字は正規化されていない
 
         if(_search_text) {
             // パスの区切り文字を正規化

@@ -272,6 +272,42 @@ function pcmOpenFolder(tabname){
     });
 }
 
+
+/* --------------------------------------------------------------------------------------*/
+/** refresh dir button */
+function pcmAddRefreshDirButton(){
+    for (let tabname of ['txt2img', 'img2img']){
+        const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        //PCM_DEBUG_PRINT(`pcm_add_refresh_dir_button called : ${selector}`);
+        const controlsDiv = gradioApp().querySelector(selector);
+        
+        // Open Folder Button
+        const refreshDirButton = document.createElement('div');
+        refreshDirButton.id = `${tabname}_pcm_refresh_dir_btn`;
+        refreshDirButton.classList.add('pcm-refresh-dir-btn');
+        refreshDirButton.innerHTML = `<img src="${PCM_API_ENDPOINT_BASE}/resources/refresh-dir.svg" alt="RefreshDir">`;
+        refreshDirButton.title = 'Refresh Only Current Directory';
+        refreshDirButton.addEventListener('click', function() {
+            pcmRefreshDir(tabname);
+        });
+        controlsDiv.prepend(refreshDirButton); // 先頭に追加
+    }
+}
+
+function pcmRefreshDir(tabname){
+    // 現在のディレクトリを取得
+    const selector = `#${tabname}_promptcards_tree .tree-list-content-dir[data-selected]`;
+    const selected = gradioApp().querySelector(selector);
+    let path = "";
+    if (selected){
+        path = selected.getAttribute('data-path');
+        path = path.replaceAll('\\', '/');
+        path = path.split('/').slice(1).join('/'); // root ('prompt_cards') を除く
+    }
+    PCM_DEBUG_PRINT(`pcmRefreshDir called : ${tabname}, path = ${path}`);
+}
+
+
 /* --------------------------------------------------------------------------------------*/
 /** Card List Refresh Button Callback */
 function pcmRefreshCardListButtonSetCallback(){
@@ -297,6 +333,7 @@ const pcmApplyShowOptions = (tabname)=>{
 /* --------------------------------------------------------------------------------------*/
 // checkbox 追加 (onUiLoaded では早すぎるため要素を監視)
 pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', ()=>{
+    pcmAddRefreshDirButton();
     pcmAddOpenFolderButton();
     pcmAddSearchTextboxDesc();
     pcmAddSearchTextboxPrompt();
