@@ -12,7 +12,7 @@ function pcmExtraNetworksTreeOnClick(event, tabname, extra_networks_tabname) {
      */
     var btn = event.currentTarget;
     var par = btn.parentElement;
-    PCM_DEBUG_PRINT(`pcmExtraNetworksTreeOnClick: CLICKED BUTTON: ${btn.dataset.path}`);
+    PCM_DEBUG_PRINT(`pcmExtraNetworksTreeOnClick: CLICKED BUTTON`);
     if (par.dataset.treeEntryType === "file") {
         pcmExtraNetworksTreeProcessFileClick(event, btn, tabname, extra_networks_tabname);
     } else {
@@ -31,7 +31,7 @@ function pcmExtraNetworksTreeProcessFileClick(event, btn, tabname, extra_network
      * @param extra_networks_tabname    The id of the active extraNetworks tab. Ex: lora, checkpoints, etc.
      */
     // NOTE: Currently unused.
-    PCM_DEBUG_PRINT(`pcmExtraNetworksTreeOnClick: FILE TYPE TREE BUTTON clicked: ${btn.dataset.path}`);
+    PCM_DEBUG_PRINT(`pcmExtraNetworksTreeOnClick: FILE TYPE TREE BUTTON clicked`);
     return;
 }
 
