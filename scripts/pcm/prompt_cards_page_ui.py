@@ -10,49 +10,15 @@ from scripts.pcm.prompt_card_info import PromptCardInfoManager, PromptCardInfo
 from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.utility import filter_walk
 
+
 class PromptCardsPage(ExtraNetworksPage):
     """ PromptCards タブのページ, 標準のExtraNetworksPageを無理矢理再利用 """
 
-    def __init__(self):
-        super().__init__('PromptCards')
-        self.enable_filter = True
-        self.img_folder_path = os.path.join(extension_root_path, image_folder)
-
-        # テンプレートの読み込み
-        self.html_templates_path = os.path.join(extension_root_path, templates_folder)
-
-        # - ボタンテンプレート
-        self.btn_send_cnet_tpl = self._create_custom_button_template(
-            os.path.join(self.html_templates_path, "send-cnet-button.html"),
-            '/'.join([endpoint_base, "resources", "upload-square-svgrepo-com.svg"]),
-            '/'.join([endpoint_base, "resources", "upload-square-blue-svgrepo-com.svg"])
-        )
-        self.btn_send_cnet_mask_tpl = self._create_custom_button_template(
-            os.path.join(self.html_templates_path, "send-cnet-mask-button.html"),
-            '/'.join([endpoint_base, "resources", "upload-twice-square-svgrepo-com.svg"]),
-            '/'.join([endpoint_base, "resources", "upload-twice-square-red-svgrepo-com.svg"])
-        )
-        self.btn_info_edit_tpl = self._create_custom_button_template(
-            os.path.join(self.html_templates_path, "info-edit-button.html"),
-            '/'.join([endpoint_base, "resources", "info-1-svgrepo-com.svg"]),
-            '/'.join([endpoint_base, "resources", "info-1-red-svgrepo-com.svg"])
-        )
-
-        # - カスタムカードテンプレート
-        self.custom_card_tpl = ""
-        with open(os.path.join(self.html_templates_path, "custom-card.html.tpl"), "r", encoding="utf-8") as f:
-            self.custom_card_tpl = f.read() 
-
-        # - カスタムツリービューテンプレート
-        self.btn_tree_tpl = ""
-        with open(os.path.join(self.html_templates_path, "custom-tree-button.html"), "r", encoding="utf-8") as f:
-            self.btn_tree_tpl = f.read() 
-
-
-    def _create_custom_button_template(self, tpl_file, svg_icon_normal_url, svg_icon_hover_url):
+    @staticmethod
+    def _create_custom_button_template(tpl_file, svg_icon_normal_url, svg_icon_hover_url):
         '''
         ボタンのテンプレートを読み込み、SVGアイコン ({svg_icon}) のみ挿入して返す。
-
+        クラス変数の初期化に使うため static method
         Args:
             tpl_file: ボタンのテンプレートファイルのパス
             svg_icon_normal_url: 通常時のアイコン用SVG画像のEndpoint URL
@@ -63,25 +29,63 @@ class PromptCardsPage(ExtraNetworksPage):
         res = ""
         with open(tpl_file, "r", encoding="utf-8") as f:
             res = f.read()
-        
+
         # 両方のアイコンを含むHTMLを作成
         normal_icon_html = f'<span class="normal-icon"><img src="{svg_icon_normal_url}"></img></span>'
         hover_icon_html = f'<span class="hover-icon"><img src="{svg_icon_hover_url}"></img></span>'
-        
+
         class SafeDict(dict):
             def __missing__(self, key):
                 return f"{{{key}}}"
-
         return res.format_map(
             SafeDict({"svg_icon":normal_icon_html + hover_icon_html})
         )
 
+    # フォルダパス
+    img_folder_path = os.path.join(extension_root_path, image_folder)    
+    html_templates_path = os.path.join(extension_root_path, templates_folder)
+ 
+    # ボタンテンプレート
+    btn_send_cnet_tpl = _create_custom_button_template(
+        os.path.join(html_templates_path, "send-cnet-button.html"),
+        '/'.join([endpoint_base, "resources", "upload-square-svgrepo-com.svg"]),
+        '/'.join([endpoint_base, "resources", "upload-square-blue-svgrepo-com.svg"])
+    )
+    btn_send_cnet_mask_tpl = _create_custom_button_template(
+        os.path.join(html_templates_path, "send-cnet-mask-button.html"),
+        '/'.join([endpoint_base, "resources", "upload-twice-square-svgrepo-com.svg"]),
+        '/'.join([endpoint_base, "resources", "upload-twice-square-red-svgrepo-com.svg"])
+    )
+    btn_info_edit_tpl = _create_custom_button_template(
+        os.path.join(html_templates_path, "info-edit-button.html"),
+        '/'.join([endpoint_base, "resources", "info-1-svgrepo-com.svg"]),
+        '/'.join([endpoint_base, "resources", "info-1-red-svgrepo-com.svg"])
+    )
+
+    # カスタムカードテンプレート
+    custom_card_tpl = ""
+    with open(os.path.join(html_templates_path, "custom-card.html.tpl"), "r", encoding="utf-8") as f:
+        custom_card_tpl = f.read() 
+
+    # カスタムツリービューテンプレート
+    btn_tree_tpl = ""
+    with open(os.path.join(html_templates_path, "custom-tree-button.html"), "r", encoding="utf-8") as f:
+        btn_tree_tpl = f.read() 
+
+
+    def __init__(self):
+        super().__init__('PromptCards')
+        self.enable_filter = True
+        self.btn_send_cnet_tpl = PromptCardsPage.btn_send_cnet_tpl # 念のため
+        self.btn_send_cnet_mask_tpl = PromptCardsPage.btn_send_cnet_mask_tpl # 念のため
+        self.btn_info_edit_tpl = PromptCardsPage.btn_info_edit_tpl # 念のため
+        self.custom_card_tpl = PromptCardsPage.custom_card_tpl # 念のため
+        self.btn_tree_tpl = PromptCardsPage.btn_tree_tpl # 必須 (ExtraNetworksPage.__init__() で初期化されるため無いと隠蔽される)
 
     def refresh(self):
         ''' ブラウザのリフレッシュボタンを押した際の処理
         この後に list_items(), create_html() が呼び出されるので特に何もしない '''
         pass
-
 
 
     def list_items(self):
@@ -96,10 +100,10 @@ class PromptCardsPage(ExtraNetworksPage):
         CacheInfo.save_cache_info()
 
         index = 0
-        for img_full_path in CacheInfo.get_all_image_paths():
+        for image_path in CacheInfo.get_all_image_paths():
             # self.folder_path からの相対パス（"prompt_cards" 含まず)
             # e.g "xxx.png", "sub1\yyy.png" (後で正規化)
-            rel_path = os.path.relpath(img_full_path, img_folder_path)
+            rel_path = os.path.relpath(image_path, img_folder_path)
             
             # e.g. "xxx.png" -> "prompt_cards", "sub1/yyy.png" -> "prompt_cards/sub1"
             rel_path_dir = os.path.dirname(rel_path)
@@ -112,15 +116,15 @@ class PromptCardsPage(ExtraNetworksPage):
             search_path += "$"
             
             # 個別画像のキャッシュの更新
-            thumbs_name = CacheInfo.update_cache(img_full_path, rel_path)
+            thumbs_name = CacheInfo.update_cache(image_path, rel_path)
             preview_url = CacheInfo.find_preview(thumbs_name) # サムネイルのエンドポイントURL
     
             item = {
                 "name": rel_path.replace('\\', '/'), # "sub1/xxx.png"
-                "filename": img_full_path, # "/physical_full_path/prompt_cards/sub1/xxx.png"
+                "filename": image_path, # "/physical_full_path/prompt_cards/sub1/xxx.png"
                 "shorthash": "",
                 "preview": preview_url, 
-                "local_preview": img_full_path,
+                "local_preview": image_path,
                 "prompt": "",
                 "description": "",
                 "metadata": {},
@@ -135,9 +139,16 @@ class PromptCardsPage(ExtraNetworksPage):
     def allowed_directories_for_previews(self):
         return [os.path.join(extension_root_path, image_folder)]
 
+
     def create_item_html(self, tabname, item, template=None):
         ''' list_items() で生成された item をもとにカードのHTML string を生成する
         template が渡されない場合は TreeView 生成用の辞書を返す'''
+        return PromptCardsPage.create_item_html_base(tabname, item, template, self.extra_networks_tabname)
+
+
+    @classmethod
+    def create_item_html_base(cls, tabname, item, template=None, extra_networks_tabname=None):
+        ''' create_item_html() の実体を外部からも呼べるように共通部分をクラスメソッド化して切り出し '''
         # スタイル設定
         style_height = f"height: {shared.opts.extra_networks_card_height}px;" if shared.opts.extra_networks_card_height else ''
         style_width = f"width: {shared.opts.extra_networks_card_width}px;" if shared.opts.extra_networks_card_width else ''
@@ -163,7 +174,7 @@ class PromptCardsPage(ExtraNetworksPage):
         classes = "pcm-card-button pcm-card-button-cnet"
         if not cnet_enabled:
             classes += " cnet-disabled"
-        send_cnet_button = self.btn_send_cnet_tpl.format(
+        send_cnet_button = cls.btn_send_cnet_tpl.format(
             classes=classes,
             tabname=tabname,
             thumbs_name=thumbs_name,
@@ -172,7 +183,7 @@ class PromptCardsPage(ExtraNetworksPage):
         classes = "pcm-card-button pcm-card-button-cnet-mask"
         if not cnet_enabled:
             classes += " cnet-disabled"
-        send_cnet_mask_button = self.btn_send_cnet_mask_tpl.format(
+        send_cnet_mask_button = cls.btn_send_cnet_mask_tpl.format(
             classes=classes,
             tabname=tabname,
             thumbs_name=thumbs_name,
@@ -180,7 +191,7 @@ class PromptCardsPage(ExtraNetworksPage):
         )
         #  - カード情報編集ボタン
         classes = "pcm-card-button pcm-info-edit-button"
-        info_edit_button = self.btn_info_edit_tpl.format(
+        info_edit_button = cls.btn_info_edit_tpl.format(
             classes=classes,
             tabname=tabname,
             thumbs_name=thumbs_name
@@ -210,7 +221,7 @@ class PromptCardsPage(ExtraNetworksPage):
             "sort_keys": "",
             "style": style,
             "tabname": tabname,
-            "extra_networks_tabname": self.extra_networks_tabname,
+            "extra_networks_tabname": extra_networks_tabname,
             "send_cnet_mask_button": send_cnet_mask_button,
             "send_cnet_button": send_cnet_button,
             "info_edit_button": info_edit_button,
@@ -231,7 +242,7 @@ class PromptCardsPage(ExtraNetworksPage):
         # template が渡された場合はHTMLを返す
         else:
             # 渡されたテンプレートは無視してカスタムテンプレートを使用
-            return self.custom_card_tpl.format(**item_with_extras)
+            return cls.custom_card_tpl.format(**item_with_extras)
 
 
     def create_tree_view_html(self, tabname: str) -> str:
@@ -349,8 +360,45 @@ class PromptCardsPage(ExtraNetworksPage):
         return subdirs_html
 
 
-# ページを登録
-script_callbacks.on_before_ui(lambda : ui_extra_networks.register_page(PromptCardsPage()))
+def create_one_item_html(thumbs_name, tabname):
+    ''' 指定した thumbs_name のカードのHTMLを生成 (部分アップデート用) '''
+    # item Object を生成する
+    cache_info = CacheInfo.cache_info[thumbs_name]
+    card_info :PromptCardInfo = PromptCardInfoManager.get_card_info(thumbs_name)
+
+    image_path = cache_info.get('image_path', '')
+    rel_path = cache_info.get('rel_path', '')
+
+    # e.g. "xxx.png" -> "prompt_cards", "sub1/yyy.png" -> "prompt_cards/sub1"
+    rel_path_dir = os.path.dirname(rel_path)
+    search_path = os.path.join(image_folder, rel_path_dir) if rel_path_dir != "" else image_folder
+    search_path = search_path.replace('\\', '/') # パスの区切り文字を正規化
+
+    # direcotry end mark '$'の挿入
+    #   "prompt_cards"      -> "prompt_cards$"
+    #   "prompt_cards/sub1" -> "prompt_cards/sub1$"
+    search_path += "$"
+
+    # 個別画像のキャッシュの更新
+    CacheInfo.update_cache(image_path, rel_path)
+    preview_url = CacheInfo.find_preview(thumbs_name) # サムネイルのエンドポイントURL
+
+    item = {
+        "name": rel_path.replace('\\', '/'), # "sub1/xxx.png"
+        "filename": image_path, # "/physical_full_path/prompt_cards/sub1/xxx.png"
+        "shorthash": "",
+        "preview": preview_url,
+        "local_preview": image_path,
+        "prompt": "",
+        "description": "",
+        "metadata": {},
+        "search_terms": [search_path], # "prompt_cards/sub1$"
+        "sort_keys": {"default": 0}, # sort はしないので適当に 0 を入れておく
+    }
+
+    # カード情報のHTMLを返す
+    html = PromptCardsPage.create_item_html_base(tabname, item, PromptCardsPage.custom_card_tpl, "promptcards")
+    return html
 
 
 def open_folder_win(path: str):
@@ -372,3 +420,7 @@ def open_folder_win(path: str):
     except Exception as e:
         print(f"PromptCardsManager: Folder Open Error: {e}")
         print(traceback.format_exc())
+
+
+# ページを登録
+script_callbacks.on_before_ui(lambda : ui_extra_networks.register_page(PromptCardsPage()))

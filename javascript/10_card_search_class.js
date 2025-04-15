@@ -135,19 +135,9 @@ class PcmCardSearch {
             const cards_length_json = Object.keys(json).length;
             PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${cards_length_json} cards in JSON`);
 
-            // JSON をカード情報に加工 (現状サーバのデータそのままだが念のため)
-            let cards = {};
-            for (const orgname in json){
-                //PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${orgname} in JSON`);
-                const card = PcmCardSearch.getDefaultCard();
-                card.path = json[orgname].path;
-                card.prompt = json[orgname].prompt.toLowerCase();
-                card.desc = json[orgname].desc.toLowerCase();
-                cards[orgname] = card;
-            }
-            PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${Object.keys(cards).length} cards updated for ${tabname}`);
-            PcmCardSearch.cards[tabname] = cards;
-
+            // カード情報を更新
+            PcmCardSearch.cards[tabname] = {}; // リセット
+            PcmCardSearch.updateCardData(json, tabname);
 
             if(PcmCardSearch.isInitialized[tabname]){
                 const tmpQuery = PcmCardSearch.queries[tabname];
@@ -217,6 +207,25 @@ class PcmCardSearch {
             console.error(error.stack);
         }
     }
+
+    /** サーバからの JSON データをカードデータに加工して cards にセット
+     * @param {object} jsonData サーバからの JSON データ {<org_name>: {path: <search_terms>, prompt: <prompt>, desc: <description>}, ... }
+     * @param {string} tabname "txt2img" or "img2img"
+    */
+    static updateCardData(jsonData, tabname){
+        let cards = {};
+        for (const orgname in jsonData){
+            //PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${orgname} in JSON`);
+            const card = PcmCardSearch.getDefaultCard();
+            card.path = jsonData[orgname].path;
+            card.prompt = jsonData[orgname].prompt.toLowerCase();
+            card.desc = jsonData[orgname].desc.toLowerCase();
+            cards[orgname] = card;
+        }
+        PCM_DEBUG_PRINT(`pcmCardSearch.updateCards: ${Object.keys(cards).length} cards updated for ${tabname}`);
+        Object.assign(PcmCardSearch.cards[tabname], cards);
+    }
+
 
     /** 指定したクエリ文字列を更新 (デフォルトでupdateMatch()も実行)
      * @param {string} tabname "txt2img" or "img2img"

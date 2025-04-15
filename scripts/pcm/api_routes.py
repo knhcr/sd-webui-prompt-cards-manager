@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Body
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from modules import script_callbacks
@@ -10,7 +10,7 @@ from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.prompt_card_info import PromptCardInfoManager
 from scripts.pcm.category import CategoryAlias
 from scripts.pcm.extension_settings import PCM_SETTINGS_KEYS
-from scripts.pcm.prompt_cards_page_ui import open_folder_win
+from scripts.pcm.prompt_cards_page_ui import open_folder_win, create_one_item_html
 
 
 class APIRoutes:
@@ -44,7 +44,9 @@ class APIRoutes:
 
         @app.get(f"{endpoint_base}/prompt-card-info")
         async def prompt_card_info(request: Request):
-            """ プロンプトカード情報を取得 (categoryも追加した JSON 形式) """
+            """ プロンプトカード情報を取得 (categoryも追加した JSON 形式)
+            カードクリック時にプロンプトへの反映する情報に使用
+            """
             qs = dict(request.query_params)
             #DEBUG_PRINT(f"API Routes.prompt_card_info qs: {qs}")
 
@@ -76,12 +78,14 @@ class APIRoutes:
             ret = card_info.get_image_and_mask(mask_suffix = qs.get("mask_suffix", None))
             return JSONResponse(ret)
         
+
         @app.get(f"{endpoint_base}/refresh-category-alias")
         async def refresh_category_alias(request: Request):
             ''' サーバ内のカテゴリー Alias のリフレッシュを要求 '''
             CategoryAlias().refresh_aliases()
             return
         
+
         @app.get(f"{endpoint_base}/open-folder")
         async def open_folder(request: Request):
             ''' Explorer でフォルダを開く (Windows Only) '''
@@ -91,6 +95,7 @@ class APIRoutes:
             open_folder_win(path)
             return
         
+
         @app.get(f"{endpoint_base}/settings")
         async def get_settings(request: Request):
             ''' Settings の設定値を取得, IS_FORGE, IS_REFORGE のフラグも追加 '''
@@ -101,6 +106,32 @@ class APIRoutes:
                     ret[d[k]] = getattr(shared.opts, d[k])
             ret["IS_FORGE"] = IS_FORGE
             ret["IS_REFORGE"] = IS_REFORGE
+            return JSONResponse(ret)
+
+
+        @app.post(f"{endpoint_base}/cards")
+        async def update_cards(request: Request):
+            ''' カード情報を更新する '''
+            body = await request.json() # [ {thumbsName: <thumbsName>}, ... ]
+            DEBUG_PRINT(f"API Routes.update_cards body: {body}")
+            
+            ret = {}
+            for item in body:
+                thumbs_name = item["thumbsName"]
+                DEBUG_PRINT(f"API Routes.update_cards thumbs_name: {thumbs_name}")
+
+                # DOM の生成
+                html_t2i = create_one_item_html(thumbs_name, "txt2img")
+                html_i2i = create_one_item_html(thumbs_name, "img2img")
+
+                # cardSearch class 用のデータ生成
+                card_data = PromptCardInfoManager.get_card_info(thumbs_name).get_card_info_for_search()
+
+                ret[thumbs_name] = {}
+                ret[thumbs_name]["txt2img"] = html_t2i
+                ret[thumbs_name]["img2img"] = html_i2i
+                ret[thumbs_name]["cardData"] = card_data
+            
             return JSONResponse(ret)
 
 # Register to Gradio

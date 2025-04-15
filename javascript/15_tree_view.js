@@ -242,14 +242,6 @@ pcmTreeViewSetLeafDirMark = (tabname=null)=>{
 }
 
 
-/** 表示オプションの適用 : ShowDir, ShowDesc, ImageFit */
-pcmApplyShowOptions = (tabname)=>{
-    pcmHideDirNameToggle(tabname, true);
-    pcmShowDescToggle(tabname, true);
-    pcmImageFitToggle(tabname, true);
-}
-
-
 /** 選択したフォルダの履歴 
  *   - 配列は t2i, i2i の順 */
 let pcmSelectedFolderHistory = [[null], [null]]; // 選択した要素の履歴(新しい順), 各要素は searchPath (末尾に $ は付かない)

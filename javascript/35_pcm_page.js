@@ -88,6 +88,71 @@ const initializePage = async()=>{
     }
 };
 
+
+/** thumbsName のカードを更新する
+ * DOM の差し替え, cardSearch の情報の更新, updateMatch のコール
+ * tabname は判らないため、txt2img, img2img の両方を処理する
+ * @param {string} thumbsName <thumbsName>$timestamp
+*/
+const pcmUpdateCard = async (thumbsName)=>{
+    PCM_DEBUG_PRINT(`pcmUpdateCard: ${thumbsName}`);
+    if(!thumbsName) return;
+    thumbsName = thumbsName.split("$")[0];
+
+    // 更新済みカードを取得
+    const queryDict =[
+        {thumbsName: thumbsName},
+    ];
+    const newData = await fetch(`${PCM_API_ENDPOINT_BASE}/cards`, {
+        method: 'POST',
+        body: JSON.stringify(queryDict)
+    });
+    const jsonData = await newData.json();
+    //console.log(jsonData);
+    //{
+    //    "thumbsName": {
+    //        "txt2img": "<div class='pcm-card'>...</div>",
+    //        "img2img": "<div class='pcm-card'>...</div>",
+    //        "cardData": {<org_name>: {path: <search_terms>, prompt: <prompt>, desc: <description>}}
+    //    }
+    //}
+
+    for (const tabname of ['txt2img', 'img2img']){
+        // 更新済みカードを適用
+        const cardDomNew = document.createRange().createContextualFragment(jsonData[thumbsName][tabname]);
+        //  - ファイル名から既存のカードDOMを取得して差し替え
+        const cardDom = pcmGetCardByThumbsName(thumbsName, tabname);
+        if(cardDom){
+            cardDom.replaceWith(cardDomNew);
+        }else{
+            // 新規の場合はとりあえず末尾に追加
+            const cardContainer = gradioApp().querySelector(`#${tabname}_promptcards_cards`);
+            if (!cardContainer){
+                console.error(`PromptCardsManger Error: ${thumbsName} ${tabname} cardContainer not found`);
+                return;
+            }
+            cardContainer.appendChild(cardDomNew);
+        }
+
+        // CardSearch の情報を更新
+        PcmCardSearch.updateCardData(jsonData[thumbsName].cardData, tabname);
+
+        // マッチと表示の再適用
+        PcmCardSearch.updateMatch(tabname, true);
+        pcmApplyShowOptions(tabname);
+    }
+}
+
+
+/** thumbsName からカードの DOM を取得する */
+const pcmGetCardByThumbsName = (thumbsName, tabname)=>{
+    if(!tabname) return null;
+    const selector = `#${tabname}_promptcards_cards .pcm-card`;
+    const card = Array.from(gradioApp().querySelectorAll(selector))
+        .find(card => card.getAttribute('onclick').includes(`'${thumbsName}'`));
+    return card;
+}
+
 pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmSetPromptCardsTabOnClickAsync);
 pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmReforgeBypassFilterSort);
 onUiLoaded(initializePage);

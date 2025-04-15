@@ -35,6 +35,14 @@ class PromptCardInfoEditorUi:
             pcmPieResetPage();
             return inputs;
         }'''),
+
+        # 指定のカードを更新する
+        "pcmPieUpdateCard" : Template('''function(...args){
+            PCM_DEBUG_PRINT("gradio pipeline pcmPieUpdateCard");
+            const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
+            pcmUpdateCard(inputs[0]);
+            return inputs;
+        }'''),
     }
 
     image_resolution_text_tpl = '<span id="{id_w}" class="{cls_w}">{width}</span> x <span id="{id_h}" class="{cls_h}">{height}</span>'\
@@ -169,7 +177,7 @@ class PromptCardInfoEditorUi:
                     with gr.Row(elem_classes="pcm-pie-footer-btn-row"):
                         cancel_btn = gr.Button("Cancel", variant="secondary", elem_id="pcm_pie_close_btn")
                         save_btn = gr.Button("Save", variant="primary", elem_id="pcm_pie_save_btn")
-
+                        
 
         # コールバック登録
 
@@ -209,6 +217,12 @@ class PromptCardInfoEditorUi:
             inputs=save_btn__inputs,
             outputs=save_btn__outputs,
             _js=cls._js_pipelines['pcmPieResetPage'].substitute(num_inputs=len(save_btn__inputs)), # JS側の画面リセット処理
+        ).then(
+            # JS 側のカード更新処理をコール
+            _js=cls._js_pipelines['pcmPieUpdateCard'].substitute(num_inputs=len([filename_input])),
+            fn=lambda x: x, # inputs を受ける場合、fn=None だと js パイプライン処理後にブラウザ側でエラーが出るためダミーの処理
+            inputs=[filename_input],
+            outputs=[filename_input], # ダミーのアウトプット
         )
         
         #  - Prompt ボタンクリック

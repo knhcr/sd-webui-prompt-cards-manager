@@ -228,8 +228,9 @@ class PromptCardInfo:
                         break
         return data_uri_image, data_uri_mask
     
+    
     def get_card_info_for_frontend(self) -> dict:
-        ''' フロントエンドに渡す用のカード情報
+        ''' カードクリック時にプロンプトへの反映する情報
         カード情報に加え、category, has_some_data を埋め込んで返す
         '''
         #DEBUG_PRINT(f"PromptCardInfo.get_card_info_for_frontend card_info: {self.card_info}")
@@ -237,7 +238,29 @@ class PromptCardInfo:
         data['category'] = self.category
         data['has_some_data'] = self.has_some_data
         return data
+    
+    
+    def get_card_info_for_search(self) -> dict:
+        ''' CardSearch class 用のデータを生成
+        {<org_name>: {path: <search_terms>, prompt: <prompt>, desc: <description>}}
+        '''
+        ret = {}
+        rel_path = CacheInfo.cache_info[self.thumbs_name].get("rel_path", "")
+        rel_path = rel_path.replace('\\', '/') # パスの区切り文字を正規化
 
+        rel_path_dir = os.path.dirname(rel_path)
+        search_path = image_folder + '/' + rel_path_dir if rel_path_dir != "" else image_folder
+        search_path += "$"
+
+        org_name = html.escape(os.path.splitext(rel_path)[0])
+
+        #DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info_for_search org_name: {org_name}")
+        ret[org_name] = {
+            "path": search_path,
+            "prompt": self.card_info.get("prompt", "").lower(),
+            "desc": self.card_info.get("description", "").lower()
+        }
+        return ret
 
 
 def safe_join(safe_dir, target_path):

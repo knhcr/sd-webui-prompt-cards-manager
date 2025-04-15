@@ -285,6 +285,15 @@ function pcmRefreshCardListButtonSetCallback(){
     }
 }
 
+
+/** 表示オプションの適用 : ShowDir, ShowDesc, ImageFit */
+const pcmApplyShowOptions = (tabname)=>{
+    pcmHideDirNameToggle(tabname, true);
+    pcmShowDescToggle(tabname, true);
+    pcmImageFitToggle(tabname, true);
+}
+
+
 /* --------------------------------------------------------------------------------------*/
 // checkbox 追加 (onUiLoaded では早すぎるため要素を監視)
 pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', ()=>{
