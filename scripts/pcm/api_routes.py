@@ -133,6 +133,21 @@ class APIRoutes:
                 ret[thumbs_name]["cardData"] = card_data
             
             return JSONResponse(ret)
+        
+        @app.post(f"{endpoint_base}/refresh-dir")
+        async def refresh_dir(request: Request):
+            ''' 指定されたディレクトリを更新し、更新後のディレクトリ直下のファイルを取得 '''
+            body = await request.json() # {path: <path>, tabName: <tabName>, recursive: <bool>}
+            DEBUG_PRINT(f"API Routes.refresh_dir body: {body}")
+
+            # ディレクトリ更新
+            
+
+
+            # 更新後のディレクトリ直下のファイルを取得
+            # 取得したファイル名を返す
+
+            return
 
 # Register to Gradio
 script_callbacks.on_app_started(lambda demo, app : APIRoutes.register_routes(app))

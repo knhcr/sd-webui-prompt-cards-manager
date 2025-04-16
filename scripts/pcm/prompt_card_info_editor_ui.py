@@ -40,7 +40,7 @@ class PromptCardInfoEditorUi:
         "pcmPieUpdateCard" : Template('''function(...args){
             PCM_DEBUG_PRINT("gradio pipeline pcmPieUpdateCard");
             const inputs = args.slice(0, ${num_inputs}); // inputs の value のみ切り出し
-            pcmUpdateCard(inputs[0]);
+            pcmUpdateCards(inputs[0], null); // エディタで保存時のコールバックでは tabname は決まらないため両方 (null)
             return inputs;
         }'''),
     }

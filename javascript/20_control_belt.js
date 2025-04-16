@@ -275,7 +275,7 @@ function pcmOpenFolder(tabname){
 
 /* --------------------------------------------------------------------------------------*/
 /** refresh dir button */
-function pcmAddRefreshDirButton(){
+async function pcmAddRefreshDirButton(){
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
         //PCM_DEBUG_PRINT(`pcm_add_refresh_dir_button called : ${selector}`);
@@ -287,24 +287,36 @@ function pcmAddRefreshDirButton(){
         refreshDirButton.classList.add('pcm-refresh-dir-btn');
         refreshDirButton.innerHTML = `<img src="${PCM_API_ENDPOINT_BASE}/resources/refresh-dir.svg" alt="RefreshDir">`;
         refreshDirButton.title = 'Refresh Only Current Directory';
-        refreshDirButton.addEventListener('click', function() {
-            pcmRefreshDir(tabname);
+        refreshDirButton.addEventListener('click', async function() {
+            await pcmRefreshDir(tabname);
         });
         controlsDiv.prepend(refreshDirButton); // 先頭に追加
     }
 }
 
-function pcmRefreshDir(tabname){
+async function pcmRefreshDir(tabname){
     // 現在のディレクトリを取得
     const selector = `#${tabname}_promptcards_tree .tree-list-content-dir[data-selected]`;
     const selected = gradioApp().querySelector(selector);
     let path = "";
     if (selected){
-        path = selected.getAttribute('data-path');
-        path = path.replaceAll('\\', '/');
+        path = pcmDirTreeElementToSearchPath(selected.parentElement);
         path = path.split('/').slice(1).join('/'); // root ('prompt_cards') を除く
     }
-    PCM_DEBUG_PRINT(`pcmRefreshDir called : ${tabname}, path = ${path}`);
+    PCM_DEBUG_PRINT(`pcmRefreshDir called : ${tabname}, "${path}"`);
+
+    // Directory 更新要求
+    const url = `${PCM_API_ENDPOINT_BASE}/refresh-dir`;
+    const data = {
+        path: path,
+        tabName: tabname,
+        recursive: false // 現状再帰更新は未実装 [TODO]
+    };
+    const response = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(data)
+    });
+    const json = await response.json();
 }
 
 

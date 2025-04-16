@@ -92,17 +92,20 @@ const initializePage = async()=>{
 /** thumbsName のカードを更新する
  * DOM の差し替え, cardSearch の情報の更新, updateMatch のコール
  * tabname は判らないため、txt2img, img2img の両方を処理する
- * @param {string} thumbsName <thumbsName>$timestamp
+ * @param {string[] or string} thumbsNames <thumbsName>$timestamp or その配列
+ * @param {string} tabname txt2img or img2img or null (null の場合は両方)
 */
-const pcmUpdateCard = async (thumbsName)=>{
-    PCM_DEBUG_PRINT(`pcmUpdateCard: ${thumbsName}`);
-    if(!thumbsName) return;
-    thumbsName = thumbsName.split("$")[0];
+const pcmUpdateCards = async (thumbsNames, tabname=null)=>{
+    PCM_DEBUG_PRINT(`pcmUpdateCards: ${thumbsNames}`);
+    if(!thumbsNames) return;
+    if (typeof thumbsNames === 'string'){
+        thumbsNames = [thumbsNames];
+    }
+
+    thumbsNames = thumbsNames.map(x => x.split("$")[0]);
 
     // 更新済みカードを取得
-    const queryDict =[
-        {thumbsName: thumbsName},
-    ];
+    const queryDict = thumbsNames.map(thumbsName => ({thumbsName: thumbsName}));
     const newData = await fetch(`${PCM_API_ENDPOINT_BASE}/cards`, {
         method: 'POST',
         body: JSON.stringify(queryDict)
@@ -117,31 +120,41 @@ const pcmUpdateCard = async (thumbsName)=>{
     //    }
     //}
 
-    for (const tabname of ['txt2img', 'img2img']){
-        // 更新済みカードを適用
-        const cardDomNew = document.createRange().createContextualFragment(jsonData[thumbsName][tabname]);
-        //  - ファイル名から既存のカードDOMを取得して差し替え
-        const cardDom = pcmGetCardByThumbsName(thumbsName, tabname);
-        if(cardDom){
-            cardDom.replaceWith(cardDomNew);
-        }else{
-            // 新規の場合はとりあえず末尾に追加
-            const cardContainer = gradioApp().querySelector(`#${tabname}_promptcards_cards`);
-            if (!cardContainer){
-                console.error(`PromptCardsManger Error: ${thumbsName} ${tabname} cardContainer not found`);
-                return;
-            }
-            cardContainer.appendChild(cardDomNew);
-        }
+    let targetTabnames = [];
 
-        // CardSearch の情報を更新
-        PcmCardSearch.updateCardData(jsonData[thumbsName].cardData, tabname);
+    if (tabname === 'txt2img')      targetTabnames = ['txt2img'];
+    else if (tabname === 'img2img') targetTabnames = ['img2img'];
+    else if (tabname === null)      targetTabnames = ['txt2img', 'img2img'];
+
+    for (const tabname of targetTabnames){
+        for (const thumbsName of thumbsNames){
+            // 更新済みカードを適用
+            const cardDomNew = document.createRange().createContextualFragment(jsonData[thumbsName][tabname]);
+            //  - ファイル名から既存のカードDOMを取得して差し替え
+            const cardDom = pcmGetCardByThumbsName(thumbsName, tabname);
+            if(cardDom){
+                cardDom.replaceWith(cardDomNew);
+            }else{
+                // 新規の場合はとりあえず末尾に追加
+                const cardContainer = gradioApp().querySelector(`#${tabname}_promptcards_cards`);
+                if (!cardContainer){
+                    console.error(`PromptCardsManger Error: ${thumbsName} ${tabname} cardContainer not found`);
+                    return;
+                }
+                cardContainer.appendChild(cardDomNew);
+            }
+
+            // CardSearch 用のデータを更新
+            PcmCardSearch.updateCardData(jsonData[thumbsName].cardData, tabname);
+        }
 
         // マッチと表示の再適用
         PcmCardSearch.updateMatch(tabname, true);
         pcmApplyShowOptions(tabname);
     }
 }
+
+
 
 
 /** thumbsName からカードの DOM を取得する */
