@@ -186,10 +186,12 @@ class PcmCardSearch {
                 // クエリの再適用
                 PcmCardSearch.updateMatch(tabname, true);
 
-                // 検索パスを引き継いだ場合ツリーを展開
+                // 検索パスを引き継いだ場合当該ツリーを展開して data-selected クラスを追加
                 if(keptPath !== null){
                     const dirElem = pcmSearchPathToDirTreeElement(keptPath, tabname);
                     if(dirElem) pcmExpandDirItem(tabname, dirElem, true);
+                    const dirElemDiv = dirElem.querySelector("div.tree-list-content-dir");
+                    if(dirElemDiv) dirElemDiv.dataset.selected = "";
                 }
             }
 
