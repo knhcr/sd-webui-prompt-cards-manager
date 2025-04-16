@@ -294,7 +294,11 @@ async function pcmAddRefreshDirButton(){
     }
 }
 
-async function pcmRefreshDir(tabname){
+/** 指定されたディレクトリを更新し、更新後のディレクトリ直下のDOMを取得
+ * @param {string} tabname 
+ * @param {boolean} is_recurse 現状再帰更新は未実装 [TODO]
+*/
+async function pcmRefreshDir(tabname, is_recurse=false){
     // 現在のディレクトリを取得
     const selector = `#${tabname}_promptcards_tree .tree-list-content-dir[data-selected]`;
     const selected = gradioApp().querySelector(selector);
@@ -310,13 +314,57 @@ async function pcmRefreshDir(tabname){
     const data = {
         path: path,
         tabName: tabname,
-        recursive: false // 現状再帰更新は未実装 [TODO]
+        is_recurse: is_recurse
     };
     const response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify(data)
     });
     const json = await response.json();
+    // json
+    //{
+    //    "html": {
+    //        "txt2img": html, // if "txt2img" is specified in tabName, else key not exists
+    //        "img2img": html  // if "img2img" is specified in tabName, else key not exists
+    //    },
+    //    "cardData": card_info_for_search
+    //}
+
+    // path に対応するディレクトリの DOM の差し替え
+    if (tabname in json["html"]){
+        // 古いカードを取得
+        const oldCards = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards .pcm-card`))
+            .filter(x=>{
+                const orgname = x.querySelector(".name").getAttribute("orgname");
+                const cardPath = orgname.split("/").slice(0,-1).join("/");
+                return cardPath === path;
+            });
+
+        PCM_DEBUG_PRINT(`pcmRefreshDir: ${tabname}, oldCards: ${oldCards.length}`);
+
+        // 新しいカードを追加
+        const innerHtml = json["html"][tabname];
+        const fragment = document.createRange().createContextualFragment(innerHtml);
+        if (oldCards.length > 0){
+            // 一つ以上古いカードが存在する場合は最初のカードの場所
+            oldCards[0].parentElement.insertBefore(fragment, oldCards[0]);
+        }else{
+            // 古いカードが存在しない場合 (全体にカード自体存在しない場合も含む) は最後に追加
+            gradioApp().querySelector(`#${tabname}_promptcards_cards`).appendChild(fragment);
+        }
+        // 古いカードを削除
+        for (const oldCard of oldCards){
+            oldCard.remove();
+        }
+    }
+
+    // cardData を更新
+    PcmCardSearch.deleteCardData(path+"$", tabname);
+    PcmCardSearch.updateCardData(json["cardData"], tabname);
+
+    // マッチ結果と表示オプションを更新
+    PcmCardSearch.updateMatch(tabname, true);
+    pcmApplyShowOptions(tabname);
 }
 
 

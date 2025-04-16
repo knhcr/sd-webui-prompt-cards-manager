@@ -13,6 +13,7 @@ from scripts.pcm.constants import DEBUG_PRINT
 from base64 import b64encode
 from modules import shared
 from scripts.pcm.extension_settings import PCM_SETTINGS_KEYS
+from scripts.pcm.utility import safe_join
 import html
 
 class PromptCardInfoManager:
@@ -25,7 +26,7 @@ class PromptCardInfoManager:
         cls.refresh_card_info_dict()
 
     @classmethod
-    def get_card_info(cls, thumbs_name, is_refresh=True):
+    def get_card_info(cls, thumbs_name, is_refresh=True) -> PromptCardInfo:
         # カード情報がメモリに無い場合は新規作成
         if thumbs_name not in cls.__card_info_dict:
             #DEBUG_PRINT(f"PromptCardInfoManager card initialize: {thumbs_name}")
@@ -38,6 +39,41 @@ class PromptCardInfoManager:
             cls.__card_info_dict[thumbs_name] = PromptCardInfo(thumbs_name)
         
         return cls.__card_info_dict[thumbs_name]
+
+
+    @classmethod
+    def get_all_card_info(cls, dir_path=None, is_refresh=True) -> list[PromptCardInfo] :
+        ''' 指定されたディレクトリの全カード情報を取得
+        dir_path が指定されている場合はそのディレクトリのみを取得, recurse無し (Default: None)
+        is_refresh が True の場合はキャッシュを全更新(Default: True)
+
+        Parameters:
+            dir_path: 対象ディレクトリの相対パス (セパレータは任意) (Default: None)
+            is_refresh: キャッシュを全更新するかどうか (Default: True)
+        Returns:
+            [card_info, ...]
+        '''
+        ret = []
+        if is_refresh:
+            CacheInfo.update_all_caches()
+
+        # 対象の画像リストを取得して各カードに対して get_card_info を実行
+        targets = [] # 対象カードのサムネイル名リスト
+
+        if dir_path is None:
+            targets = CacheInfo.cache_info.keys()
+        else:
+            dir_path = os.path.normpath(dir_path)
+            DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info dir_path (normalized): {dir_path}")
+            targets = [x for x in CacheInfo.cache_info.keys() if os.path.dirname(CacheInfo.cache_info[x].get("rel_path", "")) == dir_path]
+            DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info targets: {len(targets)}")
+
+        for thumbs_name in targets:
+            card_info = cls.get_card_info(thumbs_name, is_refresh=is_refresh)
+            ret.append(card_info)
+
+        return ret
+
 
     @classmethod
     def refresh_card_info_dict(cls):
@@ -53,22 +89,42 @@ class PromptCardInfoManager:
                 del cls.__card_info_dict[thumbs_name]
 
     @classmethod
-    def get_all_card_info_for_search(cls):
-        ''' ブラウザ上でカードを検索するための全情報を取得
+    def get_all_card_info_for_search(cls, dir_path=None, is_refresh=True) -> dict:
+        ''' ブラウザ上でカードを検索するための全情報を取得, 
         org_name をキーとして全カードの下記のような辞書を返す
             { <org_name> : {
                 path : {search_terms}, prompt : {prompt}, desc : {description} }
             }
          prompt, desc は lower case に変換
+        
+        dir_path が指定されている場合はそのディレクトリのみを取得, recurse無し (Default: None)
+        is_refresh が True の場合はキャッシュを全更新(Default: True)
+
+        Parameters:
+            dir_path: 対象ディレクトリの相対パス (セパレータは任意) (Default: None)
+            is_refresh: キャッシュを全更新するかどうか (Default: True)
+        Returns:
+            { <org_name> : {path: {search_terms}, prompt: {prompt}, desc: {description}}}
         '''
         ret = {}
-        # 全カードを探索して情報を取得
-        CacheInfo.update_all_caches() # この時点でキャッシュが最新に更新されていないため
-        for thumbs_name in CacheInfo.cache_info:
+        if is_refresh:
+            CacheInfo.update_all_caches()
+
+        # 対象カードを探索して情報を取得
+        targets = []
+        if dir_path is None:
+            targets = CacheInfo.cache_info.keys()
+        else:
+            dir_path = os.path.normpath(dir_path)
+            DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info_for_search dir_path (normalized): {dir_path}")
+            targets = [x for x in CacheInfo.cache_info.keys() if os.path.dirname(CacheInfo.cache_info[x].get("rel_path", "")) == dir_path]
+            DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info_for_search targets: {len(targets)}")
+
+        for thumbs_name in targets:
             card_info = cls.get_card_info(thumbs_name, is_refresh=False).card_info
 
             rel_path = CacheInfo.cache_info[thumbs_name].get("rel_path", "")
-            rel_path = rel_path.replace('\\', '/') # パスの区切り文字を正規化
+            rel_path = rel_path.replace('\\', '/') # パスの区切り文字を '/' に統一
 
             rel_path_dir = os.path.dirname(rel_path)
             search_path = image_folder + '/' + rel_path_dir if rel_path_dir != "" else image_folder
@@ -263,24 +319,3 @@ class PromptCardInfo:
         return ret
 
 
-def safe_join(safe_dir, target_path):
-    ''' werkzeug.utils.safe_join() の代替
-    target_path が safe_dir 以下にあるかをチェックしあれば絶対パスにして返す
-    無い場合は None を返す
-    '''
-    safe_path = Path(safe_dir).resolve()
-    target_path = Path(target_path)
-    
-    if not target_path.is_absolute():
-        # 相対パスの場合は safe_dir 以下に結合して判定
-        target_path = safe_path.joinpath(target_path).resolve()
-    else:
-        # 絶対パスの場合はそのまま判定
-        target_path = target_path.resolve()
-
-    safe_path_str = os.path.normpath(str(safe_path))
-    target_path_str = os.path.normpath(str(target_path))
-    if target_path_str.startswith(safe_path_str + os.path.sep):
-        return target_path_str
-    else:
-        return None

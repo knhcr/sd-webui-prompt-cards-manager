@@ -15,8 +15,7 @@ class PcmCardSearch {
         return {
             path: "", // カードの path (末尾は $ が付与)
             prompt: "", // カードの prompt (lower case)
-            desc: "", // カードの description (lower case)
-            orgname: ""
+            desc: "" // カードの description (lower case)
         };
     }
 
@@ -228,6 +227,22 @@ class PcmCardSearch {
         Object.assign(PcmCardSearch.cards[tabname], cards);
     }
 
+    /** 指定されたsearchpathに対応するカードデータを削除,
+     * path を指定した場合当該searchpathにマッチするカード(サブフォルダを含めない場合末尾に $ 必須)
+     * @param {string} path card.path に対する検索パス (サブフォルダを含めない場合末尾に $ 必須)
+    */
+    static deleteCardData(path=null, tabName=null){
+        if(path === null || path === undefined) return;
+        if(!["txt2img", "img2img"].includes(tabName)) return;
+
+        const cards = PcmCardSearch.cards[tabName];
+        for (const orgname in cards){
+            const card = cards[orgname];
+            if(card.path.indexOf(path) != -1){
+                delete cards[orgname];
+            }
+        }
+    }
 
     /** 指定したクエリ文字列を更新 (デフォルトでupdateMatch()も実行)
      * @param {string} tabname "txt2img" or "img2img"

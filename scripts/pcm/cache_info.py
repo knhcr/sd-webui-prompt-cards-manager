@@ -14,18 +14,19 @@ import threading
 class CacheInfo:
     ''' 
     画像のサムネイルキャッシュ情報を管理するクラス
+    あくまでも画像情報の管理のみ、プロンプト等の情報は管理しない
     cache_info[thumbs_name] = {
         'mtime': image_mtime,
-        'image_path': image_path,
-        'rel_path': rel_path,
+        'image_path': image_path, // abs path with os.path.sep
+        'rel_path': rel_path, // rel path with os.path.sep
         'last_access': time.time(),
-        'image_resolution': image_resolution,
-    }    
+        'image_resolution': {width: int, height: int},
+    }
     '''
     lock = threading.RLock()
     thumbs_folder_path = os.path.join(extension_root_path, thumbs_folder)
-    cache_info = None
-    cache_info_file = None
+    cache_info = None # 全キャッシュの情報
+    cache_info_file = None # chache_info を保存するファイルの絶対パス
     
     @classmethod
     def init(cls):

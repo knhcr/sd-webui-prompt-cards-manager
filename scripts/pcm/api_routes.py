@@ -10,7 +10,7 @@ from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.prompt_card_info import PromptCardInfoManager
 from scripts.pcm.category import CategoryAlias
 from scripts.pcm.extension_settings import PCM_SETTINGS_KEYS
-from scripts.pcm.prompt_cards_page_ui import open_folder_win, create_one_item_html
+from scripts.pcm.prompt_cards_page_ui import open_folder_win, create_one_item_html, create_one_dir_html
 
 
 class APIRoutes:
@@ -136,18 +136,44 @@ class APIRoutes:
         
         @app.post(f"{endpoint_base}/refresh-dir")
         async def refresh_dir(request: Request):
-            ''' 指定されたディレクトリを更新し、更新後のディレクトリ直下のファイルを取得 '''
-            body = await request.json() # {path: <path>, tabName: <tabName>, recursive: <bool>}
+            ''' 指定されたディレクトリを更新し、更新後のディレクトリ直下のファイルを取得
+            request.json()
+            {path: <path>, tabName: <tabName>, is_recurse: <bool>} 
+            [TODO] is_recurse は未実装
+
+            return 
+                {
+                    "html": {
+                        "txt2img": html, // if "txt2img" is specified in tabName, else key not exists
+                        "img2img": html  // if "img2img" is specified in tabName, else key not exists
+                    },
+                    "cardData": card_info_for_search
+                }
+            '''
+            ret = {}
+            ret["html"] = {}
+            ret["cardData"] = {}
+
+            body = await request.json() # {path: <path>, tabName: <tabName>, is_recurse: <bool>}
             DEBUG_PRINT(f"API Routes.refresh_dir body: {body}")
 
-            # ディレクトリ更新
+            target_tabnames = []
+            if body["tabName"] == "txt2img": target_tabnames = ["txt2img"]
+            elif body["tabName"] == "img2img": target_tabnames = ["img2img"]
+            elif body["tabName"] == None: target_tabnames = ["txt2img", "img2img"]
+
+            if target_tabnames == []:
+                return ret
+
+            for tabname in target_tabnames:
+                # 当該ディレクトリのキャッシュを更新し、ディレクトリ直下のDOMを取得
+                ret["html"][tabname] = create_one_dir_html(body["path"], tabname)
             
+            # ディレクトリ直下の card_info_for_search を取得
+            card_info_for_search = PromptCardInfoManager.get_all_card_info_for_search(body["path"])
+            ret["cardData"] = card_info_for_search
 
-
-            # 更新後のディレクトリ直下のファイルを取得
-            # 取得したファイル名を返す
-
-            return
+            return JSONResponse(ret)
 
 # Register to Gradio
 script_callbacks.on_app_started(lambda demo, app : APIRoutes.register_routes(app))

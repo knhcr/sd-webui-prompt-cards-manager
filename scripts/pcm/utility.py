@@ -44,3 +44,27 @@ def filter_walk(
         return _ret
     
     return _filter_walk(dir, filter_d, filter_f, _ret)
+
+
+
+from pathlib import Path
+def safe_join(safe_dir, target_path):
+    ''' Same functionality as werkzeug.utils.safe_join() with standard library.
+    Check if target_path is under safe_dir, if so, return the absolute path, otherwise return None.
+    '''
+    safe_path = Path(safe_dir).resolve()
+    target_path = Path(target_path)
+    
+    if not target_path.is_absolute():
+        # If target_path is relative, combine it with safe_dir and check
+        target_path = safe_path.joinpath(target_path).resolve()
+    else:
+        # If target_path is absolute, check it directly
+        target_path = target_path.resolve()
+
+    safe_path_str = os.path.normpath(str(safe_path))
+    target_path_str = os.path.normpath(str(target_path))
+    if target_path_str.startswith(safe_path_str + os.path.sep):
+        return target_path_str
+    else:
+        return None

@@ -44,7 +44,7 @@ class PromptCardsPage(ExtraNetworksPage):
     # フォルダパス
     img_folder_path = os.path.join(extension_root_path, image_folder)    
     html_templates_path = os.path.join(extension_root_path, templates_folder)
- 
+
     # ボタンテンプレート
     btn_send_cnet_tpl = _create_custom_button_template(
         os.path.join(html_templates_path, "send-cnet-button.html"),
@@ -402,6 +402,18 @@ def create_one_item_html(thumbs_name, tabname):
     # カード情報のHTMLを返す
     html = PromptCardsPage.create_item_html_base(tabname, item, PromptCardsPage.custom_card_tpl, "promptcards")
     return html
+
+
+def create_one_dir_html(path: str, tabname: str):
+    ''' 指定されたパスのディレクトリのHTMLを生成 '''
+    # 指定した dir のファイル情報を更新し、当該フォルダ内の画像の card_info を取得
+    cache_info_list = PromptCardInfoManager.get_all_card_info(path)
+
+    DEBUG_PRINT(f"create_one_dir_html path: {path}, tabname: {tabname} : images : {len(cache_info_list)}")
+
+    # 取得した card_info のリストをもとにHTMLを生成
+    return "\n".join([create_one_item_html(card_info.thumbs_name, tabname) for card_info in cache_info_list])
+
 
 
 def open_folder_win(path: str):
