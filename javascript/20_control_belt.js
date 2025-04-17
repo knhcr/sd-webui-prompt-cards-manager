@@ -242,8 +242,11 @@ const pcmAddOpenFolderButton = ()=>{
         // Open Folder Button
         const openFolderButton = document.createElement('div');
         openFolderButton.id = `${tabname}_pcm_open_folder_btn`;
-        openFolderButton.classList.add('pcm-open-folder-btn');
-        openFolderButton.innerHTML = `<img src="${PCM_API_ENDPOINT_BASE}/resources/window-svgrepo-com.svg" alt="Open Folder">`;
+        openFolderButton.classList.add('pcm-control-belt-push-btn');
+        openFolderButton.innerHTML = `
+            <img class="normal" src="${PCM_API_ENDPOINT_BASE}/resources/window-svgrepo-com.svg" alt="Open Folder">
+            <img class="hover" src="${PCM_API_ENDPOINT_BASE}/resources/window-blue-svgrepo-com.svg" alt="Open Folder hover">
+        `;
         openFolderButton.title = 'Open Folder by Explorer (Windows Only)';
         openFolderButton.addEventListener('click', function() {
             pcmOpenFolder(tabname);
@@ -284,8 +287,11 @@ async function pcmAddRefreshDirButton(){
         // Open Folder Button
         const refreshDirButton = document.createElement('div');
         refreshDirButton.id = `${tabname}_pcm_refresh_dir_btn`;
-        refreshDirButton.classList.add('pcm-refresh-dir-btn');
-        refreshDirButton.innerHTML = `<img src="${PCM_API_ENDPOINT_BASE}/resources/refresh-dir.svg" alt="RefreshDir">`;
+        refreshDirButton.classList.add('pcm-control-belt-push-btn');
+        refreshDirButton.innerHTML = `
+            <img class="normal" src="${PCM_API_ENDPOINT_BASE}/resources/refresh-dir.svg" alt="RefreshDir">
+            <img class="hover" src="${PCM_API_ENDPOINT_BASE}/resources/refresh-dir-blue.svg" alt="RefreshDir hover">
+        `;
         refreshDirButton.title = 'Refresh Only Current Directory';
         refreshDirButton.addEventListener('click', async function() {
             await pcmRefreshDir(tabname);

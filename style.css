@@ -505,6 +505,17 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
     gap: 0.5rem; /* 要素間の間隔 */
 }
 
+/*#region Control Belt : hover icon ------------------------------------*/
+.pcm-control-belt-push-btn > img.hover{
+    display: none;
+}
+.pcm-control-belt-push-btn:hover > img.hover{
+    display: inline-block;
+}
+.pcm-control-belt-push-btn:hover > img.normal{
+    display: none;
+}
+
 /*#region Control Belt : checkbox ------------------------------------*/
 /* checkbox label */
 .pcm-checkbox-label {
