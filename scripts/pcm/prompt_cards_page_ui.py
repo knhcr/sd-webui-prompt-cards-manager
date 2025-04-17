@@ -103,7 +103,7 @@ class PromptCardsPage(ExtraNetworksPage):
         for image_path in CacheInfo.get_all_image_paths():
             # self.folder_path からの相対パス（"prompt_cards" 含まず)
             # e.g "xxx.png", "sub1\yyy.png" (後で正規化)
-            rel_path = os.path.relpath(image_path, img_folder_path)
+            rel_path = CacheInfo.get_rel_path(image_path)
             
             # e.g. "xxx.png" -> "prompt_cards", "sub1/yyy.png" -> "prompt_cards/sub1"
             rel_path_dir = os.path.dirname(rel_path)
@@ -116,7 +116,7 @@ class PromptCardsPage(ExtraNetworksPage):
             search_path += "$"
             
             # 個別画像のキャッシュの更新
-            thumbs_name = CacheInfo.update_cache(image_path, rel_path)
+            thumbs_name = CacheInfo.update_cache(image_path)
             preview_url = CacheInfo.find_preview(thumbs_name) # サムネイルのエンドポイントURL
     
             item = {
@@ -408,7 +408,7 @@ def create_one_item_html(thumbs_name, tabname):
     search_path += "$"
 
     # 個別画像のキャッシュの更新
-    CacheInfo.update_cache(image_path, rel_path)
+    CacheInfo.update_cache(image_path)
     preview_url = CacheInfo.find_preview(thumbs_name) # サムネイルのエンドポイントURL
 
     item = {

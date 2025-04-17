@@ -10,6 +10,7 @@ import hashlib
 import traceback
 from scripts.pcm.utility import filter_walk
 import threading
+from functools import lru_cache
 
 class CacheInfo:
     ''' 
@@ -97,7 +98,9 @@ class CacheInfo:
                 traceback.print_exc(file=sys.stderr)
                 return None
 
+
     @classmethod
+    @lru_cache(maxsize=4096)
     def get_thumbnail_name(cls, image_path):
         ''' オリジナル画像のフルパスからサムネイルファイルのファイル名を生成して返す。拡張子は jpg 固定。
             ファイル名は image_path の self.img_folder_path からの相対パス (foo/bar/baz.png) を下記のように処理する:
@@ -107,7 +110,7 @@ class CacheInfo:
                   さらに、1.の結果を sha256 ハッシュした値の先頭 12 文字を生成。
                   {base64_path[:116]}-{sha256_hash[:12]}.jpg を返す
         '''
-        rel_path = os.path.relpath(image_path, os.path.join(extension_root_path, image_folder))
+        rel_path = cls.get_rel_path(image_path)
         ret = None
         base64_path = base64.urlsafe_b64encode(rel_path.encode('utf-8')).decode('utf-8')
         if len(base64_path) <= 116:
@@ -117,10 +120,17 @@ class CacheInfo:
             sha256_hash = hashlib.sha256(base64_path.encode('utf-8')).hexdigest()[:12]
             ret += '-' + sha256_hash + '.jpg'
         return ret
-
     
+
     @classmethod
-    def update_cache(cls, image_path, rel_path):
+    @lru_cache(maxsize=4096)
+    def get_rel_path(cls, image_path):
+        ''' 画像のフルパスから image_folder からの相対パスを返す '''
+        return os.path.relpath(image_path, os.path.join(extension_root_path, image_folder))
+
+
+    @classmethod
+    def update_cache(cls, image_path):
         '''
         画像のサムネイル作成、キャッシュ情報の更新を行う。
         キャッシュが存在して更新が不要な場合スキップ
@@ -147,7 +157,7 @@ class CacheInfo:
                     cls.cache_info[thumbs_name] = {
                         'mtime': image_mtime,
                         'image_path': image_path,
-                        'rel_path': rel_path, # image_folder からの相対パス
+                        'rel_path': cls.get_rel_path(image_path), # image_folder からの相対パス
                         'last_access': time.time(),
                         'image_resolution': image_resolution,
                     }
@@ -159,15 +169,16 @@ class CacheInfo:
                 print(f"Error updating cache for {image_path}", file=sys.stderr)
                 print(traceback.format_exc(), file=sys.stderr)
                 return None
-        
+
+
     @classmethod
     def update_all_caches(cls):
         ''' 全キャッシュを更新する '''
         with cls.lock:
             for image_path in cls.get_all_image_paths():
-                rel_path = os.path.relpath(image_path, os.path.join(extension_root_path, image_folder))
-                cls.update_cache(image_path, rel_path)
+                cls.update_cache(image_path)
             cls.cleanup_unused_caches()
+
 
     @classmethod
     def get_all_image_paths(cls):
