@@ -238,10 +238,11 @@ class PcmCardSearch {
         const cards = PcmCardSearch.cards[tabName];
         for (const orgname in cards){
             const card = cards[orgname];
-            if(card.path.indexOf(path) != -1){
+            if(card.path.startsWith(path)){
                 delete cards[orgname];
             }
         }
+        
     }
 
     /** 指定したクエリ文字列を更新 (デフォルトでupdateMatch()も実行)
