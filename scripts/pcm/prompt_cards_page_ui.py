@@ -8,7 +8,7 @@ from scripts.pcm.constants import image_folder, templates_folder, endpoint_base,
 from scripts.pcm.cache_info import CacheInfo
 from scripts.pcm.prompt_card_info import PromptCardInfoManager, PromptCardInfo
 from scripts.pcm.constants import DEBUG_PRINT
-from scripts.pcm.utility import filter_walk
+from scripts.pcm.utility import filter_walk, natsort_obj
 
 
 class PromptCardsPage(ExtraNetworksPage):
@@ -144,6 +144,31 @@ class PromptCardsPage(ExtraNetworksPage):
         ''' list_items() で生成された item をもとにカードのHTML string を生成する
         template が渡されない場合は TreeView 生成用の辞書を返す'''
         return PromptCardsPage.create_item_html_base(tabname, item, template, self.extra_networks_tabname)
+
+
+    def create_card_view_html(self, tabname: str, *, none_message) -> str:
+        """Generates HTML for the network Card View section for a tab.
+
+        This HTML goes into the `extra-networks-pane.html` <div> with
+        `id='{tabname}_{extra_networks_tabname}_cards`.
+
+        Args:
+            tabname: The name of the active tab.
+            none_message: HTML text to show when there are no cards.
+
+        Returns:
+            HTML formatted string.
+        """
+        res = ""
+
+        for item in natsort_obj(self.items.values(), key=lambda x: x["filename"]):
+            res += self.create_item_html(tabname, item, self.card_tpl)
+
+        if res == "":
+            dirs = "".join([f"<li>{x}</li>" for x in self.allowed_directories_for_previews()])
+            res = none_message or shared.html("extra-networks-no-cards.html").format(dirs=dirs)
+
+        return res
 
 
     @classmethod
@@ -285,7 +310,7 @@ class PromptCardsPage(ExtraNetworksPage):
             _file_li = []
 
             dummy_file_added = False
-            for k, v in sorted(data.items(), key=lambda x: shared.natural_sort_key(x[0])):
+            for k, v in natsort_obj(data.items(), key=lambda x:x[0]):
                 # k は dir_path
                 #   - data-path 属性にそのまま入る
                 #   - os.path.basename(k) が action_list_item_label (=ボタンのラベル) に入る
@@ -303,7 +328,7 @@ class PromptCardsPage(ExtraNetworksPage):
             
 
         # Add each root directory to the tree.
-        for k, v in sorted(tree.items(), key=lambda x: shared.natural_sort_key(x[0])):
+        for k, v in natsort_obj(tree.items(), key=lambda x:x[0]):
             item_html = self.create_tree_dir_item_html(tabname, k, _build_tree(v))
             # Only add non-empty entries to the tree.
             if item_html is not None:
@@ -407,12 +432,15 @@ def create_one_item_html(thumbs_name, tabname):
 def create_one_dir_html(path: str, tabname: str):
     ''' 指定されたパスのディレクトリのHTMLを生成 '''
     # 指定した dir のファイル情報を更新し、当該フォルダ内の画像の card_info を取得
-    cache_info_list = PromptCardInfoManager.get_all_card_info(path)
+    card_info_list = PromptCardInfoManager.get_all_card_info(path)
 
-    DEBUG_PRINT(f"create_one_dir_html path: {path}, tabname: {tabname} : images : {len(cache_info_list)}")
+    DEBUG_PRINT(f"create_one_dir_html path: {path}, tabname: {tabname} : images : {len(card_info_list)}")
 
     # 取得した card_info のリストをもとにHTMLを生成
-    return "\n".join([create_one_item_html(card_info.thumbs_name, tabname) for card_info in cache_info_list])
+
+    card_info_list = natsort_obj(card_info_list, key=lambda x: x.image_path)
+
+    return "\n".join([create_one_item_html(card_info.thumbs_name, tabname) for card_info in card_info_list])
 
 
 

@@ -1,6 +1,5 @@
 import os
 from typing import Callable
-
 def filter_walk(
         dir: str,
         ignore_dot_starts:bool = False,
@@ -68,3 +67,34 @@ def safe_join(safe_dir, target_path):
         return target_path_str
     else:
         return None
+
+
+
+from typing import Any, Callable, Union
+import re, unicodedata
+def natsort_obj(items: list[Any], key:Callable[[Any], str]=lambda x: x) -> list[Any]:
+    ''' natural order sort for list of any objects
+    e.g.)
+        item1.id = 'foo_001', item3.id = 'foo_03', item2.id = 'foo_2'
+        natsort_obj([item1, item3, item2], key=lambda x: x.id) # => [item1, item2, item3]
+
+    Parameters:
+        items: list of any objects
+        key: function for extracting key string for sorting
+    '''
+    def _key_func(item: Any) -> list[Union[str, int]]:
+        ''' returns splited list of item's key (list of str.lower() or int if it is digit) for sorted()
+        'foo_01bar100.txt' -> ['foo_', 1, 'bar', 100, '.txt']
+        '''
+        key_str = key(item) or ''
+        key_str = unicodedata.normalize('NFKC', key_str) # convert 2byte Number to ASCII Number (e.g. １ -> 1)
+        main_keys = [
+            int(x) if x.isdigit() else x.casefold() # casefold() is lower() for unicode
+            for x in re.split(r'(\d+)', key_str) if x # ignore empty string
+        ]
+        
+        # For stable sort add key_str.
+        # Comparing "FOO100" and "foo100" 's main_keys is completely the same, so add key_str to distinguish them.
+        return [main_keys, key_str]
+
+    return sorted(items, key=_key_func)
