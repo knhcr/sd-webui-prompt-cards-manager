@@ -13,6 +13,32 @@ async function pcmCardClick(event, tabname, thumbsName) {
 
     PCM_DEBUG_PRINT(`tab: ${tabname} pcmCardClick called : ${thumbsName}`);
 
+    /** プロンプトの変更を確認
+     * @param {string} currentText 現在のプロンプトエリアの生テキスト
+     * @param {string} newText 新しいカードテキスト
+     * @param {string} category カテゴリ名
+     * @returns {boolean} 変更がある場合は true, 変更がない場合は false
+     */
+    function _isChanged(currentText, newText, category){
+        let ret = false;
+        const pStart = new RegExp(`^## -- \\[${category}\\] -+>$`, "m");
+        const pEnd = new RegExp(`^## <-+ \\[${category}\\] --$`, "m");
+
+        const mStart = currentText.match(pStart);
+        const mEnd = currentText.match(pEnd);
+
+        if(mStart && mEnd && mStart.index < mEnd.index){
+            let startIndex = mStart.index + mStart[0].length + 1;
+            let endIndex = mEnd.index-1;
+            const targetText = currentText.slice(startIndex, endIndex);
+            PCM_DEBUG_PRINT(`pcmCardClick _isChanged targetText: ${targetText}`);
+            PCM_DEBUG_PRINT(`pcmCardClick _isChanged newText: ${newText}`);
+            ret = targetText !== newText;
+        }
+        PCM_DEBUG_PRINT(`pcmCardClick _isChanged ret: ${ret}`);
+        return ret;
+    }
+
     // スクロール位置を記憶
     const scrollPosition = {
         x: window.scrollX,
@@ -51,8 +77,30 @@ async function pcmCardClick(event, tabname, thumbsName) {
     let selectorTmp = '';
     let elemTmp = null;
     
-    // 置換モードで同じカードを連続クリックした場合、置換ではなく削除し、最後にクリックされたカード名をリセット
+    // 置換モードで同じカードを連続クリックした場合、
+    // Prompt, Negative Prompt 共にカードの内容から変更が無かった場合は
+    // 置換ではなく削除し、最後にクリックされたカード名をリセット
+    let deleteFlag = false;
     if (data.isReplace && pcmLastClickedCard === thumbsName){
+        let isChangedP = false;
+        selectorTmp = `#${tabname}_prompt textarea`;
+        elemTmp = gradioApp().querySelector(selectorTmp);
+        if (elemTmp){
+            isChangedP = _isChanged(elemTmp.value, data.prompt, data.category);
+        }
+        let isChangedN = false;
+        selectorTmp = `#${tabname}_neg_prompt textarea`;
+        elemTmp = gradioApp().querySelector(selectorTmp);
+        if (elemTmp){
+            isChangedN = _isChanged(elemTmp.value, data.negative_prompt, data.category);
+        }
+        if(!isChangedP && !isChangedN){
+            deleteFlag = true;
+        }
+    }
+    
+    if(deleteFlag){
+        // 変更無し状態で同じカードを連続クリックした場合リセット
         data.prompt = "";
         data.negative_prompt = "";
         pcmLastClickedCard = "";
