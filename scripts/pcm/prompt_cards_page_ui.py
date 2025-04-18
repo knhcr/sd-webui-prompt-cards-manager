@@ -9,6 +9,7 @@ from scripts.pcm.cache_info import CacheInfo
 from scripts.pcm.prompt_card_info import PromptCardInfoManager, PromptCardInfo
 from scripts.pcm.constants import DEBUG_PRINT
 from scripts.pcm.utility import filter_walk, natsort_obj
+from modules import extra_networks
 
 
 class PromptCardsPage(ExtraNetworksPage):
@@ -423,6 +424,17 @@ def create_one_item_html(thumbs_name, tabname):
         "search_terms": [search_path], # "prompt_cards/sub1$"
         "sort_keys": {"default": 0}, # sort はしないので適当に 0 を入れておく
     }
+
+    # 標準の refresh ボタンを押した際の処理に合わせるため、
+    # item の更新処理である A1111 標準関数 self.read_user_metadata() と全く同じ処理を挟む
+    #  - user_medatada は カード.json の中身をそのまま入れているだけで PCM では未使用なため、
+    #    処理の実体としては description をセットするだけで良いが念のため
+    filename = item.get("filename", None)
+    metadata = extra_networks.get_user_metadata(filename, lister=None)
+    desc = metadata.get("description", None)
+    if desc is not None:
+        item["description"] = desc
+    item["user_metadata"] = metadata    
 
     # カード情報のHTMLを返す
     html = PromptCardsPage.create_item_html_base(tabname, item, PromptCardsPage.custom_card_tpl, "promptcards")
