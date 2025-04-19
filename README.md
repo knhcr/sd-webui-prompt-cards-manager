@@ -293,3 +293,4 @@ This extension utilizes the folloing third-party resouces.
 * https://www.svgrepo.com/svg/362678/eraser-bold, LICENSE: MIT License, AUTHOR: phosphor
 * https://www.svgrepo.com/svg/258637/mirror-horizontally-graphic-design, LICENSE: CC0 License, UPLOADER: SVG Repo
 * https://www.svgrepo.com/svg/129307/painting-roller, LICENSE: CC0 License, UPLOADER: SVG Repo
+* https://www.svgrepo.com/svg/368760/id, LICENSE: MIT License, AUTHOR: teenyicons
