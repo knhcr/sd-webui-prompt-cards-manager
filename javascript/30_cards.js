@@ -31,8 +31,8 @@ async function pcmCardClick(event, tabname, thumbsName) {
             let startIndex = mStart.index + mStart[0].length + 1;
             let endIndex = mEnd.index-1;
             const targetText = currentText.slice(startIndex, endIndex);
-            PCM_DEBUG_PRINT(`pcmCardClick _isChanged targetText: ${targetText}`);
-            PCM_DEBUG_PRINT(`pcmCardClick _isChanged newText: ${newText}`);
+            //PCM_DEBUG_PRINT(`pcmCardClick _isChanged targetText: ${targetText}`);
+            //PCM_DEBUG_PRINT(`pcmCardClick _isChanged newText: ${newText}`);
             ret = targetText !== newText;
         }
         PCM_DEBUG_PRINT(`pcmCardClick _isChanged ret: ${ret}`);
@@ -571,4 +571,47 @@ async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", 
 async function pcmDropImageToCnetExtension(dataUri, index = 0, tabname = "txt2img", is_mask = false){
     // [TODO]
     return;
+}
+
+/** カードの Action エリアをクリックした際、Dir Name 表示中の場合はツリーをボタンをクリックと同等の機能 */
+function pcmCardActionDivOnClick(event){
+    // tabname 取得
+    let tabname = null;
+    if(!tabname){
+        const t2i_pane = gradioApp().querySelector('#txt2img_promptcards_pane');
+        if(t2i_pane && t2i_pane.contains(event.target)){
+            tabname = 'txt2img';
+        }
+    }
+    if(!tabname){
+        const i2i_pane = gradioApp().querySelector('#img2img_promptcards_pane');
+        if(i2i_pane && i2i_pane.contains(event.target)){
+            tabname = 'img2img';
+        }
+    }
+    if(!tabname) return;
+
+    // show dirname の状態判定
+    const showDirnameBtn = gradioApp().querySelector(`#${tabname}_pcm_dirname_toggle`)
+    if(!showDirnameBtn) return;
+    const isShowDirname = showDirnameBtn.classList.contains('enabled');
+    PCM_DEBUG_PRINT(`pcmCardActionDivOnClick ${tabname} ${isShowDirname}`);
+    if(!isShowDirname) return;
+
+    // orgName
+    const orgName = event.currentTarget.querySelector('.name').getAttribute('orgname');
+    PCM_DEBUG_PRINT(`pcmCardActionDivOnClick : orgName = ${orgName}`);
+
+    // orgName to path
+    let path = PcmCardSearch.cards[tabname][orgName].path;
+    if(!path) return;
+    path = path.slice(0, -1); // $ を除く
+
+    const dirElem = pcmSearchPathToDirTreeElement(path, tabname);
+    if(!dirElem) return;
+    
+    PCM_DEBUG_PRINT(`pcmCardActionDivOnClick : dir Elem clicked`);
+    event.stopPropagation();
+    event.preventDefault();
+    dirElem.querySelector(':scope > .tree-list-content').click();
 }

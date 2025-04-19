@@ -140,7 +140,7 @@ const pcmAddDirnameToggleBtn = ()=>{
         //btn.classList.add('enabled');
         btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/folder-exclamation-svgrepo-com.svg" alt="Show Desc Off">` + 
                         `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/folder-exclamation-blue-svgrepo-com.svg" alt="Show Desc On">`;
-        btn.title = 'Show Dirname';
+        btn.title = 'Show directory names on cards.\nWhen enabled, clicking on the file name area of a card will select its directory in the tree view.';
         btn.addEventListener('click', function() {
             pcmHideDirNameToggle(tabname);
         });

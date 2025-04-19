@@ -1,6 +1,6 @@
 <div class='pcm-card{noCardInfo}' onclick="{card_clicked}" style="{style}">
     {background_image}
-    <div class="actions">
+    <div class="actions" onclick="pcmCardActionDivOnClick(event)">
         <div class="name" orgname="{orgName}" basename="{baseName}">{name}</div>
         <div class="description">{description}</div>
     </div>
