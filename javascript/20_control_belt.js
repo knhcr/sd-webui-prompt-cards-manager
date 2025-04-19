@@ -76,6 +76,7 @@ function pcmDescSearchCallback(tabname){
     PcmCardSearch.updateQuery(tabname, "desc", query, true);
 }
 
+
 /* --------------------------------------------------------------------------------------*/
 /** subdir toggle button */
 const pcmAddSubdirToggleBtn = ()=>{
@@ -91,7 +92,7 @@ const pcmAddSubdirToggleBtn = ()=>{
         btn.classList.add('enabled');
         btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/file-tree-svgrepo-com.svg" alt="Show Desc Off">` + 
                         `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/file-tree-blue-svgrepo-com.svg" alt="Show Desc On">`;
-        btn.title = 'Show Subdir';
+        btn.title = 'Show cards in sub directory.';
         btn.addEventListener('click', function() {
             pcmSubdirToggle(tabname);
         });
@@ -125,6 +126,42 @@ function pcmSubdirToggle(tabname, asis=false) {
     }
 }
 
+
+/* --------------------------------------------------------------------------------------*/
+/** actions toggle button */
+const pcmAddActionsToggleBtn = ()=>{
+    for (let tabname of ['txt2img', 'img2img']){
+        const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        //PCM_DEBUG_PRINT(`pcm_add_subdir_toggle_checkbox called : ${selector}`);
+        const controlsDiv = gradioApp().querySelector(selector);
+        
+        // Actions エリア表示切替ボタン
+        const btn = document.createElement('div');
+        btn.id = `${tabname}_pcm_actions_toggle`;
+        btn.classList.add('pcm-control-belt-btn');
+        btn.classList.add('enabled');
+        btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/id-svgrepo-com.svg" alt="Show Name Off">` + 
+                        `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/id-blue-svgrepo-com.svg" alt="Show Name On">`;
+        btn.title = 'Show Name';
+        btn.addEventListener('click', function() {
+            pcmHideActionsToggle(tabname);
+        });
+        controlsDiv.prepend(btn);
+    }
+}
+/** actions toggle callback */
+function pcmHideActionsToggle(tabname, asis=false) {
+    const btn = gradioApp().querySelector(`#${tabname}_pcm_actions_toggle`);
+    const actionElems = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card > .actions`));
+    if (btn){
+        if(!asis) btn.classList.toggle('enabled', !btn.classList.contains('enabled'));
+        for (let actionElem of actionElems){
+            actionElem.classList.toggle('hidden', !btn.classList.contains('enabled'));
+        }
+    }
+}
+
+
 /* --------------------------------------------------------------------------------------*/
 /** dirname toggle button */
 const pcmAddDirnameToggleBtn = ()=>{
@@ -140,7 +177,9 @@ const pcmAddDirnameToggleBtn = ()=>{
         //btn.classList.add('enabled');
         btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/folder-exclamation-svgrepo-com.svg" alt="Show Desc Off">` + 
                         `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/folder-exclamation-blue-svgrepo-com.svg" alt="Show Desc On">`;
-        btn.title = 'Show directory names on cards.\nWhen enabled, clicking on the file name area of a card will select its directory in the tree view.';
+        btn.title = 'Show directory names on cards.\n' +
+                    'If enabled, clicking on the file name area of a card will select its directory in the tree view,\n' +
+                    'instead of inserting the card prompt.';
         btn.addEventListener('click', function() {
             pcmHideDirNameToggle(tabname);
         });
@@ -404,6 +443,7 @@ pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', 
     pcmAddSearchTextboxDesc();
     pcmAddSearchTextboxPrompt();
     pcmAddSubdirToggleBtn();
+    pcmAddActionsToggleBtn();
     pcmAddDirnameToggleBtn();
     pcmAddShowDescToggleBtn();
     pcmAddImageFitBtn();
