@@ -779,11 +779,16 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 /* show name unchecked の場合の actions の表示 (classList に hoverOnly が追加されている) */
 #txt2img_promptcards_cards > .pcm-card > .actions.hoverOnly,
 #img2img_promptcards_cards > .pcm-card > .actions.hoverOnly{
-    display: none;
+    opacity:0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition-delay: 0.05s;
+    transition-timing-function: ease-in-out;
 }
 #txt2img_promptcards_cards > .pcm-card:hover > .actions.hoverOnly,
 #img2img_promptcards_cards > .pcm-card:hover > .actions.hoverOnly{
-    display: inline-block;
+    opacity:1;
+    visibility: visible;
 }
 
 
