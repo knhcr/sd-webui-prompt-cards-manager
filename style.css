@@ -492,7 +492,8 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 #txt2img_promptcards_extra_sort_path, #img2img_promptcards_extra_sort_path,
 #txt2img_promptcards_extra_sort_name, #img2img_promptcards_extra_sort_name,
 #txt2img_promptcards_extra_sort_date_created, #img2img_promptcards_extra_sort_date_created,
-#txt2img_promptcards_extra_sort_date_modified, #img2img_promptcards_extra_sort_date_modified 
+#txt2img_promptcards_extra_sort_date_modified, #img2img_promptcards_extra_sort_date_modified,
+#txt2img_promptcards_extra_tree_view, #img2img_promptcards_extra_tree_view
 {
   display: none;
 }
