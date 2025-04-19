@@ -14,7 +14,8 @@
 }
 
 /* PromptCards タブ */
-#txt2img_promptcards_pane {
+#txt2img_promptcards_pane,
+#img2img_promptcards_pane{
     min-height:10px;
     height: calc((100vh - 880px)*1.06);
 }
@@ -765,10 +766,12 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
     --card-name-font-size: 16px;
     --card-desc-color: #dbc09f;
 }
-#txt2img_promptcards_cards .name{
+#txt2img_promptcards_cards .name,
+#img2img_promptcards_cards .name{
     font-size: var(--card-name-font-size);
 }
-#txt2img_promptcards_cards .description{
+#txt2img_promptcards_cards .description,
+#img2img_promptcards_cards .description{
     color: var(--card-desc-color);
 }
 
