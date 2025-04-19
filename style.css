@@ -781,7 +781,15 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 /* 画像の fit */
 #txt2img_promptcards_cards .pcm-card > img.fit-contain,
 #img2img_promptcards_cards .pcm-card > img.fit-contain{
-    object-fit: contain !important;
+    object-fit: contain;
+    /* 格子模様の背景色 : 濃さの変更は rgba(204,204,204,0.4) の 0.4 の値を変更 */
+    background-image:
+        linear-gradient(45deg, rgba(204,204,204,0.4) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(204,204,204,0.4) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(204,204,204,0.4) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(204,204,204,0.4) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;    
 }
 /*#endregion Card Design ------------------------------------*/
 
