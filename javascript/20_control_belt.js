@@ -146,7 +146,7 @@ const pcmAddActionsToggleBtn = (isEnabled=true)=>{
         }
         btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/id-svgrepo-com.svg" alt="Show Name Off">` + 
                         `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/id-blue-svgrepo-com.svg" alt="Show Name On">`;
-        btn.title = 'Show Name';
+        btn.title = 'Always show names of all cards.\nIf unchecked, names are shown only when hovering over a card.';
         btn.addEventListener('click', function() {
             pcmHideActionsToggle(tabname);
         });
@@ -160,7 +160,7 @@ function pcmHideActionsToggle(tabname, asis=false) {
     if (btn){
         if(!asis) btn.classList.toggle('enabled', !btn.classList.contains('enabled'));
         for (let actionElem of actionElems){
-            actionElem.classList.toggle('hidden', !btn.classList.contains('enabled'));
+            actionElem.classList.toggle('hoverOnly', !btn.classList.contains('enabled'));
         }
     }
 }

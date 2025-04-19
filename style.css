@@ -517,6 +517,7 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 .pcm-control-belt-push-btn:hover > img.normal{
     display: none;
 }
+/*#endregion Control Belt : hover icon ------------------------------------*/
 
 /*#region Control Belt : checkbox ------------------------------------*/
 /* checkbox label */
@@ -774,6 +775,17 @@ div > #img2img_promptcards_extra_search, div:has(> #img2img_promptcards_extra_se
 #img2img_promptcards_cards .description{
     color: var(--card-desc-color);
 }
+
+/* show name unchecked の場合の actions の表示 (classList に hoverOnly が追加されている) */
+#txt2img_promptcards_cards > .pcm-card > .actions.hoverOnly,
+#img2img_promptcards_cards > .pcm-card > .actions.hoverOnly{
+    display: none;
+}
+#txt2img_promptcards_cards > .pcm-card:hover > .actions.hoverOnly,
+#img2img_promptcards_cards > .pcm-card:hover > .actions.hoverOnly{
+    display: inline-block;
+}
+
 
 /* 画像の表示 */
 #txt2img_promptcards_cards > .pcm-card > img,
