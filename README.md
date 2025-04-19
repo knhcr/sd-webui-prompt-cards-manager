@@ -25,6 +25,15 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/04/19
+  - Changed control belt buttons
+    + Added refresh only current selected dir button,
+    + Removed toggle show tree view button,
+    + Added toggle show card name,
+    + Changed behavior of show description button. If enabled, clicking the name area of card will select its directory, instead of inserting prompt.
+  - Changed card click behavior
+    + When clicking on the same card as the one clicked immediately before, if there have been changes to the content of the prompt, modify it so that the card's content overwrites the existing content instead of deleting it.
+
 * 2025/04/16
   - Changed to refresh the card view when you altered its info without pushing refresh button.
   - Changed PromptCards tab height.
