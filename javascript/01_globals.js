@@ -66,6 +66,59 @@ const pcmGetSettingsAsync = async (timeout=5000) => {
     return data;
 }
 
+/** Settings のキー名 */
+const PCM_SETTINGS_KEYS = {
+    "mini_gallery":{
+        "show_image": "prompt_cards_manager_gallery_show_image",
+        "show_resolution": "prompt_cards_manager_gallery_show_resolution",
+        "show_seed": "prompt_cards_manager_gallery_show_seed",
+        "show_cnet": "prompt_cards_manager_gallery_show_cnet",
+    },
+
+    "cards":{
+        "ignore_dot_starts": "prompt_cards_manager_ignore_dot_starts",
+        "default_is_replace": "prompt_cards_manager_default_is_replace",
+        "default_apply_resolution": "prompt_cards_manager_default_apply_resolution",
+        "default_resolution_width": "prompt_cards_manager_default_resolution_width",
+        "default_resolution_height": "prompt_cards_manager_default_resolution_height",
+        "default_cnet_enabled": "prompt_cards_manager_default_cnet_enabled",
+    },
+
+    "cnet":{
+        "default_preprocessor": "prompt_cards_manager_default_controlnet_preprocessor",
+        "default_models": "prompt_cards_manager_default_controlnet_models",
+        "default_weight": "prompt_cards_manager_default_controlnet_weight",
+        "default_starting_control_step": "prompt_cards_manager_default_controlnet_starting_control_step",
+        "default_ending_control_step": "prompt_cards_manager_default_controlnet_ending_control_step",
+        "default_control_mode": "prompt_cards_manager_default_controlnet_control_mode",
+        "default_resize_mode": "prompt_cards_manager_default_controlnet_resize_mode",
+    },
+
+    "mask_editor":{
+        "min_brush_size": "prompt_cards_manager_mask_editor_min_brush_size",
+        "max_brush_size": "prompt_cards_manager_mask_editor_max_brush_size",
+        "default_brush_size": "prompt_cards_manager_default_mask_editor_brush_size",
+        "default_invert_mask": "prompt_cards_manager_default_mask_editor_invert_mask",
+    },
+
+    "control_belt":{
+        "show_subdirs": "prompt_cards_manager_control_belt_show_subdirs",
+        "show_dirname": "prompt_cards_manager_control_belt_show_dirname",
+        "show_actions": "prompt_cards_manager_control_belt_show_actions",
+        "show_desc": "prompt_cards_manager_control_belt_show_desc",
+        "fit_image": "prompt_cards_manager_control_belt_fit_image",
+    },
+
+    "misc":{
+        "decoration_line_length": "prompt_cards_manager_decoration_line_length",
+        "fix_template_paste_behavior": "prompt_cards_manager_fix_template_paste_behavior",
+        "cancel_editing_with_ctrl_q": "prompt_cards_manager_cancel_editing_with_ctrl_q",
+        "save_editing_with_ctrl_s": "prompt_cards_manager_save_editing_with_ctrl_s",
+        "open_folder_enabled": "prompt_cards_manager_open_folder_enabled",
+    }
+};
+
+
 /** elem_id から Gradio のコンポーネントオブジェクトを取得
  *  全てのオブジェクトを配列で返す
  *  props.value に Gradio が管理する各コンポーネントの value が格納されている

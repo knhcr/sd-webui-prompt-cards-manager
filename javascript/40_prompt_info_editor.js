@@ -295,7 +295,7 @@ const pcmPieResetPage = ()=>{
  */
 const pcmPieOnKeyDownEsc = (event)=>{
     const isOpen = !gradioApp().querySelector('#pcm_pie_container').classList.contains("hidden");
-    const isKeyEvent = opts.prompt_cards_manager_cancel_editing_with_ctrl_q
+    const isKeyEvent = opts[PCM_SETTINGS_KEYS.misc.cancel_editing_with_ctrl_q]
         ? (event.ctrlKey && event.key === 'q') : event.key === 'Escape';
     if (isOpen && isKeyEvent){
         PCM_DEBUG_PRINT("Escape event.")
@@ -309,7 +309,7 @@ const pcmPieOnKeyDownEsc = (event)=>{
  * Ctrl-S で Save
  */
 const pcmPieOnKeyDownCtrlS = (event)=>{
-    if (!opts.prompt_cards_manager_save_editing_with_ctrl_s){return;}
+    if (!opts[PCM_SETTINGS_KEYS.misc.save_editing_with_ctrl_s]){return;}
     const isOpen = !gradioApp().querySelector('#pcm_pie_container').classList.contains("hidden");
     const isKeyEvent = event.ctrlKey && event.key === 's';
     if(isOpen && isKeyEvent){

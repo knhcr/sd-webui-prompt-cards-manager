@@ -213,7 +213,7 @@ async function pcmSendCnetBtnClick(event, tabname, thumbs_name, mask_suffix) {
  */
 function pcmGeneratePrompt(currentText, text, category="", isReplace=true){
     if(!category) category = '';
-    let decoration_length = opts.prompt_cards_manager_decoration_line_length;
+    let decoration_length = opts[PCM_SETTINGS_KEYS.misc.decoration_line_length];
     if(!decoration_length) decoration_length = 55;
     const prefix = `## -- [${category}] ${'-'.repeat(decoration_length)}>` 
     const suffix = `## <${'-'.repeat(decoration_length)} [${category}] --`;
@@ -354,14 +354,13 @@ async function pcmDropImageToCnet(dataUri, index = 0, tabname = "txt2img", is_ma
  * @param {boolean} is_mask マスク画像か否か
  */
 async function pcmDropImageToCnetForge(dataUri, index = 0, tabname = "txt2img", is_mask = false){
-    const cnetModel = opts.prompt_cards_manager_default_controlnet_models;
-    const cnetPreprocessor = opts.prompt_cards_manager_default_controlnet_preprocessor;
-    const controlWeight = opts.prompt_cards_manager_default_controlnet_weight;
-    const startingControlStep = opts.prompt_card_manager_default_controlnet_starting_control_step;
-    const endingControlStep = opts.prompt_cards_manager_default_controlnet_ending_control_step;
-    const controlMode = opts.prompt_cards_manager_default_controlnet_control_mode;
-    const resizeMode = opts.prompt_cards_manager_default_controlnet_resize_mode;
-
+    const cnetModel = opts[PCM_SETTINGS_KEYS.cnet.default_models];
+    const cnetPreprocessor = opts[PCM_SETTINGS_KEYS.cnet.default_preprocessor];
+    const controlWeight = opts[PCM_SETTINGS_KEYS.cnet.default_weight];
+    const startingControlStep = opts[PCM_SETTINGS_KEYS.cnet.default_starting_control_step];
+    const endingControlStep = opts[PCM_SETTINGS_KEYS.cnet.default_ending_control_step];
+    const controlMode = opts[PCM_SETTINGS_KEYS.cnet.default_control_mode];
+    const resizeMode = opts[PCM_SETTINGS_KEYS.cnet.default_resize_mode];
 
     
     let selectorTmp = ''; // テンポラリセレクタ

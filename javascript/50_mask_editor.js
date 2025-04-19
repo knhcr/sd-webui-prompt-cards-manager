@@ -119,10 +119,10 @@ class PcmMaskEditor{
         PCM_DEBUG_PRINT("currentImageInfo", currentImageInfo);
 
         // エディターデフォルト設定値を取得 (opts から取得)
-        const minBrushSize = opts.prompt_cards_manager_mask_editor_min_brush_size;
-        const maxBrushSize = opts.prompt_cards_manager_mask_editor_max_brush_size;
-        const defaultBrushSize = opts.prompt_cards_manager_default_mask_editor_brush_size;
-        const defaultInvertMask = opts.prompt_cards_manager_default_mask_editor_invert_mask;
+        const minBrushSize = opts[PCM_SETTINGS_KEYS.mask_editor.min_brush_size];
+        const maxBrushSize = opts[PCM_SETTINGS_KEYS.mask_editor.max_brush_size];
+        const defaultBrushSize = opts[PCM_SETTINGS_KEYS.mask_editor.default_brush_size];
+        const defaultInvertMask = opts[PCM_SETTINGS_KEYS.mask_editor.default_invert_mask];
     
         // ブラシサイズの設定
         const shorter = Math.min(currentImageInfo.width, currentImageInfo.height);

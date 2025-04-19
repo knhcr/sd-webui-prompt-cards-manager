@@ -9,7 +9,7 @@ PCM_SETTINGS_KEYS = {
         "show_resolution": "prompt_cards_manager_gallery_show_resolution",
         "show_seed": "prompt_cards_manager_gallery_show_seed",
         "show_cnet": "prompt_cards_manager_gallery_show_cnet",
-        },
+    },
 
     "cards":{
         "ignore_dot_starts": "prompt_cards_manager_ignore_dot_starts",
@@ -37,6 +37,14 @@ PCM_SETTINGS_KEYS = {
         "default_invert_mask": "prompt_cards_manager_default_mask_editor_invert_mask",
     },
 
+    "control_belt":{
+        "show_subdirs": "prompt_cards_manager_control_belt_show_subdirs",
+        "show_dirname": "prompt_cards_manager_control_belt_show_dirname",
+        "show_actions": "prompt_cards_manager_control_belt_show_actions",
+        "show_desc": "prompt_cards_manager_control_belt_show_desc",
+        "fit_image": "prompt_cards_manager_control_belt_fit_image",
+    },
+
     "misc":{
         "decoration_line_length": "prompt_cards_manager_decoration_line_length",
         "fix_template_paste_behavior": "prompt_cards_manager_fix_template_paste_behavior",
@@ -50,6 +58,7 @@ PCM_SETTINGS_KEYS = {
 def on_ui_settings():
     section = ("prompt_cards_manager", "Prompt Cards Manager")
 
+    # -- Mini Gallery --
     # show mini gallery (needs reload ui)
     shared.opts.add_option(PCM_SETTINGS_KEYS["mini_gallery"]["show_image"], shared.OptionInfo(
         True, "Mini Gallery : Show Image Gallery",
@@ -74,6 +83,8 @@ def on_ui_settings():
         section=section
     ))
 
+
+    # -- Cards --
     # ignore dot starts
     shared.opts.add_option(PCM_SETTINGS_KEYS["cards"]["ignore_dot_starts"], shared.OptionInfo(
         True, "Ignore dirs and files starting with . (such as .git, .DS_Store)",
@@ -82,36 +93,38 @@ def on_ui_settings():
 
     # default value : is_replace
     shared.opts.add_option(PCM_SETTINGS_KEYS["cards"]["default_is_replace"], shared.OptionInfo(
-        True, "[Editor Default Value] Replace Mode ",
+        True, "Card Info Editor : [Default Value] Replace Mode ",
         section=section
     ))
 
     # default value : apply_resolution
     shared.opts.add_option(PCM_SETTINGS_KEYS["cards"]["default_apply_resolution"], shared.OptionInfo(
-        True, "[Editor Default Value] Apply Resolution",
+        True, "Card Info Editor : [Default Value] Apply Resolution",
         section=section
     ))
 
     # default value : resolution width
     shared.opts.add_option(PCM_SETTINGS_KEYS["cards"]["default_resolution_width"], shared.OptionInfo(
-        1024, "[Editor Default Value] Resolution Width",
+        1024, "Card Info Editor : [Default Value] Resolution Width",
         gr.Slider, {"minimum": 64, "maximum": 3072, "step": 8}, 
         section=section
     ))
 
     # default value : resolution height
     shared.opts.add_option(PCM_SETTINGS_KEYS["cards"]["default_resolution_height"], shared.OptionInfo(
-        1024, "[Editor Default Value] Resolution Height",
+        1024, "Card Info Editor : [Default Value] Resolution Height",
         gr.Slider, {"minimum": 64, "maximum": 3072, "step": 8}, 
         section=section
     ))
 
     # default value : cnet_enabled
     shared.opts.add_option(PCM_SETTINGS_KEYS["cards"]["default_cnet_enabled"], shared.OptionInfo(
-        True, "[Editor Default Value] CNet Enabled",
+        True, "Card Info Editor : [Default Value] CNet Enabled",
         section=section
     ))
 
+
+    # -- ControlNet --
     # controlnet preprocessor
     preprocessors = ["None"]
     def update_controlnet_preprocessor(preprocessors):
@@ -195,14 +208,9 @@ def on_ui_settings():
         gr.Radio, {"choices": ["Just Resize", "Crop and Resize", "Resize and Fill"]},
         section=section
     ))
+    
 
-    # 
-    shared.opts.add_option(PCM_SETTINGS_KEYS["misc"]["decoration_line_length"], shared.OptionInfo(
-        55, "Decoration Line Length (length or this: \"-------------------->\")",
-        gr.Slider, {"minimum": 1, "maximum": 100, "step": 1},
-        section=section
-    ))
-
+    # -- Mask Editor --
     # mask editor min brush size
     shared.opts.add_option(PCM_SETTINGS_KEYS["mask_editor"]["min_brush_size"], shared.OptionInfo(
         0.5, "Mask Editor : Min Brush Size (% of shorter side of image)",
@@ -230,7 +238,53 @@ def on_ui_settings():
         gr.Checkbox, 
         section=section
     ))
-    
+
+
+    # -- Control Belt --
+    # show subdirs
+    shared.opts.add_option(PCM_SETTINGS_KEYS["control_belt"]["show_subdirs"], shared.OptionInfo(
+        True, "Control Belt : [Default Value] Show Subdirs ",
+        gr.Checkbox,
+        section=section
+    ))
+
+    # show actions
+    shared.opts.add_option(PCM_SETTINGS_KEYS["control_belt"]["show_actions"], shared.OptionInfo(
+        True, "Control Belt : [Default Value] Show Actions",
+        gr.Checkbox,
+        section=section
+    ))
+
+    # show dirname
+    shared.opts.add_option(PCM_SETTINGS_KEYS["control_belt"]["show_dirname"], shared.OptionInfo(
+        False, "Control Belt : [Default Value] Show Dirname",
+        gr.Checkbox,
+        section=section
+    ))
+
+    # show desc
+    shared.opts.add_option(PCM_SETTINGS_KEYS["control_belt"]["show_desc"], shared.OptionInfo(
+        False, "Control Belt : [Default Value] Show Desc",
+        gr.Checkbox,
+        section=section
+    ))
+
+    # fit image
+    shared.opts.add_option(PCM_SETTINGS_KEYS["control_belt"]["fit_image"], shared.OptionInfo(
+        True, "Control Belt : [Default Value] Fit Image",
+        gr.Checkbox,
+        section=section
+    ))
+
+
+    # -- Misc --
+    # decoration line length
+    shared.opts.add_option(PCM_SETTINGS_KEYS["misc"]["decoration_line_length"], shared.OptionInfo(
+        55, "Decoration Line Length (length or this: \"-------------------->\")",
+        gr.Slider, {"minimum": 1, "maximum": 100, "step": 1},
+        section=section
+    ))
+
     # fix 'Template:' paste behavior of sd-dynamic-prompts.
     shared.opts.add_option(PCM_SETTINGS_KEYS["misc"]["fix_template_paste_behavior"], shared.OptionInfo(
         False,

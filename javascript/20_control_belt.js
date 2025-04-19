@@ -79,7 +79,7 @@ function pcmDescSearchCallback(tabname){
 
 /* --------------------------------------------------------------------------------------*/
 /** subdir toggle button */
-const pcmAddSubdirToggleBtn = ()=>{
+const pcmAddSubdirToggleBtn = (isEnabled=true)=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
         //PCM_DEBUG_PRINT(`pcm_add_subdir_toggle_checkbox called : ${selector}`);
@@ -89,7 +89,9 @@ const pcmAddSubdirToggleBtn = ()=>{
         const btn = document.createElement('div');
         btn.id = `${tabname}_pcm_subdirs_toggle`;
         btn.classList.add('pcm-control-belt-btn');
-        btn.classList.add('enabled');
+        if (isEnabled){
+            btn.classList.add('enabled');
+        }
         btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/file-tree-svgrepo-com.svg" alt="Show Desc Off">` + 
                         `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/file-tree-blue-svgrepo-com.svg" alt="Show Desc On">`;
         btn.title = 'Show cards in sub directory.';
@@ -129,7 +131,7 @@ function pcmSubdirToggle(tabname, asis=false) {
 
 /* --------------------------------------------------------------------------------------*/
 /** actions toggle button */
-const pcmAddActionsToggleBtn = ()=>{
+const pcmAddActionsToggleBtn = (isEnabled=true)=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
         //PCM_DEBUG_PRINT(`pcm_add_subdir_toggle_checkbox called : ${selector}`);
@@ -139,7 +141,9 @@ const pcmAddActionsToggleBtn = ()=>{
         const btn = document.createElement('div');
         btn.id = `${tabname}_pcm_actions_toggle`;
         btn.classList.add('pcm-control-belt-btn');
-        btn.classList.add('enabled');
+        if (isEnabled){
+            btn.classList.add('enabled');
+        }
         btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/id-svgrepo-com.svg" alt="Show Name Off">` + 
                         `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/id-blue-svgrepo-com.svg" alt="Show Name On">`;
         btn.title = 'Show Name';
@@ -164,7 +168,7 @@ function pcmHideActionsToggle(tabname, asis=false) {
 
 /* --------------------------------------------------------------------------------------*/
 /** dirname toggle button */
-const pcmAddDirnameToggleBtn = ()=>{
+const pcmAddDirnameToggleBtn = (isEnabled=false)=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
         //PCM_DEBUG_PRINT(`pcm_add_dirname_toggle_checkbox called : ${selector}`);
@@ -174,7 +178,9 @@ const pcmAddDirnameToggleBtn = ()=>{
         const btn = document.createElement('div');
         btn.id = `${tabname}_pcm_dirname_toggle`;
         btn.classList.add('pcm-control-belt-btn');
-        //btn.classList.add('enabled');
+        if (isEnabled){
+            btn.classList.add('enabled');
+        }
         btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/folder-exclamation-svgrepo-com.svg" alt="Show Desc Off">` + 
                         `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/folder-exclamation-blue-svgrepo-com.svg" alt="Show Desc On">`;
         btn.title = 'Show directory names on cards.\n' +
@@ -204,7 +210,7 @@ function pcmHideDirNameToggle(tabname, asis=false) {
 
 /* --------------------------------------------------------------------------------------*/
 /** show description toggle button */
-const pcmAddShowDescToggleBtn = ()=>{
+const pcmAddShowDescToggleBtn = (isEnabled=false)=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
         //PCM_DEBUG_PRINT(`pcm_add_show_desc_toggle_checkbox called : ${selector}`);
@@ -214,7 +220,9 @@ const pcmAddShowDescToggleBtn = ()=>{
         const btn = document.createElement('div');
         btn.id = `${tabname}_pcm_desc_toggle`;
         btn.classList.add('pcm-control-belt-btn');
-        //btn.classList.add('enabled');
+        if (isEnabled){
+            btn.classList.add('enabled');
+        }
         btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/details-svgrepo-com.svg" alt="Show Desc Off">` + 
                         `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/details-blue-svgrepo-com.svg" alt="Show Desc On">`;
         btn.title = 'Show Description';
@@ -238,7 +246,7 @@ function pcmShowDescToggle(tabname, asis=false) {
 
 /* --------------------------------------------------------------------------------------*/
 /** image fit toggle button */
-const pcmAddImageFitBtn = ()=>{
+const pcmAddImageFitBtn = (isEnabled=true)=>{
     for (let tabname of ['txt2img', 'img2img']){
         const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
         //PCM_DEBUG_PRINT(`pcm_add_image_fit_checkbox called : ${selector}`);
@@ -248,7 +256,9 @@ const pcmAddImageFitBtn = ()=>{
         const btn = document.createElement('div');
         btn.id = `${tabname}_pcm_image_fit_toggle`;
         btn.classList.add('pcm-control-belt-btn');
-        btn.classList.add('enabled');
+        if (isEnabled){
+            btn.classList.add('enabled');
+        }
         btn.innerHTML = `<img class="off" src="${PCM_API_ENDPOINT_BASE}/resources/minimize-square-minimalistic-svgrepo-com.svg" alt="Image Fit Off">` + 
                         `<img class="on" src="${PCM_API_ENDPOINT_BASE}/resources/minimize-square-minimalistic-blue-svgrepo-com.svg" alt="Image Fit On">`;
         btn.title = 'Image Fit';
@@ -428,24 +438,27 @@ function pcmRefreshCardListButtonSetCallback(){
 
 
 /** 表示オプションの適用 : ShowDir, ShowDesc, ImageFit */
-const pcmApplyShowOptions = (tabname)=>{
+function pcmApplyShowOptions(tabname){
     pcmHideDirNameToggle(tabname, true);
     pcmShowDescToggle(tabname, true);
     pcmImageFitToggle(tabname, true);
+    pcmHideActionsToggle(tabname, true);
 }
 
 
 /* --------------------------------------------------------------------------------------*/
 // checkbox 追加 (onUiLoaded では早すぎるため要素を監視)
-pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', ()=>{
+pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', async ()=>{
+    const opts = await pcmGetSettingsAsync();
+
     pcmAddRefreshDirButton();
     pcmAddOpenFolderButton();
     pcmAddSearchTextboxDesc();
     pcmAddSearchTextboxPrompt();
-    pcmAddSubdirToggleBtn();
-    pcmAddActionsToggleBtn();
-    pcmAddDirnameToggleBtn();
-    pcmAddShowDescToggleBtn();
-    pcmAddImageFitBtn();
+    pcmAddSubdirToggleBtn(opts[PCM_SETTINGS_KEYS.control_belt.show_subdirs]);
+    pcmAddActionsToggleBtn(opts[PCM_SETTINGS_KEYS.control_belt.show_actions]);
+    pcmAddDirnameToggleBtn(opts[PCM_SETTINGS_KEYS.control_belt.show_dirname]);
+    pcmAddShowDescToggleBtn(opts[PCM_SETTINGS_KEYS.control_belt.show_desc]);
+    pcmAddImageFitBtn(opts[PCM_SETTINGS_KEYS.control_belt.fit_image]);
     pcmRefreshCardListButtonSetCallback();
 });
