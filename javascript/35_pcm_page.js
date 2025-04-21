@@ -88,7 +88,7 @@ async function pcmSetApplyFunctions(){
         await pcmSleepAsync(100);
     }
 
-    // applyFilter() と applySort() の差し替え
+    // applyFilter()
     for (const tabname of tabnames){
         const tabname_full = `${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}`;
 
@@ -96,62 +96,62 @@ async function pcmSetApplyFunctions(){
             // use this as refresh finished callback
             PCM_DEBUG_PRINT(`pcm applyFilter() : refresh DOM finished: ${tabname_full}, flag = ${flag}`);
             const tabname = tabname_full.slice(0, tabname_full.indexOf(PCM_EXTRA_NETWORKS_TABNAME)-1);
-            pcmOnRefreshEnd(tabname);
-        };
 
-        extraNetworksApplySort[tabname_full] = ()=>{
-            // do nothing
+            // タブからのコール回数のカウンタを確認してカードデータを更新するかどうかを決める
+            let needUpdateCards = false;
+            if (typeof window.pcm_apply_filter_call_count_from_tab !== 'object'){
+                window.pcm_apply_filter_call_count_from_tab = {};
+                window.pcm_apply_filter_call_count_from_tab[tabname] = 0;
+            }
+            PCM_DEBUG_PRINT(`applyFilter() call from tab counter ${tabname} : ${window.pcm_apply_filter_call_count_from_tab[tabname]}`);
+        
+            if (window.pcm_apply_filter_call_count_from_tab[tabname] === 0){
+                needUpdateCards = true;
+            }else{
+                // タブからのコールであることを示すカウンタをデクリメント
+                window.pcm_apply_filter_call_count_from_tab[tabname] -= 1;
+                
+                // ページロード後の初回のコールの場合
+                // DOM は前回終了時のキャッシュが読み込まれるが、カードサーチ情報はキャッシュされないので、取得する必要あり
+                if (typeof window.pcm_card_data_initialized !== 'object'){
+                    window.pcm_card_data_initialized = {};
+                    if (!tabname in window.pcm_card_data_initialized){
+                        window.pcm_card_data_initialized[tabname] = false;
+                    }
+                }
+                if (!window.pcm_card_data_initialized[tabname]){
+                    needUpdateCards = true;
+                    window.pcm_card_data_initialized[tabname] = true;
+                }
+            }
+
+            // カードデータを更新する必要がある場合はコール
+            if (needUpdateCards){
+                pcmOnRefreshEnd(tabname);
+            }
         };
+    }
+
+    // applySort()
+    for (const tabname of tabnames){
+        const tabname_full = `${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}`;
+        extraNetworksApplySort[tabname_full] = ()=>{};
     }
     PCM_DEBUG_PRINT(`pcmSetApplyFunctions finished`);
 };
 
 
-/** DOM リフレッシュ終了時の処理
- * リフレッシュ中にタブ遷移を行なう可能性があるため、タブからのコール階数をカウントすることで当該コールに当たる回数だけリフレッシュをスキップ
- *   - タブからのコール階数を示すが正の場合はカウンタをデクリメント
- *   - カウンタが 0 だった場合はカードデータを更新
-*/
+/** DOM リフレッシュ終了時の処理 */
 async function pcmOnRefreshEnd(tabname){
-    PCM_DEBUG_PRINT(`pcm applyFilter() : updateCards Calling: ${tabname}`);
-    if (typeof window.pcm_apply_filter_call_count_from_tab !== 'object'){
-        window.pcm_apply_filter_call_count_from_tab = {};
-        window.pcm_apply_filter_call_count_from_tab[tabname] = 0;
-    }
-    PCM_DEBUG_PRINT(`applyFilter() call from tab counter ${tabname} : ${window.pcm_apply_filter_call_count_from_tab[tabname]}`);
-
-    let needUpdateCards = false;
-    if (window.pcm_apply_filter_call_count_from_tab[tabname] > 0){
-        // タブからのコールであることを示すカウンタをデクリメント
-        window.pcm_apply_filter_call_count_from_tab[tabname] -= 1;
-        
-        // ページロード後の初回のコールの場合は、 DOM は前回終了時のキャッシュが読み込まれるが、カードサーチ情報は空なので取得する必要あり
-        if (typeof window.pcm_card_data_initialized !== 'object'){
-            window.pcm_card_data_initialized = {};
-            if (!tabname in window.pcm_card_data_initialized){
-                window.pcm_card_data_initialized[tabname] = false;
-            }
-        }
-        if (!window.pcm_card_data_initialized[tabname]){
-            needUpdateCards = true;
-            window.pcm_card_data_initialized[tabname] = true;
-        }
-    }else{
-        // タブからのコールでない場合 (=リフレッシュボタンからのコールのはず) はカードデータを更新
-        needUpdateCards = true;
-    }
-    
-    if (needUpdateCards){
-        await PcmCardSearch.updateCards(tabname); // card 検索用内部データの更新
-        PcmCardSearch.updateDom(tabname); // 新しいマッチ結果を DOM に反映
-        pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
-        pcmTreeViewSetLeafDirMark(tabname); // ツリービューのリーフノードにマークをセット
-        pcmApplyShowOptions(tabname); // 表示オプションの適用
-    }
+    await PcmCardSearch.updateCards(tabname); // card 検索用内部データの更新
+    PcmCardSearch.updateDom(tabname); // 新しいマッチ結果を DOM に反映
+    pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
+    pcmTreeViewSetLeafDirMark(tabname); // ツリービューのリーフノードにマークをセット
+    pcmApplyShowOptions(tabname); // 表示オプションの適用
 }
 
 
-/** ExtraNetworks Tab の遷移時の処理に、そのことを示すフラグをセットさせるパッチ */
+/** モンキーパッチ : ExtraNetworks Tab の遷移時のコールバックに、tab 遷移が契機であることを示すフラグをセットさせる */
 function pcmPatchTabSelected(){
     const extraNetworksTabSelected_org = window.extraNetworksTabSelected; // original
 
@@ -195,10 +195,12 @@ const pcmInitializePage = async()=>{
 };
 
 
-/** thumbsName のカードを更新する
+/** カードの thumbsName (複数可) を指定して当該カードのみを更新する
  * DOM の差し替え, cardSearch の情報の更新, updateMatch のコール
- * tabname は判らないため、txt2img, img2img の両方を処理する
- * @param {string[] or string} thumbsNames <thumbsName>$timestamp or その配列
+ * 
+ * 現状の用途はカードエディタでカード情報を更新した際のコールバック 
+ *  - この場合tabname は判らないため、txt2img, img2img の両方を処理する
+  * @param {string[] or string} thumbsNames <thumbsName>$timestamp or その配列
  * @param {string} tabname txt2img or img2img or null (null の場合は両方)
 */
 const pcmUpdateCards = async (thumbsNames, tabname=null)=>{
@@ -259,8 +261,6 @@ const pcmUpdateCards = async (thumbsNames, tabname=null)=>{
         pcmApplyShowOptions(tabname);
     }
 }
-
-
 
 
 /** thumbsName からカードの DOM を取得する */
