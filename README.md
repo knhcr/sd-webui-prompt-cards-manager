@@ -25,6 +25,9 @@ Note that this extension does not have features to automatically generate prompt
 
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
+* 2025/04/21
+  - bugfix. Stabilized initial page open and card refresh.
+
 * 2025/04/19
   - Changed control belt buttons
     + Added refresh only current selected dir button,
