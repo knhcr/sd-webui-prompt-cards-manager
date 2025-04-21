@@ -215,7 +215,7 @@ class PcmCardSearch {
      */
     static async updateMatch(tabname, force=false, updateDom=true){
         if(!["txt2img", "img2img"].includes(tabname)) return;
-        
+       
         PcmCardSearch.#updateMatchPath(tabname, force);
         PcmCardSearch.#updateMatchPrompt(tabname, force);
         PcmCardSearch.#updateMatchDesc(tabname, force);
@@ -303,6 +303,12 @@ class PcmCardSearch {
     /** マッチ結果のDOMへの反映 */
     static updateDom(tabname){
         if(!["txt2img", "img2img"].includes(tabname)) return;
+
+        // カード情報が無い場合は何もしない
+        // ページ起動後の初回タブクリック時に、初回のデータ取得までの間一瞬全カードが消えることを防止するため
+        if(Object.keys(PcmCardSearch.cards[tabname]).length === 0){
+            return;
+        }
 
         let match = PcmCardSearch.tmpMatch[tabname].path.filter( orgname =>
                 PcmCardSearch.tmpMatch[tabname].prompt.includes(orgname) &&
