@@ -52,6 +52,8 @@ const pcmSetPromptCardsTabOnClickAsync = async ()=>{
  * - フィルタリングもソートも独自実装のため標準機能による処理は不要
  *   + 特に reforge の場合は処理をバイパスしないとカードが全て消されてしまう
  * - DOM のリフレッシュ処理が終わった後のコールバックとして再利用する
+ *   + refresh() の処理後だけでなく、extranewtowks tab のボタンを押した時もコールされる
+ *     - 直前に呼ばれる extraNetworksTabSelected() にモンキーパッチを当てることで対処
  * 
  * [元々の処理の概要] 
  * - カードのリフレッシュ時にapplyExtraNetworkFilter() がコールされる
@@ -64,21 +66,115 @@ const pcmSetPromptCardsTabOnClickAsync = async ()=>{
  *   div.card で引っ掛けた要素をソートして DOM として埋め込む処理に変更されている
  * - 従って card 以外のカスタムクラスだと applySort() を通った時点で DOM が空になってしまう
  */
-function pcmSetApplyFunctions(){
-    for (const tabname of ['txt2img', 'img2img']){
+async function pcmSetApplyFunctions(){
+    PCM_DEBUG_PRINT(`pcmSetApplyFunctions called`);
+    const tabnames = ['txt2img', 'img2img'];
+    
+    // setupExtraNetworksForTab() が終わるまで待機
+    let isSetupFinished = false;
+    while(!isSetupFinished){
+        let flags = [];
+        for (const tabname of tabnames){
+            const tabname_full = `${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}`;
+            if(typeof extraNetworksApplyFilter[tabname_full] !== undefined) flags.push(true);
+            else flags.push(false);
+            
+            if(typeof extraNetworksApplySort[tabname_full] !== undefined) flags.push(true);
+            else flags.push(false);
+        }
+        if(flags.every(x => x)){
+            isSetupFinished = true;
+        }
+        await pcmSleepAsync(100);
+    }
+
+    // applyFilter() と applySort() の差し替え
+    for (const tabname of tabnames){
         const tabname_full = `${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}`;
-        extraNetworksApplyFilter[tabname_full] = ()=>{
-            PCM_DEBUG_PRINT(`pcmApplyFilter: ${tabname_full}`);
+
+        extraNetworksApplyFilter[tabname_full] = (flag)=>{
+            // use this as refresh finished callback
+            PCM_DEBUG_PRINT(`pcm applyFilter() : refresh DOM finished: ${tabname_full}, flag = ${flag}`);
+            const tabname = tabname_full.slice(0, tabname_full.indexOf(PCM_EXTRA_NETWORKS_TABNAME)-1);
+            pcmOnRefreshEnd(tabname);
         };
+
         extraNetworksApplySort[tabname_full] = ()=>{
-            PCM_DEBUG_PRINT(`pcmApplySort: ${tabname_full}`);
+            // do nothing
         };
     }
+    PCM_DEBUG_PRINT(`pcmSetApplyFunctions finished`);
+};
+
+
+/** DOM リフレッシュ終了時の処理
+ * リフレッシュ中にタブ遷移を行なう可能性があるため、タブからのコール階数をカウントすることで当該コールに当たる回数だけリフレッシュをスキップ
+ *   - タブからのコール階数を示すが正の場合はカウンタをデクリメント
+ *   - カウンタが 0 だった場合はカードデータを更新
+*/
+async function pcmOnRefreshEnd(tabname){
+    PCM_DEBUG_PRINT(`pcm applyFilter() : updateCards Calling: ${tabname}`);
+    if (typeof window.pcm_apply_filter_call_count_from_tab !== 'object'){
+        window.pcm_apply_filter_call_count_from_tab = {};
+        window.pcm_apply_filter_call_count_from_tab[tabname] = 0;
+    }
+    PCM_DEBUG_PRINT(`applyFilter() call from tab counter ${tabname} : ${window.pcm_apply_filter_call_count_from_tab[tabname]}`);
+
+    let needUpdateCards = false;
+    if (window.pcm_apply_filter_call_count_from_tab[tabname] > 0){
+        // タブからのコールであることを示すカウンタをデクリメント
+        window.pcm_apply_filter_call_count_from_tab[tabname] -= 1;
+        
+        // ページロード後の初回のコールの場合は、 DOM は前回終了時のキャッシュが読み込まれるが、カードサーチ情報は空なので取得する必要あり
+        if (typeof window.pcm_card_data_initialized !== 'object'){
+            window.pcm_card_data_initialized = {};
+            if (!tabname in window.pcm_card_data_initialized){
+                window.pcm_card_data_initialized[tabname] = false;
+            }
+        }
+        if (!window.pcm_card_data_initialized[tabname]){
+            needUpdateCards = true;
+            window.pcm_card_data_initialized[tabname] = true;
+        }
+    }else{
+        // タブからのコールでない場合 (=リフレッシュボタンからのコールのはず) はカードデータを更新
+        needUpdateCards = true;
+    }
+    
+    if (needUpdateCards){
+        await PcmCardSearch.updateCards(tabname); // card 検索用内部データの更新
+        PcmCardSearch.updateDom(tabname); // 新しいマッチ結果を DOM に反映
+        pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
+        pcmTreeViewSetLeafDirMark(tabname); // ツリービューのリーフノードにマークをセット
+        pcmApplyShowOptions(tabname); // 表示オプションの適用
+    }
+}
+
+
+/** ExtraNetworks Tab の遷移時の処理に、そのことを示すフラグをセットさせるパッチ */
+function pcmPatchTabSelected(){
+    const extraNetworksTabSelected_org = window.extraNetworksTabSelected; // original
+
+    function extraNetworksTabSelected(tabname, id, showPrompt, showNegativePrompt, tabname_full){
+        if (tabname_full.toLowerCase().includes(PCM_EXTRA_NETWORKS_TABNAME)){
+            // PCM の場合タブからのコールであることを示すカウンタをインクリメント
+            if (typeof window.pcm_apply_filter_call_count_from_tab !== 'object'){
+                window.pcm_apply_filter_call_count_from_tab = {};
+                window.pcm_apply_filter_call_count_from_tab[tabname] = 0;
+            }
+            window.pcm_apply_filter_call_count_from_tab[tabname] += 1;
+        }
+
+        // 元の関数をコール
+        extraNetworksTabSelected_org(tabname, id, showPrompt, showNegativePrompt, tabname_full);
+    }
+
+    window.extraNetworksTabSelected = extraNetworksTabSelected;
 };
 
 
 /** 見た目の初期化 */ 
-const initializePage = async()=>{
+const pcmInitializePage = async()=>{
     // Forge の場合は tree dir view の幅を調整
     const settings = await pcmGetSettingsAsync();
     if (settings && settings.IS_FORGE && !settings.IS_REFORGE){
@@ -178,4 +274,5 @@ const pcmGetCardByThumbsName = (thumbsName, tabname)=>{
 
 pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmSetPromptCardsTabOnClickAsync);
 pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmSetApplyFunctions);
-onUiLoaded(initializePage);
+onUiLoaded(pcmInitializePage);
+onUiLoaded(pcmPatchTabSelected);

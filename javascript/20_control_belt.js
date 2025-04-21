@@ -303,7 +303,7 @@ const pcmAddOpenFolderButton = ()=>{
         controlsDiv.prepend(openFolderButton); // 先頭に追加
     }
 }
-function pcmOpenFolder(tabname){
+async function pcmOpenFolder(tabname){
     PCM_DEBUG_PRINT(`pcmOpenFolder called : ${tabname}`);
     let path = "";
     let selected = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree .tree-list-content[data-selected]`);
@@ -316,12 +316,7 @@ function pcmOpenFolder(tabname){
     }
 
     const url = `${PCM_API_ENDPOINT_BASE}/open-folder?path=${path}`;
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
+    await fetch(url);
 }
 
 
@@ -418,25 +413,12 @@ async function pcmRefreshDir(tabname, is_recurse=false){
     PcmCardSearch.updateCardData(json["cardData"], tabname);
 
     // マッチ結果と表示オプションを更新
-    PcmCardSearch.updateMatch(tabname, true);
+    PcmCardSearch.updateMatch(tabname, true, true);
     pcmApplyShowOptions(tabname);
 }
 
 
 /* --------------------------------------------------------------------------------------*/
-/** Card List Refresh Button Callback */
-function pcmRefreshCardListButtonSetCallback(){
-    for (const tabname of ['txt2img', 'img2img']){
-        let elem = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_extra_refresh`);
-        if(elem){
-            elem.addEventListener('click', ()=>{
-                PcmCardSearch.updateCards(tabname);
-            });
-        }
-    }
-}
-
-
 /** 表示オプションの適用 : ShowDir, ShowDesc, ImageFit */
 function pcmApplyShowOptions(tabname){
     pcmHideDirNameToggle(tabname, true);
@@ -460,5 +442,4 @@ pcmWaitForContent(`.extra-networks-controls-div #txt2img_${PCM_EXTRA_NETWORKS_TA
     pcmAddDirnameToggleBtn(opts[PCM_SETTINGS_KEYS.control_belt.show_dirname]);
     pcmAddShowDescToggleBtn(opts[PCM_SETTINGS_KEYS.control_belt.show_desc]);
     pcmAddImageFitBtn(opts[PCM_SETTINGS_KEYS.control_belt.fit_image]);
-    pcmRefreshCardListButtonSetCallback();
 });
