@@ -64,7 +64,10 @@ class PromptCardInfoManager:
             targets = CacheInfo.cache_info.keys()
         else:
             dir_path = os.path.normpath(dir_path)
+            if dir_path == ".": # root ディレクトリの場合は空文字に変換
+                dir_path = ""
             DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info dir_path (normalized): {dir_path}")
+
             targets = [x for x in CacheInfo.cache_info.keys() if os.path.dirname(CacheInfo.cache_info[x].get("rel_path", "")) == dir_path]
             DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info targets: {len(targets)}")
 
@@ -116,7 +119,10 @@ class PromptCardInfoManager:
             targets = CacheInfo.cache_info.keys()
         else:
             dir_path = os.path.normpath(dir_path)
+            if dir_path == ".": # root ディレクトリの場合は空文字に変換
+                dir_path = ""
             DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info_for_search dir_path (normalized): {dir_path}")
+            
             targets = [x for x in CacheInfo.cache_info.keys() if os.path.dirname(CacheInfo.cache_info[x].get("rel_path", "")) == dir_path]
             DEBUG_PRINT(f"PromptCardInfoManager.get_all_card_info_for_search targets: {len(targets)}")
 
