@@ -8,7 +8,7 @@ const pcmAddSearchTextboxPrompt = ()=>{
         let elem = document.createElement('div');
         elem.classList.add('extra-network-control--search');
         let elem2 = document.createElement('input');
-        elem2.id = `${tabname}_promptcards_extra_search_prompt`;
+        elem2.id = `${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_extra_search_prompt`;
         elem2.classList.add('extra-network-control--search-text');
         elem2.type = 'search';
         elem2.placeholder = 'Search from Prompt';
@@ -25,9 +25,9 @@ const pcmAddSearchTextboxPrompt = ()=>{
     if (typeof getTextAreas === 'function') {
       if (!thirdParty["prompt-card-manager"]) {
         thirdParty["prompt-card-manager"] = {
-          "base": "#txt2img_promptcards_controls",
+          "base": `#txt2img_${PCM_EXTRA_NETWORKS_TABNAME}_controls`,
           "hasIds": true,
-          "selectors": ["#txt2img_promptcards_extra_search_prompt"]
+          "selectors": [`#txt2img_${PCM_EXTRA_NETWORKS_TABNAME}_extra_search_prompt`]
         };
       }
     }    
@@ -35,7 +35,7 @@ const pcmAddSearchTextboxPrompt = ()=>{
 }
 /** Prompt Search Callback */
 function pcmPromptSearchCallback(tabname){
-    const elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_search_prompt`);
+    const elem = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_extra_search_prompt`);
     if(!elem) return;
     let query = elem.value;
     if (query === null || query === undefined) query = "";
@@ -53,7 +53,7 @@ const pcmAddSearchTextboxDesc = ()=>{
         let elem = document.createElement('div');
         elem.classList.add('extra-network-control--search');
         let elem2 = document.createElement('input');
-        elem2.id = `${tabname}_promptcards_extra_search_desc`;
+        elem2.id = `${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_extra_search_desc`;
         elem2.classList.add('extra-network-control--search-text');
         elem2.type = 'search';
         elem2.placeholder = 'Search from Path & Prompt & Desc';
@@ -69,7 +69,7 @@ const pcmAddSearchTextboxDesc = ()=>{
 }
 /** Desc Search Callback */
 function pcmDescSearchCallback(tabname){
-    const elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_search_desc`);
+    const elem = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_extra_search_desc`);
     if(!elem) return;
     let query = elem.value;
     if (query === null || query === undefined) query = "";
@@ -133,7 +133,7 @@ function pcmSubdirToggle(tabname, asis=false) {
 /** actions toggle button */
 const pcmAddActionsToggleBtn = (isEnabled=true)=>{
     for (let tabname of ['txt2img', 'img2img']){
-        const selector = `.extra-networks-controls-div #${tabname}_promptcards_controls`;
+        const selector = `.extra-networks-controls-div #${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_controls`;
         //PCM_DEBUG_PRINT(`pcm_add_subdir_toggle_checkbox called : ${selector}`);
         const controlsDiv = gradioApp().querySelector(selector);
         
@@ -156,7 +156,7 @@ const pcmAddActionsToggleBtn = (isEnabled=true)=>{
 /** actions toggle callback */
 function pcmHideActionsToggle(tabname, asis=false) {
     const btn = gradioApp().querySelector(`#${tabname}_pcm_actions_toggle`);
-    const actionElems = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card > .actions`));
+    const actionElems = Array.from(gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards > .pcm-card > .actions`));
     if (btn){
         if(!asis) btn.classList.toggle('enabled', !btn.classList.contains('enabled'));
         for (let actionElem of actionElems){
@@ -195,7 +195,7 @@ const pcmAddDirnameToggleBtn = (isEnabled=false)=>{
 /** dirname toggle callback, also called when refresh btn clicked with asis=true. */
 function pcmHideDirNameToggle(tabname, asis=false) {
     const btn = gradioApp().querySelector(`#${tabname}_pcm_dirname_toggle`);
-    const cardNames = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card .name`));
+    const cardNames = Array.from(gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards > .pcm-card .name`));
     if (btn){
         if(!asis) btn.classList.toggle('enabled', !btn.classList.contains('enabled'));
         for (let cardName of cardNames){
@@ -235,7 +235,7 @@ const pcmAddShowDescToggleBtn = (isEnabled=false)=>{
 /** show description toggle callback, also called when refresh btn clicked with asis=true. */
 function pcmShowDescToggle(tabname, asis=false) {
     const btn = gradioApp().querySelector(`#${tabname}_pcm_desc_toggle`);
-    const cardDescs = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card .description`));
+    const cardDescs = Array.from(gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards > .pcm-card .description`));
     if (btn){
         if(!asis) btn.classList.toggle('enabled', !btn.classList.contains('enabled'));
         for (let cardDesc of cardDescs){
@@ -271,7 +271,7 @@ const pcmAddImageFitBtn = (isEnabled=true)=>{
 /** image fit toggle callback, also called when refresh btn clicked with asis=true. */
 function pcmImageFitToggle(tabname, asis=false){
     const btn = gradioApp().querySelector(`#${tabname}_pcm_image_fit_toggle`);
-    const cardImgs = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card > img`));
+    const cardImgs = Array.from(gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards > .pcm-card > img`));
     if (btn){
         if(!asis) btn.classList.toggle('enabled', !btn.classList.contains('enabled'));
         for (let cardImg of cardImgs){
@@ -306,7 +306,7 @@ const pcmAddOpenFolderButton = ()=>{
 function pcmOpenFolder(tabname){
     PCM_DEBUG_PRINT(`pcmOpenFolder called : ${tabname}`);
     let path = "";
-    let selected = gradioApp().querySelector(`#${tabname}_promptcards_tree .tree-list-content[data-selected]`);
+    let selected = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree .tree-list-content[data-selected]`);
     if (selected){
         selected = selected.parentElement;
         path = pcmDirTreeElementToSearchPath(selected);
@@ -355,7 +355,7 @@ async function pcmAddRefreshDirButton(){
 */
 async function pcmRefreshDir(tabname, is_recurse=false){
     // 現在のディレクトリを取得
-    const selector = `#${tabname}_promptcards_tree .tree-list-content-dir[data-selected]`;
+    const selector = `#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree .tree-list-content-dir[data-selected]`;
     const selected = gradioApp().querySelector(selector);
     let path = "";
     if (selected){
@@ -388,7 +388,7 @@ async function pcmRefreshDir(tabname, is_recurse=false){
     // path に対応するディレクトリの DOM の差し替え
     if (tabname in json["html"]){
         // 古いカードを取得
-        const oldCards = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_cards .pcm-card`))
+        const oldCards = Array.from(gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards .pcm-card`))
             .filter(x=>{
                 const orgname = x.querySelector(".name").getAttribute("orgname");
                 const cardPath = orgname.split("/").slice(0,-1).join("/");
@@ -405,7 +405,7 @@ async function pcmRefreshDir(tabname, is_recurse=false){
             oldCards[0].parentElement.insertBefore(fragment, oldCards[0]);
         }else{
             // 古いカードが存在しない場合 (全体にカード自体存在しない場合も含む) は最後に追加
-            gradioApp().querySelector(`#${tabname}_promptcards_cards`).appendChild(fragment);
+            gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards`).appendChild(fragment);
         }
         // 古いカードを削除
         for (const oldCard of oldCards){
@@ -427,7 +427,7 @@ async function pcmRefreshDir(tabname, is_recurse=false){
 /** Card List Refresh Button Callback */
 function pcmRefreshCardListButtonSetCallback(){
     for (const tabname of ['txt2img', 'img2img']){
-        let elem = gradioApp().querySelector(`#${tabname}_promptcards_extra_refresh`);
+        let elem = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_extra_refresh`);
         if(elem){
             elem.addEventListener('click', ()=>{
                 PcmCardSearch.updateCards(tabname);
@@ -448,7 +448,7 @@ function pcmApplyShowOptions(tabname){
 
 /* --------------------------------------------------------------------------------------*/
 // checkbox 追加 (onUiLoaded では早すぎるため要素を監視)
-pcmWaitForContent('.extra-networks-controls-div #txt2img_promptcards_controls', async ()=>{
+pcmWaitForContent(`.extra-networks-controls-div #txt2img_${PCM_EXTRA_NETWORKS_TABNAME}_controls`, async ()=>{
     const opts = await pcmGetSettingsAsync();
 
     pcmAddRefreshDirButton();

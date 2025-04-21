@@ -32,7 +32,7 @@ const pcmSetPromptCardsTabOnClickAsync = async ()=>{
                 isTabOpenedOnce[tabname] = true;
                 await pcmSleepAsync(100);
                 //await PcmCardSearch.updateCards(tabname); // カードリスト更新
-                const rootElem = await pcmQuerySelectorAsync(`#${tabname}_promptcards_tree > ul > li > div`)
+                const rootElem = await pcmQuerySelectorAsync(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree > ul > li > div`)
                 if(!rootElem) return;
                 pcmTreeViewItemsSetTitle(tabname); // ツリービューのアイテムにタイトルをセット
                 pcmTreeViewSetLeafDirMark(tabname); // ツリービューの葉ノードにマークをセット
@@ -136,7 +136,7 @@ const pcmUpdateCards = async (thumbsNames, tabname=null)=>{
                 cardDom.replaceWith(cardDomNew);
             }else{
                 // 新規の場合はとりあえず末尾に追加
-                const cardContainer = gradioApp().querySelector(`#${tabname}_promptcards_cards`);
+                const cardContainer = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards`);
                 if (!cardContainer){
                     console.error(`PromptCardsManger Error: ${thumbsName} ${tabname} cardContainer not found`);
                     return;
@@ -160,7 +160,7 @@ const pcmUpdateCards = async (thumbsNames, tabname=null)=>{
 /** thumbsName からカードの DOM を取得する */
 const pcmGetCardByThumbsName = (thumbsName, tabname)=>{
     if(!tabname) return null;
-    const selector = `#${tabname}_promptcards_cards .pcm-card`;
+    const selector = `#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards .pcm-card`;
     const card = Array.from(gradioApp().querySelectorAll(selector))
         .find(card => card.getAttribute('onclick').includes(`'${thumbsName}'`));
     return card;

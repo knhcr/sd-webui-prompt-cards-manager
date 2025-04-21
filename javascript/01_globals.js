@@ -1,6 +1,8 @@
 /** API エンドポイントのベース URL */
 const PCM_API_ENDPOINT_BASE = '/sd-webui-prompt-cards-manager';
 
+/** Extra Networks のタブ名 */
+const PCM_EXTRA_NETWORKS_TABNAME = 'promptcards';
 
 /** elem_id から Gradio のコンポーネントオブジェクトを取得
  *  複数ある場合は最初にヒットしたオブジェクト

@@ -577,13 +577,13 @@ function pcmCardActionDivOnClick(event){
     // tabname 取得
     let tabname = null;
     if(!tabname){
-        const t2i_pane = gradioApp().querySelector('#txt2img_promptcards_pane');
+        const t2i_pane = gradioApp().querySelector(`#txt2img_${PCM_EXTRA_NETWORKS_TABNAME}_pane`);
         if(t2i_pane && t2i_pane.contains(event.target)){
             tabname = 'txt2img';
         }
     }
     if(!tabname){
-        const i2i_pane = gradioApp().querySelector('#img2img_promptcards_pane');
+        const i2i_pane = gradioApp().querySelector(`#img2img_${PCM_EXTRA_NETWORKS_TABNAME}_pane`);
         if(i2i_pane && i2i_pane.contains(event.target)){
             tabname = 'img2img';
         }

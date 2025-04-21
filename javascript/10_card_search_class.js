@@ -73,7 +73,7 @@ class PcmCardSearch {
         const pDomUpadated = new Promise((resolve, reject) => {
             if(PcmCardSearch.isInitialized[tabname]){
                 // 初回以降は translucent で判定可能
-                const wrapDiv = gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block > div.wrap`);
+                const wrapDiv = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards_html.block > div.wrap`);
                 if(!wrapDiv) reject(new Error(`pcmCardSearch.updateCards: ${tabname} div.wrap not found`));
 
                 let isStarted = false; // div.wrap に translucent が付与されたら true
@@ -102,7 +102,7 @@ class PcmCardSearch {
                     resolve();
                 }, 40000);
                 obsWrapDiv.observe(
-                    gradioApp().querySelector(`#${tabname}_promptcards_cards_html.block`),
+                    gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards_html.block`),
                     {childList: true, subtree: true}
                 );
             }else{
@@ -392,7 +392,7 @@ class PcmCardSearch {
 
         try {
             // 基本いまあるカードは全部表示して、マッチしない物を非表示にする方針で処理
-            const dom_cards = gradioApp().querySelectorAll(`#${tabname}_promptcards_cards > .pcm-card`);
+            const dom_cards = gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_cards > .pcm-card`);
             for (const dom_card of dom_cards){
                 let visible = true;
                 const nameElem = dom_card.querySelector(".name");

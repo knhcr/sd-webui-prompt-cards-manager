@@ -166,7 +166,7 @@ function pcmExpandDirItem(tabname, target, recursive=false){
     }
 
     if(recursive){
-        const container = gradioApp().querySelector(`#${tabname}_promptcards_tree`);
+        const container = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree`);
         if(!container) return;
 
         const parent = target.parentElement.parentElement;
@@ -205,7 +205,7 @@ pcmTreeViewItemsSetTitle = (tabname)=>{
     PCM_DEBUG_PRINT(`pcmTreeViewItemsSetTitle called : ${tabname}`);
     if(!["txt2img", "img2img"].includes(tabname)) return;
 
-    const elems = gradioApp().querySelectorAll(`#${tabname}_promptcards_tree .tree-list-content.tree-list-content-dir`);
+    const elems = gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree .tree-list-content.tree-list-content-dir`);
     for (const elem of elems){
         let title = ""
         let path = elem.getAttribute('data-path');
@@ -224,7 +224,7 @@ pcmTreeViewSetLeafDirMark = (tabname=null)=>{
     PCM_DEBUG_PRINT(`pcmTreeViewSetLeafDirMark called : ${tabname}`);
     if(!["txt2img", "img2img"].includes(tabname)) return;
 
-    const elems = Array.from(gradioApp().querySelectorAll(`#${tabname}_promptcards_tree li.tree-list-item[data-tree-entry-type="dir"]`));
+    const elems = Array.from(gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree li.tree-list-item[data-tree-entry-type="dir"]`));
     for (const elem of elems){
         // 直下の ul > li に data-tree-entry-type="dir" があるか
         const children = Array.from(elem.querySelectorAll(':scope > ul > li[data-tree-entry-type="dir"]'));
@@ -305,7 +305,7 @@ function pcmUpdateSelectedFolderHistory(tabname, searchPath){
 */
 function pcmCardPageSwitchCategory(number, tabname){
     let target = null;
-    let categorieElems = gradioApp().querySelectorAll(`#${tabname}_promptcards_tree > ul > li > ul > li[data-tree-entry-type="dir"]`);
+    let categorieElems = gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree > ul > li > ul > li[data-tree-entry-type="dir"]`);
     if (categorieElems.length <= number) return;
     const targetCategoryElem = categorieElems[number];
     let targetChildren = Array.from(targetCategoryElem.querySelectorAll(`li[data-tree-entry-type="dir"]`)); // 子孫のフォルダノード全て
@@ -440,7 +440,7 @@ function pcmSearchPathToDirTreeElement(path, tabname){
     if (path === null) return null;
     const dirs = path.split('/');
 
-    let layer0 = gradioApp().querySelector(`#${tabname}_promptcards_tree > ul > li`);
+    let layer0 = gradioApp().querySelector(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree > ul > li`);
     if(!layer0) return null;
 
     let tmpLayer = layer0;
