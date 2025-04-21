@@ -46,24 +46,34 @@ const pcmSetPromptCardsTabOnClickAsync = async ()=>{
     }
 };
 
-/** reforge 対応 : reforge 独自の filter, sort のハンドリングをバイパスする
- * - reforge ではカードDOM 初期化時にもまず applyExtraNetworkFilter() が適用される
- * - その処理の中で applySort() を通る
- * - reforge の applySort() は '#' + tabname_full + "_cards" の innerHTML を空にしてから
+
+/**
+ * PromptCards の applyFilter(), applySort() の差し替え
+ * - フィルタリングもソートも独自実装のため標準機能による処理は不要
+ *   + 特に reforge の場合は処理をバイパスしないとカードが全て消されてしまう
+ * - DOM のリフレッシュ処理が終わった後のコールバックとして再利用する
+ * 
+ * [元々の処理の概要] 
+ * - カードのリフレッシュ時にapplyExtraNetworkFilter() がコールされる
+ *   + 中身は extraNetworksApplyFilter[tabname_full] のコール
+ * - extraNetworksApplyFilter[tabname_full] は setupExtraNetworksForTab() で初期化され、個別のタブ毎に生成された内部関数 applyFilter() が登録されている
+ * - applyFilter() の最後には applySort() もコールされる
+ * 
+ * [reforge 対応] 
+ * - reforge 版の applySort() は `#${tabname_full}_cards` の innerHTML を空にしてから
  *   div.card で引っ掛けた要素をソートして DOM として埋め込む処理に変更されている
  * - 従って card 以外のカスタムクラスだと applySort() を通った時点で DOM が空になってしまう
- * - そもそもフィルタリングは独自実装のため reforge のフィルタリングは一切不要なので
- *   monkey patch を当てて、pcmcardsの場合のみ当該処理を完全にスキップする
  */
-const pcmReforgeBypassFilterSort = () => {
-    const applyExtraNetworkFilter_org = window.applyExtraNetworkFilter; // original
-
-    window.applyExtraNetworkFilter = function(tabname_full) {
-      if (!tabname_full.toLowerCase().includes('promptcards')) {
-        applyExtraNetworkFilter_org(tabname_full); // PromptCards 以外は通常の処理
-      }
-      return;
-    };
+function pcmSetApplyFunctions(){
+    for (const tabname of ['txt2img', 'img2img']){
+        const tabname_full = `${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}`;
+        extraNetworksApplyFilter[tabname_full] = ()=>{
+            PCM_DEBUG_PRINT(`pcmApplyFilter: ${tabname_full}`);
+        };
+        extraNetworksApplySort[tabname_full] = ()=>{
+            PCM_DEBUG_PRINT(`pcmApplySort: ${tabname_full}`);
+        };
+    }
 };
 
 
@@ -167,5 +177,5 @@ const pcmGetCardByThumbsName = (thumbsName, tabname)=>{
 }
 
 pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmSetPromptCardsTabOnClickAsync);
-pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmReforgeBypassFilterSort);
+pcmWaitForContent('#txt2img_extra_tabs > .tab-nav', pcmSetApplyFunctions);
 onUiLoaded(initializePage);
