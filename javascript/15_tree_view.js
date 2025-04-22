@@ -242,12 +242,14 @@ pcmTreeViewSetLeafDirMark = (tabname=null)=>{
 }
 
 
-/** 選択したフォルダの履歴 
- *   - 配列は t2i, i2i の順 */
+/** 選択したフォルダの履歴 (配列は t2i, i2i の順) */
 let pcmSelectedFolderHistory = [[null], [null]]; // 選択した要素の履歴(新しい順), 各要素は searchPath (末尾に $ は付かない)
 let pcmSelectedFolderHistoryIndex = [0, 0]; // Undo/Redo 用現在のインデックス
 let pcmSelectedFolderHistoryIndexMax = 40; // 履歴の最大長
 let pcmSelectedFolderHistoryIsEventUndoRedo = 0; // Undo :-1, Redo:1, 通常のclick イベント: 0
+
+/** カテゴリごとの最後に選択したフォルダ */
+const pcmSelectedFolderOfEachCategory = [{}, {}]; // {'category_name': 'folderPath'}
 
 
 /** dir tree のフォルダクリック時の履歴更新処理 
@@ -265,6 +267,16 @@ function pcmUpdateSelectedFolderHistory(tabname, searchPath){
         return;
     }
 
+    // カテゴリ毎の最終選択フォルダ
+    if(searchPath){
+        let parts = searchPath.split("/");
+        if(parts.length>1){
+            PCM_DEBUG_PRINT(`pcmUpdateSelectedFolderHistory tabname: ${tabname}, category: ${parts[1]}, searchPath: ${searchPath}`);
+            pcmSelectedFolderOfEachCategory[tabIndex][parts[1]] = searchPath;
+        }
+    }
+
+    // 選択履歴
     PCM_DEBUG_PRINT(`pcmUpdateSelectedFolderHistory tabIndex: ${tabIndex}, searchPath: ${searchPath}`);
     const historyArray = pcmSelectedFolderHistory[tabIndex];
 
@@ -304,48 +316,78 @@ function pcmUpdateSelectedFolderHistory(tabname, searchPath){
  * @param {number} tabname タブ名 (txt2img, img2img)
 */
 function pcmCardPageSwitchCategory(number, tabname){
-    let target = null;
     let categorieElems = gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree > ul > li > ul > li[data-tree-entry-type="dir"]`);
-    if (categorieElems.length <= number) return;
-    const targetCategoryElem = categorieElems[number];
-    let targetChildren = Array.from(targetCategoryElem.querySelectorAll(`li[data-tree-entry-type="dir"]`)); // 子孫のフォルダノード全て
-    
+    if (categorieElems.length <= number){
+        return;
+    }
+
+    // タブ名から tabIndex を取得
     let tabIndex;
     if (tabname === "txt2img") tabIndex = 0;
     else if (tabname === "img2img") tabIndex = 1;
     else return;
 
-    const currentPath = pcmSelectedFolderHistory[tabIndex][pcmSelectedFolderHistoryIndex[tabIndex]];
-    PCM_DEBUG_PRINT(`pcmCardPageSwitchCategory tabname: ${tabname}, currentPath: ${currentPath}`);
-    if (currentPath === null){
-        target = targetCategoryElem;
+    // 選択履歴と対象カテゴリの情報を取得
+    const targetCategoryElem = categorieElems[number]; // 対象カテゴリのトップ
+    const targetCategoryName = targetCategoryElem.querySelector(".tree-list-item-label").textContent.trim(); // 対象のカテゴリ名
+    const targetChildren = Array.from(targetCategoryElem.querySelectorAll(`li[data-tree-entry-type="dir"]`)); // 対象カテゴリのサブフォルダ全て
+    
+    let targetCategoryLastPath; // 対象カテゴリの最後に選択したフォルダのパス
+    if(targetCategoryName in pcmSelectedFolderOfEachCategory[tabIndex]){
+        targetCategoryLastPath = pcmSelectedFolderOfEachCategory[tabIndex][targetCategoryName];
     }else{
-        // currentPath 
+        targetCategoryLastPath = null;
+    }
+    const currentPath = pcmSelectedFolderHistory[tabIndex][pcmSelectedFolderHistoryIndex[tabIndex]]; // 現在選択中のフォルダのパス
+    let currentCategoryName = null; // 現在選択中のカテゴリ名
+    if (currentPath){
+        let parts = currentPath.split('/');
+        if(parts.length > 1){
+            currentCategoryName = parts[1];
+        }
+    }
+    PCM_DEBUG_PRINT(`pcmCardPageSwitchCategory tabname: ${tabname}, targetCategoryName: ${targetCategoryName}, currentPath: ${currentPath}, currentCategoryName: ${currentCategoryName}`);
+
+    // ターゲットを決定
+    function _getTarget(targetCategoryElem, targetCategoryName, targetChildren, targetCategoryLastPath, currentPath, currentCategoryName){
+        if (targetCategoryLastPath === null){
+            return targetCategoryElem; // 初めて対象カテゴリをクリックした場合 -> 対象カテゴリのトップ
+        }
+        
+        // 現在選択中のノードを取得
         let currentElem = pcmSearchPathToDirTreeElement(currentPath, tabname);
         if(!currentElem){
-            target = targetCategoryElem;
+            return targetCategoryElem; // 現在選択中のノードが既に無くなっていた場合 -> 対象カテゴリのトップ
         }
-        else{
-            if (currentElem === targetCategoryElem){
-                if (targetChildren.length > 0){
-                    target = targetChildren[0];
-                }else{
-                    return; // カテゴリノードしかなく既に選択済みの場合何もせず終了
-                }
+
+        if (currentCategoryName !== targetCategoryName){
+            // 対象カテゴリが現在選択中のカテゴリと異なる場合
+            let target = pcmSearchPathToDirTreeElement(targetCategoryLastPath, tabname);
+            if(target){
+                return target; // 対象カテゴリの最後に選択したノードが存在している場合 -> そのノード
             }else{
-                const tmpIndex = targetChildren.indexOf(currentElem); // 現在のノードが子孫の何番目か
-                if(tmpIndex>=0){
-                    if(tmpIndex < targetChildren.length - 1){
-                        target = targetChildren[tmpIndex + 1];
-                    }else{
-                        target = targetCategoryElem; // 子孫の末尾の場合はカテゴリノードに戻る
-                    }
-                }else{
-                    target = targetCategoryElem; // 現在のカテゴリにも子孫にも含まれないノードの場合はカテゴリノード
-                }
+                return targetCategoryElem; // 対象カテゴリの最後に選択したノードが既に無くなっていた場合 -> 対象カテゴリのトップ
+            }
+            
+        } else{
+            // 対象カテゴリが現在選択中のカテゴリと同じ場合
+            let choices = [targetCategoryElem].concat(targetChildren); // 対象カテゴリのトップも含めた選択対象のリスト
+            let tmpIndex = choices.indexOf(currentElem); // 現在のノードがどれであるか
+            if(tmpIndex===-1){
+                return targetCategoryElem; // 選択中のノードが既に無くなっていた場合 -> 対象カテゴリのトップ
+            }else{
+                tmpIndex = (tmpIndex + 1) % choices.length;
+                return choices[tmpIndex];
             }
         }
     }
+
+    let target = _getTarget(targetCategoryElem, targetCategoryName, targetChildren, targetCategoryLastPath, currentPath, currentCategoryName);
+    if(!target){
+        PCM_DEBUG_PRINT(`pcmCardPageSwitchCategory target not found error. tabname: ${tabname}, targetCategoryName: ${targetCategoryName}, currentPath: ${currentPath}, currentCategoryName: ${currentCategoryName}`);
+        return; // ここには来ないはず
+    }
+
     target.querySelector(`:scope > .tree-list-content`).click();
     // 対象カテゴリ以外のカテゴリのノードを折り畳む
     for (const elem of categorieElems){
