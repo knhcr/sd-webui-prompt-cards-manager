@@ -26,6 +26,12 @@ Note that this extension does not have features to automatically generate prompt
 -----------------------------------------------------------------------------------------------------------------------------
 ## Update History
 * 2025/04/21
+  - Changed shortcut key folder selection behavior
+    + Select a category from another category resumes past selected position.
+    + `Shift` - `Ctrl` - `<Num>` : Select Reverse order
+    + `Shift` - `Ctrl` - `0` : Redo Select Folder (Same as `Alt` - `0`)
+
+* 2025/04/21
   - bugfix. Stabilized initial page open and card refresh.
 
 * 2025/04/19
@@ -197,8 +203,10 @@ Note that this extension does not have features to automatically generate prompt
 ![example](./docs/images/tree.png)
 
 ### Keyboard Shortcut
-  - `Ctrl + 1 ~ 9` : You can switch Category 1st to 9th from above listed in tree view. By pressing continuously, you can traverse the subfolders of the target category.
-  - `Ctrl + 0` / `Alt + 0` : You can Undo / Redo for Category switching.
+  - `Ctrl - 1 ~ 9` : You can switch Category 1st to 9th from above listed in tree view. By pressing continuously, you can traverse the subfolders of the target category.
+    + `Shift - Ctrl - 1 ~ 9` : Select in reverse order.
+  - `Ctrl - 0` / `Alt - 0` : You can Undo / Redo for Category switching.
+    + `Shift - Ctrl - 0` : Also Redo selection.
 
 
 ### Control Belt
