@@ -1,4 +1,5 @@
 import os
+import subprocess
 from modules import shared, ui_extra_networks, script_callbacks
 from modules.ui_extra_networks import ExtraNetworksPage, get_tree, ExtraNetworksItem
 import html
@@ -471,7 +472,7 @@ def open_folder_win(path: str):
 
     try:
         DEBUG_PRINT(f"open_folder_win target: {target}")
-        os.startfile(target)
+        subprocess.Popen(["explorer.exe", target])
     except Exception as e:
         print(f"PromptCardsManager: Folder Open Error: {e}")
         print(traceback.format_exc())
