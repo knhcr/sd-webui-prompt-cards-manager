@@ -311,11 +311,12 @@ function pcmUpdateSelectedFolderHistory(tabname, searchPath){
 
 /** 数字指定で dir tree のフォルダの click event を発火
  *   - 上の並びから {number} 個目のカテゴリをクリック (0スタート)
- *   - 現在の選択場所が既に当該カテゴリ内の何れかだった場合はカテゴリ内の次のフォルダを選択(循環)
+ *   - 現在の選択場所が既に当該カテゴリ内の何れかだった場合はカテゴリ内の次/前のフォルダを選択(循環)
  * @param {number} number 数字
  * @param {number} tabname タブ名 (txt2img, img2img)
+ * @param {boolean} reverse 前のフォルダを選択するか (デフォルトfalse)
 */
-function pcmCardPageSwitchCategory(number, tabname){
+function pcmCardPageSwitchCategory(number, tabname, reverse=false){
     let categorieElems = gradioApp().querySelectorAll(`#${tabname}_${PCM_EXTRA_NETWORKS_TABNAME}_tree > ul > li > ul > li[data-tree-entry-type="dir"]`);
     if (categorieElems.length <= number){
         return;
@@ -349,7 +350,7 @@ function pcmCardPageSwitchCategory(number, tabname){
     PCM_DEBUG_PRINT(`pcmCardPageSwitchCategory tabname: ${tabname}, targetCategoryName: ${targetCategoryName}, currentPath: ${currentPath}, currentCategoryName: ${currentCategoryName}`);
 
     // ターゲットを決定
-    function _getTarget(targetCategoryElem, targetCategoryName, targetChildren, targetCategoryLastPath, currentPath, currentCategoryName){
+    function _getTarget(targetCategoryElem, targetCategoryName, targetChildren, targetCategoryLastPath, currentPath, currentCategoryName, reverse){
         if (targetCategoryLastPath === null){
             return targetCategoryElem; // 初めて対象カテゴリをクリックした場合 -> 対象カテゴリのトップ
         }
@@ -376,19 +377,25 @@ function pcmCardPageSwitchCategory(number, tabname){
             if(tmpIndex===-1){
                 return targetCategoryElem; // 選択中のノードが既に無くなっていた場合 -> 対象カテゴリのトップ
             }else{
-                tmpIndex = (tmpIndex + 1) % choices.length;
+                if(reverse){
+                    tmpIndex = (tmpIndex - 1 + choices.length) % choices.length;
+                }else{
+                    tmpIndex = (tmpIndex + 1) % choices.length;
+                }
                 return choices[tmpIndex];
             }
         }
     }
 
-    let target = _getTarget(targetCategoryElem, targetCategoryName, targetChildren, targetCategoryLastPath, currentPath, currentCategoryName);
+    let target = _getTarget(targetCategoryElem, targetCategoryName, targetChildren, targetCategoryLastPath, currentPath, currentCategoryName, reverse);
     if(!target){
         PCM_DEBUG_PRINT(`pcmCardPageSwitchCategory target not found error. tabname: ${tabname}, targetCategoryName: ${targetCategoryName}, currentPath: ${currentPath}, currentCategoryName: ${currentCategoryName}`);
         return; // ここには来ないはず
     }
 
+    // 対象をクリック
     target.querySelector(`:scope > .tree-list-content`).click();
+
     // 対象カテゴリ以外のカテゴリのノードを折り畳む
     for (const elem of categorieElems){
         if(elem !== targetCategoryElem){
@@ -397,7 +404,7 @@ function pcmCardPageSwitchCategory(number, tabname){
     }
 }
 
-/** Ctrl + 0, Alt + 0 で Undo/Redo の click を発火
+/** Ctrl + 0, Alt + 0 で Undo/Redo 用 click コールバック
  *   - クリック履歴の更新は custom_tree_button.js のディレクトリ click event で発生するため不要
  * @param {string} tabname タブ名 (txt2img, img2img)
  * @param {number} isUndoRedo 1: Undo, -1: Redo
@@ -417,7 +424,7 @@ function pcmCardPageDoUndoRedo(tabname, isUndoRedo){
     const searchText = pcmSelectedFolderHistory[tabIndex][nextIndex];
     const elem = pcmSearchPathToDirTreeElement(searchText, tabname);
     if(!elem){
-        // DOM 上に既に存在しない場合 ( refresh がちゃんと呼べていれば個々には来ない筈)
+        // DOM 上に既に存在しない場合 ( refresh がちゃんと呼べていればここには来ない筈)
         PCM_DEBUG_PRINT(`pcmCardPageDoUndoRedo tabname: ${tabname}, searchText: ${searchText} not found in DOM`);
         pcmSelectedFolderHistoryIndex[tabIndex] = nextIndex;
         return;
@@ -430,45 +437,60 @@ function pcmCardPageDoUndoRedo(tabname, isUndoRedo){
  *   - 数字キーは 1-9 まで -> -1 して 0-8 にマッピング
 */
 window.addEventListener('keydown', (event)=>{
-    if(event.ctrlKey && /^\d$/.test(event.key)){
+    // 現在のタブ名を取得
+    function _getTabname(){
+        let elem = null;
+        elem = gradioApp().querySelector('#tab_txt2img');
+        if(elem && elem.style.display === 'block'){
+            return "txt2img";
+        }
+        elem = gradioApp().querySelector('#tab_img2img');
+        if(elem && elem.style.display === 'block'){
+            return "img2img";
+        }
+        return null;
+    }
+
+    if(event.shiftKey && event.ctrlKey && /^Digit\d$/.test(event.code)){
+        // shift + ctrl + 数字キー -> カテゴリクリック (逆順), 0 の場合は Redo
+        //  - shift + 数字キーは event.key が !, " などの記号になるため event.code を使用
         event.preventDefault();
 
-        // 現在のタブ
-        let tabname;
-        let elem = gradioApp().querySelector('#tab_txt2img');
-        if(elem && elem.style.display === 'block'){
-            tabname = "txt2img";
-        }else{
-            elem = gradioApp().querySelector('#tab_img2img');
-            if(elem && elem.style.display === 'block'){
-                tabname = "img2img";
-            }
-        }
+        let tabname = _getTabname();
         if(!tabname) return;
+
+        PCM_DEBUG_PRINT(`pcm shortcut key tabname: ${tabname}, C-S-${event.code}`);
+
+        if(event.code === 'Digit0'){
+            pcmCardPageDoUndoRedo(tabname, -1); // Redo
+        }else{
+            pcmCardPageSwitchCategory(parseInt(event.code.slice(-1),10)-1, tabname, true); // カテゴリクリック (逆順)
+        }
+
+    } else if(event.ctrlKey && /^\d$/.test(event.key)){
+        // ctrl + 数字キー -> カテゴリクリック, 0 の場合は Undo
+        event.preventDefault();
+
+        let tabname = _getTabname();
+        if(!tabname) return;
+
+        PCM_DEBUG_PRINT(`pcm shortcut key tabname: ${tabname}, C-${event.key}`);
+
         if(event.key === '0'){
             pcmCardPageDoUndoRedo(tabname, 1); // Undo
         }else{
-            pcmCardPageSwitchCategory(parseInt(event.key,10)-1, tabname); // カテゴリクリック
+            pcmCardPageSwitchCategory(parseInt(event.key,10)-1, tabname, false); // カテゴリクリック
         }
 
     } else if(event.altKey && event.key === '0'){
+        // alt + 0 -> Redo
         event.preventDefault();
 
-        // 現在のタブ
-        let tabname;
-        let elem = gradioApp().querySelector('#tab_txt2img');
-        if(elem && elem.style.display === 'block'){
-            tabname = "txt2img";
-        }else{
-            elem = gradioApp().querySelector('#tab_img2img');
-            if(elem && elem.style.display === 'block'){
-                tabname = "img2img";
-            }
-        }
+        let tabname = _getTabname();
         if(!tabname) return;
         pcmCardPageDoUndoRedo(tabname, -1); // Redo
-    }    
-});
+    }
+}, true);
 
 
 /** dir tree util: search path -> フォルダ要素 (<li>), 無ければ null
